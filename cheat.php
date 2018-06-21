@@ -1,14 +1,10 @@
 <?php
 
-lol_using_goto_in_2018:
-
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
-do
-{
-	$CurrentPlanet = GetFirstAvailablePlanet();
-}
-while( !$CurrentPlanet );
+SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+
+lol_using_goto_in_2018:
 
 $Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
 
@@ -17,21 +13,21 @@ if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 	SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 }
 
-SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+do
+{
+	$CurrentPlanet = GetFirstAvailablePlanet();
+}
+while( !$CurrentPlanet && sleep( 5 ) === 0 );
+
 SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
 
 do
 {
-	$Zone = GetFirstAvailableZone( $CurrentPlanet );
-	
-	if( $Zone === null )
+	do
 	{
-		Msg( 'Failed to find a zone, waiting 15 seconds and trying again' );
-
-		sleep( 15 );
-
-		goto lol_using_goto_in_2018;
+		$Zone = GetFirstAvailableZone( $CurrentPlanet );
 	}
+	while( !$Zone && sleep( 5 ) === 0 );
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
 
