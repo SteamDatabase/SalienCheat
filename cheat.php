@@ -1,5 +1,7 @@
 <?php
 
+lol_using_goto_in_2018:
+
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
 $Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
@@ -24,7 +26,8 @@ do
 
 		sleep( 15 );
 
-		continue;
+		// just start over
+		goto lol_using_goto_in_2018;
 	}
 
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
@@ -65,7 +68,7 @@ function GetFirstAvailableZone( $Planet )
 	
 	usort( $CleanZones, function( $a, $b )
 	{
-		return $b[ 'difficulty' ] - $b[ 'difficulty' ];
+		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
 	} );
 	
 	return $CleanZones[ 0 ];
