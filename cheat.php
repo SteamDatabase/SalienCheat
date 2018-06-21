@@ -4,6 +4,12 @@ lol_using_goto_in_2018:
 
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
+do
+{
+	$CurrentPlanet = GetFirstAvailablePlanet();
+}
+while( !$CurrentPlanet );
+
 $Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
 
 if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
@@ -12,12 +18,21 @@ if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 }
 
 SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
-SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=2&access_token=' . $Token );
+SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
 
 do
 {
-	$Zone = GetFirstAvailableZone( 2 );
+	$Zone = GetFirstAvailableZone( $CurrentPlanet );
 	
+	if( $Zone === null )
+	{
+		Msg( 'Failed to find a zone, waiting 15 seconds and trying again' );
+
+		sleep( 15 );
+
+		goto lol_using_goto_in_2018;
+	}
+
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
@@ -26,13 +41,12 @@ do
 
 		sleep( 15 );
 
-		// just start over
 		goto lol_using_goto_in_2018;
 	}
 
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 	
-	Msg( 'Joined zone ' . $Zone[ 'zone_position' ] . ' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' );
+	Msg( 'Joined zone ' . $Zone[ 'zone_position' ] . ' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '% - Difficulty: ' . $Zone[ 'difficulty' ] );
 	
 	sleep( 120 );
 	
@@ -55,6 +69,12 @@ function GetScoreForZone( $Zone )
 function GetFirstAvailableZone( $Planet )
 {
 	$Zones = SendGET( 'GetPlanet', 'id=' . $Planet );
+
+	if( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) )
+	{
+		return null;
+	}
+
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
 	
@@ -66,12 +86,37 @@ function GetFirstAvailableZone( $Planet )
 		}
 	}
 	
+	if( empty( $CleanZones  ) )
+	{
+		return null;
+	}
+
 	usort( $CleanZones, function( $a, $b )
 	{
 		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
 	} );
-	
+
 	return $CleanZones[ 0 ];
+}
+
+function GetFirstAvailablePlanet()
+{
+	$Planets = SendGET( 'GetPlanets', 'active_only=1' );
+
+	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
+	{
+		return null;
+	}
+
+	foreach( $Planets[ 'response' ][ 'planets' ] as $Planet )
+	{
+		if( !$Planet[ 'state' ][ 'captured' ]  )
+		{
+			Msg( 'Got planet ' . $Planet[ 'id' ] );
+
+			return $Planet[ 'id' ];
+		}
+	}
 }
 
 function SendPOST( $Method, $Data )
