@@ -1,5 +1,7 @@
 <?php
 
+set_time_limit( 0 );
+
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
 SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
@@ -53,7 +55,14 @@ do
 	
 	sleep( 120 );
 	
-	SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
+	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
+
+	if( isset( $Data[ 'response' ][ 'new_score' ] ) )
+	{
+		$Data = $Data[ 'response' ];
+
+		Msg( 'Score: ' . $Data[ 'old_score' ] . ' => ' . $Data[ 'new_score' ] . ' (next level: ' . $Data[ 'next_level_score' ] . ') - Current level: ' . $Data[ 'new_level' ] );
+	}
 }
 while( true );
 
