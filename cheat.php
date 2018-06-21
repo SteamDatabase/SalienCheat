@@ -6,13 +6,6 @@ SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&acce
 
 lol_using_goto_in_2018:
 
-$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
-
-if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
-{
-	SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
-}
-
 do
 {
 	$CurrentPlanet = GetFirstAvailablePlanet();
@@ -20,6 +13,20 @@ do
 while( !$CurrentPlanet && sleep( 5 ) === 0 );
 
 SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
+
+do
+{
+	$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+}
+while( !isset( $Data[ 'response' ][ 'active_planet' ] ) );
+
+// Set the planet to what Steam thinks is the active one, even though we sent JoinPlanet request
+$CurrentPlanet = $Data[ 'response' ][ 'active_planet' ];
+
+if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
+{
+	SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
+}
 
 do
 {
