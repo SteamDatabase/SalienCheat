@@ -2,8 +2,12 @@
 
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
-//SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=2' );
-//SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+
+if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
+{
+	SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
+}
 
 SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
 SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=2&access_token=' . $Token );
@@ -13,6 +17,16 @@ do
 	$Zone = GetFirstAvailableZone( 2 );
 	
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
+
+	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
+	{
+		Msg( 'Failed to join a zone, waiting 15 seconds and trying again' );
+
+		sleep( 15 );
+
+		continue;
+	}
+
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 	
 	Msg( 'Joined zone ' . $Zone[ 'zone_position' ] . ' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' );
