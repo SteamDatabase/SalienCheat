@@ -128,6 +128,7 @@ function SendPOST( $Method, $Data )
 		CURLOPT_CONNECTTIMEOUT => 10,
 		CURLOPT_POST           => 1,
 		CURLOPT_POSTFIELDS     => $Data,
+		CURLOPT_CAINFO         => __DIR__ . '/cainfo.pem',
 		CURLOPT_HTTPHEADER     =>
 		[
 			'Accept: */*',
@@ -165,6 +166,7 @@ function SendGET( $Method, $Data )
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 10,
 		CURLOPT_CONNECTTIMEOUT => 10,
+		CURLOPT_CAINFO         => __DIR__ . '/cainfo.pem',
 		CURLOPT_HTTPHEADER     =>
 		[
 			'Accept: */*',
