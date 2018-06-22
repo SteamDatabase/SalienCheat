@@ -8,12 +8,15 @@ import re
 import sys
 import json
 import logging
+import hashlib
 from io import open
 from time import sleep, time
 from getpass import getpass
 
 import requests
 from tqdm import tqdm
+
+UPDATE_URL = "https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.py"
 
 logging.basicConfig(level=logging.DEBUG if sys.argv[-1] == 'debug' else logging.INFO,
                     format="%(asctime)s | %(message)s")
@@ -64,6 +67,36 @@ def get_access_token(force_input=False):
         fp.write(token)
 
     return token
+
+def update_script():
+    LOG.info("Checking for new version...")
+    r = requests.get(UPDATE_URL, stream=True)
+
+    if r.status_code == 200:
+        update_hash = hashlib.sha1(r.content).hexdigest()
+        data = open(sys.argv[0], 'r', encoding='utf-8').read()
+        current_hash = hashlib.md5(data.encode()).hexdigest()
+
+        LOG.info("Current hash: {}".format(current_hash))
+        LOG.info("Update hash: {}".format(update_hash))
+        if current_hash != update_hash:
+            LOG.info("New version found online!")
+            LOG.info("If you want to update please type 'yes', otherwise press Enter.")
+
+            if input().lower() == "yes":
+                LOG.info("Saving backup and updating script...")
+
+                # Backup the old script
+                os.rename(sys.argv[0], "{}.backup".format(current_hash))
+
+                # Save the new script
+                with open(sys.argv[0], 'wb') as fp:
+                    fp.write(r.content)
+
+                LOG.info("Update finished, please restart the script...")
+                sys.exit()
+            else:
+                LOG.info("Skipping update...")
 
 class Saliens(requests.Session):
     api_url = 'https://community.steam-api.com/%s/v0001/'
@@ -249,6 +282,9 @@ class Saliens(requests.Session):
                                   )
 
 # ------- MAIN ----------
+
+if sys.argv[-1] != 'debug':
+    update_script()
 
 game = Saliens(None)
 game.access_token = get_access_token()
