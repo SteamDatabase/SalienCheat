@@ -16,11 +16,13 @@ unset( $ParsedToken );
 // If you want to cheat for your own group, come up with up with your own approach, thank you
 SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
 
+$SkippedPlanets = [];
+
 lol_using_goto_in_2018:
 
 do
 {
-	$CurrentPlanet = GetFirstAvailablePlanet();
+	$CurrentPlanet = GetFirstAvailablePlanet( $SkippedPlanets );
 }
 while( !$CurrentPlanet && sleep( 5 ) === 0 );
 
@@ -38,7 +40,16 @@ do
 	{
 		$Zone = GetFirstAvailableZone( $CurrentPlanet );
 	}
-	while( !$Zone && sleep( 5 ) === 0 );
+	while( $Zone === null && sleep( 5 ) === 0 );
+
+	if( $Zone === false )
+	{
+		$SkippedPlanets[ $CurrentPlanet ] = true;
+
+		Msg( 'There are no zones to join in this planet, restarting...' );
+
+		goto lol_using_goto_in_2018;
+	}
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
 
@@ -117,7 +128,7 @@ function GetFirstAvailableZone( $Planet )
 	
 	if( empty( $CleanZones ) )
 	{
-		return null;
+		return false;
 	}
 
 	usort( $CleanZones, function( $a, $b )
@@ -133,7 +144,7 @@ function GetFirstAvailableZone( $Planet )
 	return $CleanZones[ 0 ];
 }
 
-function GetFirstAvailablePlanet()
+function GetFirstAvailablePlanet( $SkippedPlanets )
 {
 	$Planets = SendGET( 'GetPlanets', 'active_only=1' );
 
@@ -156,6 +167,11 @@ function GetFirstAvailablePlanet()
 
 	foreach( $Planets as $Planet )
 	{
+		if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
+		{
+			continue;
+		}
+
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
 			Msg( 'Got planet ' . $Planet[ 'id' ] . ' with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
