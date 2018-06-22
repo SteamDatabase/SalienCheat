@@ -31,18 +31,21 @@ def get_access_token(force_input=False):
     token = ''
 
     if not force_input:
-        if os.path.isfile(token_path):
-            data = open(token_path, 'r', encoding='utf-8').read()
+        if token_re.match(sys.argv[-1]):
+            token = sys.argv[-1]
+        else:
+            if os.path.isfile(token_path):
+                data = open(token_path, 'r', encoding='utf-8').read()
 
-            try:
-                token = json.loads(data)['token']
-            except:
-                token = data.strip()
+                try:
+                    token = json.loads(data)['token']
+                except:
+                    token = data.strip()
 
-            if not token_re.match(token):
-                token = ''
-            else:
-                LOG.info("Loaded token from token.txt")
+                if not token_re.match(token):
+                    token = ''
+                else:
+                    LOG.info("Loaded token from token.txt")
 
     if not token:
         token = _input("Login to steamcommunity.com\n"
