@@ -62,6 +62,18 @@ do
 		goto lol_using_goto_in_2018;
 	}
 
+	// Find a new planet if there are no hard zones left
+	$HardZones = $Zone[ 'hard_zones' ];
+	$PlanetCaptured = $Zone[ 'planet_captured' ];
+	$PlanetPlayers = $Zone[ 'planet_players' ];
+
+	if( !$HardZones && time() - $LastRestart > 60 )
+	{
+		Msg( '!! This planet does not have any hard zones left, restarting...' );
+
+		goto lol_using_goto_in_2018;
+	}
+
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
@@ -76,9 +88,16 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Zone ' . $Zone[ 'zone_position' ] . ' on planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
-		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) .
-		'% - Difficulty: ' . $Zone[ 'difficulty' ]
+		'>> Planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
+		' - Players: ' . number_format( $PlanetPlayers ) .
+		' - Captured: ' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
+		' - Hard zones: ' . $HardZones
+	);
+
+	Msg(
+		'>> Zone ' . $Zone[ 'zone_position' ] .
+		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
+		' - Difficulty: ' . $Zone[ 'difficulty' ]
 	);
 
 	if( isset( $Zone[ 'top_clans' ] ) )
@@ -134,14 +153,22 @@ function GetFirstAvailableZone( $Planet )
 	global $CurrentPlanetName;
 	$CurrentPlanetName = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'name' ];
 
+	$PlanetCaptured = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'capture_progress' ];
+	$PlanetPlayers = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'current_players' ];
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
+	$HardZones = 0;
 	
 	foreach( $Zones as $Zone )
 	{
 		if( $Zone[ 'captured' ] )
 		{
 			continue;
+		}
+
+		if( $Zone[ 'difficulty' ] === 3 )
+		{
+			$HardZones++;
 		}
 
 		// Always join boss zone
@@ -172,7 +199,12 @@ function GetFirstAvailableZone( $Planet )
 		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
 	} );
 
-	return $CleanZones[ 0 ];
+	$Zone = $CleanZones[ 0 ];
+	$Zone[ 'hard_zones' ] = $HardZones;
+	$Zone[ 'planet_captured' ] = $PlanetCaptured;
+	$Zone[ 'planet_players' ] = $PlanetPlayers;
+
+	return $Zone;
 }
 
 function GetFirstAvailablePlanet( $SkippedPlanets )
@@ -229,7 +261,6 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			Msg(
 				'>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
 				' - Players: ' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-				' - Captured: ' . number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%' .
 				' - Hard zones: ' . $Planet[ 'hard_zones' ]
 			);
 
