@@ -14,6 +14,7 @@ from getpass import getpass
 
 import requests
 from tqdm import tqdm
+import argparse
 
 logging.basicConfig(level=logging.DEBUG if sys.argv[-1] == 'debug' else logging.INFO,
                     format="%(asctime)s | %(message)s")
@@ -24,11 +25,24 @@ try:
 except:
     _input = input
 
+ap = argparse.ArgumentParser()
+ap.add_argument(
+    "-t", "--token", required=False, type=str, help="Miniagame token")
+ap.add_argument("-f",
+    "--working-folder",
+    required=False,
+    type=str,
+    default=os.getcwd(),
+    help=
+    "set the bot's working folder, default is folder from where the bot is executed"
+)
+args = vars(ap.parse_args())
+bot_path = args["working_folder"]
 
 def get_access_token(force_input=False):
     token_re = re.compile("^[a-z0-9]{32}$")
-    token_path = './token.txt'
-    token = ''
+    token_path = bot_path+'/token.txt'
+    token = args["token"]
 
     if not force_input:
         if os.path.isfile(token_path):
