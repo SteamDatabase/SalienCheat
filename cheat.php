@@ -17,6 +17,7 @@ Msg( 'https://steamcommunity.com/groups/SteamDB' );
 echo PHP_EOL . PHP_EOL;
 
 $SkippedPlanets = [];
+$CurrentPlanetName = '??';
 
 lol_using_goto_in_2018:
 
@@ -63,14 +64,23 @@ do
 	}
 
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
-	
+
 	Msg(
-		'>> Joined zone ' . $Zone[ 'zone_position' ] . ' on planet ' . $CurrentPlanet .
+		'>> Zone ' . $Zone[ 'zone_position' ] . ' on planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
 		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) .
-		'% - Difficulty: ' . $Zone[ 'difficulty' ] .
-		' - Leader: ' . ( isset( $Zone[ 'leader' ][ 'url' ] ) ? $Zone[ 'leader' ][ 'url' ] : 'no leader yet' )
+		'% - Difficulty: ' . $Zone[ 'difficulty' ]
 	);
-	
+
+	if( isset( $Zone[ 'top_clans' ] ) )
+	{
+		Msg(
+			'>> Top clans: ' . implode(', ', array_map( function( $Clan )
+			{
+				return $Clan[ 'url' ];
+			}, $Zone[ 'top_clans' ] ) )
+		);
+	}
+
 	sleep( 120 );
 	
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
@@ -83,7 +93,8 @@ do
 			'>> Score: ' . $Data[ 'old_score' ] . ' => ' . $Data[ 'new_score' ] .
 			' (next level: ' . $Data[ 'next_level_score' ] .
 			' in ' . ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) . ') - Current level: ' . $Data[ 'new_level' ] .
-			' (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
+			' (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)',
+			PHP_EOL . PHP_EOL
 		);
 	}
 }
@@ -103,12 +114,15 @@ function GetScoreForZone( $Zone )
 
 function GetFirstAvailableZone( $Planet )
 {
-	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet );
+	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
 	if( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) )
 	{
 		return null;
 	}
+
+	global $CurrentPlanetName;
+	$CurrentPlanetName = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'name' ];
 
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
@@ -156,7 +170,7 @@ function GetFirstAvailableZone( $Planet )
 
 function GetFirstAvailablePlanet( $SkippedPlanets )
 {
-	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1' );
+	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
 	{
@@ -184,7 +198,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
-			Msg( '>> Got planet ' . $Planet[ 'id' ] . ' with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
+			Msg( '>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ') with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
 
 			return $Planet[ 'id' ];
 		}
