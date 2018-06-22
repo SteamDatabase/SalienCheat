@@ -86,13 +86,28 @@ function GetFirstAvailableZone( $Planet )
 	
 	foreach( $Zones as $Zone )
 	{
-		if( !$Zone[ 'captured' ] && $Zone[ 'capture_progress' ] < 0.95 )
+		if( $Zone[ 'captured' ] )
+		{
+			continue;
+		}
+
+		// Always join boss zone
+		if( $Zone[ 'type' ] == 4 )
+		{
+			return $Zone;
+		}
+		else if( $Zone[ 'type' ] != 3 )
+		{
+			Msg( 'Unknown zone type: ' . $Zone[ 'type' ] );
+		}
+
+		if( $Zone[ 'capture_progress' ] < 0.95 )
 		{
 			$CleanZones[] = $Zone;
 		}
 	}
 	
-	if( empty( $CleanZones  ) )
+	if( empty( $CleanZones ) )
 	{
 		return null;
 	}
