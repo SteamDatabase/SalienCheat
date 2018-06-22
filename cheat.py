@@ -193,26 +193,28 @@ class Saliens(requests.Session):
                                    desc="Player Level {level}".format(**player_info),
                                    total=int(player_info['next_level_score']),
                                    initial=int(player_info['score']),
-                                   bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt}',
+                                   bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                    )
 
     def print_planet_progress(self):
-        state = self.planet['state']
+        planet = self.planet
+        state = planet['state']
         mul = 100000
 
         current_progress = mul if state['captured'] else int(state['capture_progress'] * mul)
 
         if getattr(self, 'planet_pbar', None):
+            self.planet_pbar.desc="Planet ({id}) progress".format(**planet)
             self.planet_pbar.n = current_progress
             print(self.planet_pbar)
         else:
             self.planet_pbar = tqdm(ascii=True,
                                     position=0,
                                     dynamic_ncols=True,
-                                    desc="Planet progress",
+                                    desc="Planet ({id}) progress".format(**planet),
                                     total=mul,
                                     initial=current_progress,
-                                    bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {elapsed}<{remaining}]',
+                                    bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                     )
 
     def print_zone_progress(self, zone=None):
@@ -225,6 +227,7 @@ class Saliens(requests.Session):
         current_progress = mul if zone['captured'] else int(zone['capture_progress'] * mul)
 
         if getattr(self, 'zone_pbar', None):
+            self.zone_pbar.desc="Zone ({zone_position}) progress".format(**zone)
             self.zone_pbar.n = current_progress
             print(self.zone_pbar)
         else:
@@ -234,7 +237,7 @@ class Saliens(requests.Session):
                                   desc="Zone ({zone_position}) progress".format(**zone),
                                   total=mul,
                                   initial=current_progress,
-                                  bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {elapsed}<{remaining}]',
+                                  bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                   )
 
 # ------- MAIN ----------
@@ -307,10 +310,13 @@ while True:
             game.print_planet_progress()
             game.print_zone_progress(zone_id)
 
-            LOG.info("Fighting in zone %s (%s)", zone_id, difficulty)
+            LOG.info("Fighting in zone %s (%s) for 2mins", zone_id, difficulty)
             game.join_zone(zone_id)
 
-            sleep(120)
+            try:
+                sleep(120)
+            except KeyboardInterrupt:
+                raise SystemExit
 
             score = 120 * (5 * (2**(difficulty - 1)))
             LOG.info("Submitting score of %s...", score)
