@@ -3,7 +3,7 @@
 ## First steps
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (replace all content there)
+2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (create file yourself)
 
 ## PHP
 

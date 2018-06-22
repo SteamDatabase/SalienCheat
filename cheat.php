@@ -144,10 +144,7 @@ function GetFirstAvailableZone( $Planet )
 			Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
-		if( $Zone[ 'capture_progress' ] < 0.95 )
-		{
-			$CleanZones[] = $Zone;
-		}
+		$CleanZones[] = $Zone;
 	}
 	
 	if( empty( $CleanZones ) )
@@ -198,7 +195,11 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
-			Msg( '>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ') with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
+			Msg(
+				'>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
+				' - Players: ' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
+				' - Captured: ' . number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%'
+			);
 
 			return $Planet[ 'id' ];
 		}
