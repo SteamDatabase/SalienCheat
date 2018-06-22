@@ -1,6 +1,11 @@
-### How to use this
+# How to use this
 
-### PHP
+## First steps
+
+1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
+2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (replace all content there)
+
+## PHP
 
 1. Install PHP (yes, really)
    1. Download https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip
@@ -10,12 +15,9 @@
    1. Open `php.ini-production` in a text editor
    2. Find `;extension=curl` and remove the semicolon
    3. Save as `php.ini`
-3. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-4. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (replace all content there)
-5. Run the script: `php cheat.php`
+3. Run the script: `php cheat.php`
 
-
-### Python
+## Python
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
 1. `pip install requests tqdm`
