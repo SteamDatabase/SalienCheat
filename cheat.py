@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 UPDATE_URL = "https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.py"
 
-logging.basicConfig(level=logging.DEBUG if sys.argv[-1] == 'debug' else logging.INFO,
+logging.basicConfig(level=logging.DEBUG if "debug" in sys.argv else logging.INFO,
                     format="%(asctime)s | %(message)s")
 LOG = logging.getLogger()
 
@@ -297,7 +297,7 @@ class Saliens(requests.Session):
 
 # ------- MAIN ----------
 
-if sys.argv[-1] != 'debug':
+if not "debug" in sys.argv and not "noupdate" in sys.argv:
     update_script()
 
 game = Saliens(None)
