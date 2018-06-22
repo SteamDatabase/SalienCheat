@@ -21,6 +21,8 @@ $CurrentPlanetName = '??';
 
 lol_using_goto_in_2018:
 
+$LastRestart = time();
+
 do
 {
 	$CurrentPlanet = GetFirstAvailablePlanet( $SkippedPlanets );
@@ -37,6 +39,14 @@ $CurrentPlanet = LeaveCurrentGame( $Token, false );
 
 do
 {
+	// Check for a new planet every hour
+	if( time() - $LastRestart > 3600 )
+	{
+		Msg( '!! Idled this planet for one hour, restarting to check for new planets' );
+
+		goto lol_using_goto_in_2018;
+	}
+
 	do
 	{
 		$Zone = GetFirstAvailableZone( $CurrentPlanet );
@@ -176,14 +186,35 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
 
+	foreach( $Planets as &$Planet )
+	{
+		do
+		{
+			$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet[ 'id' ] . '&language=english' );
+		}
+		while( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) );
+
+		$Planet[ 'hard_zones' ] = 0;
+
+		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
+		{
+			if( !$Zone[ 'captured' ] && $Zone[ 'difficulty' ] === 3 )
+			{
+				$Planet[ 'hard_zones' ]++;
+			}
+		}
+
+		Msg( '>> Planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ') has ' . $Planet[ 'hard_zones' ] . ' hard zones' );
+	}
+
 	usort( $Planets, function( $a, $b )
 	{
-		if( $b[ 'state' ][ 'difficulty' ] === $a[ 'state' ][ 'difficulty' ] )
+		if( $b[ 'hard_zones' ] === $a[ 'hard_zones' ] )
 		{
 			return $a[ 'state' ][ 'current_players' ] - $b[ 'state' ][ 'current_players' ];
 		}
 		
-		return $b[ 'state' ][ 'difficulty' ] - $a[ 'state' ][ 'difficulty' ];
+		return $b[ 'hard_zones' ] - $a[ 'hard_zones' ];
 	} );
 
 	foreach( $Planets as $Planet )
@@ -198,7 +229,8 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			Msg(
 				'>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
 				' - Players: ' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-				' - Captured: ' . number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%'
+				' - Captured: ' . number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%' .
+				' - Hard zones: ' . $Planet[ 'hard_zones' ]
 			);
 
 			return $Planet[ 'id' ];
