@@ -17,6 +17,8 @@
 2. Extract the contents of this script to the same folder
 3. Run the script: `php cheat.php`
 
+You can also provide token directly in CLI, to ease running multiple accounts: `php cheat.php aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+
 ## Python
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
