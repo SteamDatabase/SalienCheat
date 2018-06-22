@@ -269,7 +269,7 @@ while True:
 
     game.refresh_player_info()
     game.refresh_planet_info()
-    LOG.info("Planet name: {name}".format(**game.planet['state']))
+    LOG.info("Planet name: {name} ({id})".format(id=game.planet['id'], **game.planet['state']))
     LOG.info("Current players: {current_players}".format(**game.planet['state']))
     LOG.info("Giveaway AppIDs: {giveaway_apps}".format(**game.planet))
     game.print_planet_progress()
