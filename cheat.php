@@ -14,21 +14,13 @@ do
 }
 while( !$CurrentPlanet && sleep( 5 ) === 0 );
 
+// Leave current game before trying to switch planets (it will report InvalidState otherwise)
+LeaveCurrentGame( $Token, true );
+
 SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
 
-do
-{
-	$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
-}
-while( !isset( $Data[ 'response' ][ 'active_planet' ] ) );
-
 // Set the planet to what Steam thinks is the active one, even though we sent JoinPlanet request
-$CurrentPlanet = $Data[ 'response' ][ 'active_planet' ];
-
-if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
-{
-	SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
-}
+$CurrentPlanet = LeaveCurrentGame( $Token, false );
 
 do
 {
@@ -146,6 +138,32 @@ function GetFirstAvailablePlanet()
 			return $Planet[ 'id' ];
 		}
 	}
+}
+
+function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
+{
+	do
+	{
+		$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+	}
+	while( !isset( $Data[ 'response' ][ 'clan_info' ] ) );
+
+	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
+	{
+		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
+	}
+
+	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
+	{
+		return 0;
+	}
+
+	if( $LeaveCurrentPlanet )
+	{
+		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_planet' ] );
+	}
+
+	return $Data[ 'response' ][ 'active_planet' ];
 }
 
 function SendPOST( $Method, $Data )
