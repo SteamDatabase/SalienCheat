@@ -8,19 +8,26 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 	exit( 1 );
 }
 
-$Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
-$ParsedToken = json_decode( $Token, true );
-
-if( is_string( $ParsedToken ) )
+if( $argc === 2 )
 {
-	$Token = $ParsedToken;
+	$Token = $argv[ 1 ];
 }
-else if( isset( $ParsedToken[ 'token' ] ) )
+else
 {
-	$Token = $ParsedToken[ 'token' ];
+	$Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
+	$ParsedToken = json_decode( $Token, true );
+	
+	if( is_string( $ParsedToken ) )
+	{
+		$Token = $ParsedToken;
+	}
+	else if( isset( $ParsedToken[ 'token' ] ) )
+	{
+		$Token = $ParsedToken[ 'token' ];
+	}
+	
+	unset( $ParsedToken );
 }
-
-unset( $ParsedToken );
 
 if( strlen( $Token ) !== 32 )
 {
@@ -112,7 +119,7 @@ do
 
 	Msg(
 		'>> Zone ' . $Zone[ 'zone_position' ] .
-		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
+		' - Captured: ' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
 		' - Difficulty: ' . $Zone[ 'difficulty' ]
 	);
 
