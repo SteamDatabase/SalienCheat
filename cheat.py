@@ -27,7 +27,7 @@ except:
 
 ap = argparse.ArgumentParser()
 ap.add_argument(
-    "-t", "--token", required=False, type=str, help="Miniagame token")
+    "-t", "--token", required=False, type=str, help="Miniagame token",default="")
 ap.add_argument("-f",
     "--working-folder",
     required=False,
@@ -45,6 +45,14 @@ def get_access_token(force_input=False):
     token = args["token"]
 
     if not force_input:
+        if token!="":
+            if not token_re.match(token):
+                token = ''
+                raise Exception("Invalid token parameter")
+            else:
+                LOG.info("Loaded token from parameter")
+                return token
+
         if os.path.isfile(token_path):
             data = open(token_path, 'r', encoding='utf-8').read()
 
