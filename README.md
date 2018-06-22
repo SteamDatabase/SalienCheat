@@ -9,5 +9,5 @@
    2. Find `;extension=curl` and remove the semicolon
    3. Save as `php.ini`
 3. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-4. Grab `token` field (it looks like a hexadecimal string) from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (replace all content there)
+4. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (replace all content there)
 5. Run the script: `php cheat.php`

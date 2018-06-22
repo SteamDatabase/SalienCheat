@@ -3,6 +3,14 @@
 set_time_limit( 0 );
 
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
+$ParsedToken = json_decode( $Token, true );
+
+if( isset( $ParsedToken[ 'token' ] ) )
+{
+	$Token = $ParsedToken[ 'token' ];
+}
+
+unset( $ParsedToken );
 
 // Please do not change our clanid if you are going to use this script
 // If you want to cheat for your own group, come up with up with your own approach, thank you
