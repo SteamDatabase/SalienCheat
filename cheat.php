@@ -2,6 +2,12 @@
 
 set_time_limit( 0 );
 
+if( !file_exists( __DIR__ . '/cacert.pem' ) )
+{
+	Msg( 'You forgot to download cacert.pem file' );
+	exit( 1 );
+}
+
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 $ParsedToken = json_decode( $Token, true );
 
