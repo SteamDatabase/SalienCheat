@@ -1,9 +1,13 @@
+const fs = require('fs');
+
 const SalienCheat = require('./node/src/index.js');
 
-const config = {
-  token: '', // Your token from https://steamcommunity.com/saliengame/gettoken
-};
+const token = fs.readFileSync('./token.txt').toString();
 
-const cheat = new SalienCheat(config);
+if (!token) {
+  console.log("You haven't created a token file...");
+}
+
+const cheat = new SalienCheat({ token });
 
 cheat.run();

@@ -4,7 +4,7 @@
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
 2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (create file yourself)
-3. Select PHP or Python version of the script, you don't need both
+3. Select PHP, Python or Node.js version of the script, you only need one
 
 ## PHP
 
@@ -27,6 +27,6 @@
 
 1. Install _Latest_ Node.js https://nodejs.org/en/
 2. Open command line in the `node` folder
-3. Run: `npm i` (or if you have yarn installed; run `yarn`)
-4. Step back a directory (`cd ..` on windows)
+3. Run: `npm i` to get dependencies
+4. Go back a directory (`cd ..` on windows)
 5. Run the script: `node cheat.js`
