@@ -158,9 +158,24 @@ do
 			' (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)',
 			PHP_EOL . PHP_EOL
 		);
+		
+		SetTitle( $Data[ 'new_level' ], $Data[ 'new_score' ], $Data[ 'next_level_score' ] );
 	}
 }
 while( true );
+
+function SetTitle( $Level, $Score, $NextLevelScore )
+{
+	$Time = ( $NextLevelScore - $Score ) / GetScoreForZone( [ 'difficulty' => 3 ] ) * 2;
+	$Hours = floor( $Time / 60 );
+	$Minutes = $Time % 60;
+
+	@cli_set_process_title(
+		'Level ' . $Level .
+		' (' . number_format( $Score ) . ' XP)' .
+		' - ETA: ' . $Hours . 'h ' . $Minutes . 'm'
+	);
+}
 
 function GetScoreForZone( $Zone )
 {
@@ -320,6 +335,8 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 		}
 	}
 	while( true );
+
+	SetTitle( $Data[ 'response' ][ 'level' ], $Data[ 'response' ][ 'score' ], $Data[ 'response' ][ 'next_level_score' ] );
 
 	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 	{
