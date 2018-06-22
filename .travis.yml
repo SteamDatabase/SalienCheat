@@ -16,6 +16,10 @@ jobs:
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker build -t $DOCKER_USERNAME/saliencheat .
+      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:latest-php
+      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:${TRAVIS_COMMIT}-php
+      - docker build -t $DOCKER_USERNAME/saliencheat . -f Dockerfile-python
+      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:latest-python
+      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:${TRAVIS_COMMIT}-python
       - docker images
-      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:$TRAVIS_COMMIT
       - docker push $DOCKER_USERNAME/saliencheat

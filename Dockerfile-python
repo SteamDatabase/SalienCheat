@@ -1,0 +1,8 @@
+FROM python:3.6.5-stretch
+
+RUN pip install requests tqdm
+
+WORKDIR /app
+COPY . .
+
+CMD python /app/cheat.py $TOKEN
