@@ -5,4 +5,4 @@ RUN pip install requests tqdm
 WORKDIR /app
 COPY . .
 
-CMD python /app/cheat.py $TOKEN
+ENTRYPOINT [ "python", "/app/cheat.py" ]
