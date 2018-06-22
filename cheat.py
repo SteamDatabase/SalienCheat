@@ -9,6 +9,7 @@ import sys
 import json
 import logging
 import hashlib
+import random
 from io import open
 from time import sleep, time
 from getpass import getpass
@@ -70,7 +71,8 @@ def get_access_token(force_input=False):
 
 def update_script():
     LOG.info("Checking for new version...")
-    r = requests.get(UPDATE_URL, stream=True)
+    #we need to pass a random string to get around githubs rawcdn caching
+    r = requests.get(UPDATE_URL, stream=True, params={"r": str(random.getrandbits(128))})
 
     if r.status_code == 200:
         update_hash = hashlib.sha1(r.content).hexdigest()
