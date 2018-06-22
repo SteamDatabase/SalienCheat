@@ -39,7 +39,7 @@
 
 1. Install the _Latest_ [Node.js](https://nodejs.org/en/) version
 2. Open the `node` folder and then open command line
-  * Tip: ['Shift + Right Click' in explorer -> 'Open Command Line/Powershell here'](http://i.imgur.com/6FJcydX.png)
+    * Tip: ['Shift + Right Click' in explorer -> 'Open Command Line/Powershell here'](http://i.imgur.com/6FJcydX.png)
 3. Type `npm i` to get dependencies
 4. Now go back a directory (Type `cd ..` on windows)
 5. Run the script by typing `node cheat.js`
