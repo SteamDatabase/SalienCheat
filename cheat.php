@@ -462,7 +462,7 @@ function Msg( $Message, $EOL = PHP_EOL )
 			"\033[1;33m",
 			"\033[1;31m",
 			"\033[1;34m",
-			"\033[1;90m",
+			"\033[0;36m",
 		],
 	$Message, $Count );
 
