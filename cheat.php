@@ -112,7 +112,7 @@ do
 
 	Msg(
 		'>> Zone ' . $Zone[ 'zone_position' ] .
-		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
+		' - Captured: ' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
 		' - Difficulty: ' . $Zone[ 'difficulty' ]
 	);
 
