@@ -4,6 +4,7 @@
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
 2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (create file yourself)
+3. Select PHP or Python version of the script, you don't need both
 
 ## PHP
 
