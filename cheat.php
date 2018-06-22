@@ -159,6 +159,7 @@ function SendPOST( $Method, $Data )
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 10,
 		CURLOPT_CONNECTTIMEOUT => 10,
+		CURLOPT_HEADER         => 1,
 		CURLOPT_POST           => 1,
 		CURLOPT_POSTFIELDS     => $Data,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
@@ -174,11 +175,17 @@ function SendPOST( $Method, $Data )
 	do
 	{
 		Msg( 'Sending ' . $Method . '...' );
-		
+
 		$Data = curl_exec( $c );
-		
-		Msg( $Data );
-		
+
+		$HeaderSize = curl_getinfo( $c, CURLINFO_HEADER_SIZE );
+		$Header = substr( $Data, 0, $HeaderSize );
+		$Data = substr( $Data, $HeaderSize );
+
+		preg_match( '/X-eresult: ([0-9]+)/', $Header, $EResult ) === 1 ? $EResult = (int)$EResult[ 1 ] : $EResult = 0;
+
+		Msg( 'EResult: ' . $EResult . ' - ' . $Data );
+
 		$Data = json_decode( $Data, true );
 	}
 	while( !isset( $Data[ 'response' ] ) );
