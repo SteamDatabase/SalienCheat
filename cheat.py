@@ -56,6 +56,8 @@ def get_access_token(force_input=False):
             token = _input("Enter valid token: ").strip()
 
     with open(token_path, 'w', encoding='utf-8') as fp:
+        if sys.version < (3,):
+            token = token.decode('utf-8')
         fp.write(token)
 
     return token
