@@ -223,6 +223,13 @@ function GetFirstAvailableZone( $Planet )
 			Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
+		// If a zone is close to completion, skip it because Valve does not reward points
+		// and replies with 42 NoMatch instead
+		if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.95 )
+		{
+			continue;
+		}
+
 		$CleanZones[] = $Zone;
 	}
 	
@@ -285,7 +292,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 	{
 		if( $b[ 'hard_zones' ] === $a[ 'hard_zones' ] )
 		{
-			return $a[ 'state' ][ 'current_players' ] - $b[ 'state' ][ 'current_players' ];
+			return $a[ 'id' ] - $b[ 'id' ];
 		}
 		
 		return $b[ 'hard_zones' ] - $a[ 'hard_zones' ];
