@@ -252,7 +252,6 @@ game.print_player_info()
 # join battle
 while True:
     LOG.info("Finding planet...")
-    game.refresh_player_info()
 
     if 'active_planet' not in game.player_info:
         # locate uncaptured planet and join it
@@ -282,7 +281,7 @@ while True:
 
     while game.planet and not game.planet['state']['captured']:
         zones = game.planet['zones']
-        zones = filter(lambda x: x['captured'] == False and x['capture_progress'] < 0.95, zones)
+        zones = list(filter(lambda x: x['captured'] == False, zones))
         boss_zones = list(filter(lambda x: x['type'] == 4, zones))
 
         if boss_zones:
@@ -292,6 +291,7 @@ while True:
             zones = sorted(zones, reverse=True, key=lambda x: x['difficulty'])
 
         if not zones:
+            LOG.debug("No open zones left on planet")
             game.player_info.pop('active_planet')
             break
 
