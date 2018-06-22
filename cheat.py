@@ -295,7 +295,11 @@ while True:
     for planet in planets:
         planet['n_hard_zones'] = list(map(lambda x: x['difficulty'], filter(lambda y: not y['captured'], planet['zones']))).count(3)
 
-    planets = sorted(planets, reverse=True, key=lambda x: x['n_hard_zones'])
+    hard_planets = list(filter(lambda x: x['n_hard_zones'] > 0, planets))
+    if hard_planets:
+        planets = hard_planets
+
+    planets = sorted(planets, reverse=False, key=lambda x: x['n_hard_zones'])
 #   planets = sorted(planets, reverse=False, key=lambda x: x['state']['current_players'])
 
     if not planets:
