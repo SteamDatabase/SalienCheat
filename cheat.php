@@ -5,12 +5,22 @@ set_time_limit( 0 );
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 $ParsedToken = json_decode( $Token, true );
 
-if( isset( $ParsedToken[ 'token' ] ) )
+if( is_string( $ParsedToken ) )
+{
+	$Token = $ParsedToken;
+}
+else if( isset( $ParsedToken[ 'token' ] ) )
 {
 	$Token = $ParsedToken[ 'token' ];
 }
 
 unset( $ParsedToken );
+
+if( strlen( $Token ) !== 32 )
+{
+	Msg( 'Failed to find your token. Verify token.txt' );
+	exit( 1 );
+}
 
 Msg( 'This script will not work until you have joined our group:' );
 Msg( 'https://steamcommunity.com/groups/SteamDB' );
