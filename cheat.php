@@ -4,6 +4,8 @@ set_time_limit( 0 );
 
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 
+// Please do not change our clanid if you are going to use this script
+// If you want to cheat for your own group, come up with up with your own approach, thank you
 SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
 
 lol_using_goto_in_2018:
