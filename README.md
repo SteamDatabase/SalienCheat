@@ -3,8 +3,8 @@
 ## First steps
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-2. Grab `token` from https://steamcommunity.com/saliengame/gettoken and put it in `token.txt` (create file yourself)
-3. Select PHP, Python or Node.js version of the script, you only need one
+2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in same folder as `cheat.php`
+3. Select PHP or Python version of the script, you don't need both
 
 ## PHP
 

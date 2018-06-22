@@ -2,15 +2,31 @@
 
 set_time_limit( 0 );
 
+if( !file_exists( __DIR__ . '/cacert.pem' ) )
+{
+	Msg( 'You forgot to download cacert.pem file' );
+	exit( 1 );
+}
+
 $Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 $ParsedToken = json_decode( $Token, true );
 
-if( isset( $ParsedToken[ 'token' ] ) )
+if( is_string( $ParsedToken ) )
+{
+	$Token = $ParsedToken;
+}
+else if( isset( $ParsedToken[ 'token' ] ) )
 {
 	$Token = $ParsedToken[ 'token' ];
 }
 
 unset( $ParsedToken );
+
+if( strlen( $Token ) !== 32 )
+{
+	Msg( 'Failed to find your token. Verify token.txt' );
+	exit( 1 );
+}
 
 Msg( 'This script will not work until you have joined our group:' );
 Msg( 'https://steamcommunity.com/groups/SteamDB' );
@@ -20,6 +36,8 @@ $SkippedPlanets = [];
 $CurrentPlanetName = '??';
 
 lol_using_goto_in_2018:
+
+$LastRestart = time();
 
 do
 {
@@ -37,6 +55,14 @@ $CurrentPlanet = LeaveCurrentGame( $Token, false );
 
 do
 {
+	// Check for a new planet every hour
+	if( time() - $LastRestart > 3600 )
+	{
+		Msg( '!! Idled this planet for one hour, restarting to check for new planets' );
+
+		goto lol_using_goto_in_2018;
+	}
+
 	do
 	{
 		$Zone = GetFirstAvailableZone( $CurrentPlanet );
@@ -48,6 +74,18 @@ do
 		$SkippedPlanets[ $CurrentPlanet ] = true;
 
 		Msg( '!! There are no zones to join in this planet, restarting...' );
+
+		goto lol_using_goto_in_2018;
+	}
+
+	// Find a new planet if there are no hard zones left
+	$HardZones = $Zone[ 'hard_zones' ];
+	$PlanetCaptured = $Zone[ 'planet_captured' ];
+	$PlanetPlayers = $Zone[ 'planet_players' ];
+
+	if( !$HardZones && time() - $LastRestart > 60 )
+	{
+		Msg( '!! This planet does not have any hard zones left, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -66,9 +104,16 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Zone ' . $Zone[ 'zone_position' ] . ' on planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
-		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) .
-		'% - Difficulty: ' . $Zone[ 'difficulty' ]
+		'>> Planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
+		' - Players: ' . number_format( $PlanetPlayers ) .
+		' - Captured: ' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
+		' - Hard zones: ' . $HardZones
+	);
+
+	Msg(
+		'>> Zone ' . $Zone[ 'zone_position' ] .
+		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
+		' - Difficulty: ' . $Zone[ 'difficulty' ]
 	);
 
 	if( isset( $Zone[ 'top_clans' ] ) )
@@ -124,14 +169,22 @@ function GetFirstAvailableZone( $Planet )
 	global $CurrentPlanetName;
 	$CurrentPlanetName = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'name' ];
 
+	$PlanetCaptured = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'capture_progress' ];
+	$PlanetPlayers = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'current_players' ];
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
+	$HardZones = 0;
 	
 	foreach( $Zones as $Zone )
 	{
 		if( $Zone[ 'captured' ] )
 		{
 			continue;
+		}
+
+		if( $Zone[ 'difficulty' ] === 3 )
+		{
+			$HardZones++;
 		}
 
 		// Always join boss zone
@@ -162,7 +215,12 @@ function GetFirstAvailableZone( $Planet )
 		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
 	} );
 
-	return $CleanZones[ 0 ];
+	$Zone = $CleanZones[ 0 ];
+	$Zone[ 'hard_zones' ] = $HardZones;
+	$Zone[ 'planet_captured' ] = $PlanetCaptured;
+	$Zone[ 'planet_players' ] = $PlanetPlayers;
+
+	return $Zone;
 }
 
 function GetFirstAvailablePlanet( $SkippedPlanets )
@@ -176,14 +234,35 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
 
+	foreach( $Planets as &$Planet )
+	{
+		do
+		{
+			$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet[ 'id' ] . '&language=english' );
+		}
+		while( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) );
+
+		$Planet[ 'hard_zones' ] = 0;
+
+		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
+		{
+			if( !$Zone[ 'captured' ] && $Zone[ 'difficulty' ] === 3 )
+			{
+				$Planet[ 'hard_zones' ]++;
+			}
+		}
+
+		Msg( '>> Planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ') has ' . $Planet[ 'hard_zones' ] . ' hard zones' );
+	}
+
 	usort( $Planets, function( $a, $b )
 	{
-		if( $b[ 'state' ][ 'difficulty' ] === $a[ 'state' ][ 'difficulty' ] )
+		if( $b[ 'hard_zones' ] === $a[ 'hard_zones' ] )
 		{
 			return $a[ 'state' ][ 'current_players' ] - $b[ 'state' ][ 'current_players' ];
 		}
 		
-		return $b[ 'state' ][ 'difficulty' ] - $a[ 'state' ][ 'difficulty' ];
+		return $b[ 'hard_zones' ] - $a[ 'hard_zones' ];
 	} );
 
 	foreach( $Planets as $Planet )
@@ -198,7 +277,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			Msg(
 				'>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
 				' - Players: ' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-				' - Captured: ' . number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%'
+				' - Hard zones: ' . $Planet[ 'hard_zones' ]
 			);
 
 			return $Planet[ 'id' ];
