@@ -1,4 +1,4 @@
-""" Play SALIENT for you
+"""Plays SALIENT for you
 
 pip install requests tqdm
 """
@@ -9,7 +9,7 @@ import sys
 import json
 import logging
 from io import open
-from time import sleep
+from time import sleep, time
 from getpass import getpass
 
 import requests
@@ -150,14 +150,17 @@ class Saliens(requests.Session):
 
     def refresh_planet_info(self):
         if 'active_planet' in self.player_info:
-            self.planet = self.sget('ITerritoryControlMinigameService/GetPlanet',
-                                    {'id': self.player_info['active_planet']},
-                                    retry=True,
-                                    ).get('planets', [{}])[0]
+            self.planet = self.get_planet(self.player_info['active_planet'])
         else:
             self.planet = {}
 
         return self.planet
+
+    def get_planet(self, pid):
+        return self.sget('ITerritoryControlMinigameService/GetPlanet',
+                          {'id': pid},
+                          retry=True,
+                          ).get('planets', [{}])[0]
 
     def represent_clan(self, clan_id):
         return self.spost('ITerritoryControlMinigameService/RepresentClan', {'clanid': clan_id})
@@ -174,9 +177,11 @@ class Saliens(requests.Session):
     def join_zone(self, pos):
         return self.spost('ITerritoryControlMinigameService/JoinZone', {'zone_position': pos})
 
-    def leave_current_zone(self):
+    def leave_all(self):
         if 'active_zone_game' in self.player_info:
             self.spost('IMiniGameService/LeaveGame', {'gameid': self.player_info['active_zone_game']}, retry=False)
+        if 'active_planet' in self.player_info:
+            self.spost('IMiniGameService/LeaveGame', {'gameid': self.player_info['active_planet']}, retry=False)
 
     def print_player_info(self):
         player_info = self.player_info
@@ -257,20 +262,26 @@ game.print_player_info()
 # join battle
 while True:
     LOG.info("Finding planet...")
+    game.leave_all()
 
-    if 'active_planet' not in game.player_info:
-        # locate uncaptured planet and join it
-        planets = game.get_planets()
-        planets = list(filter(lambda x: x['state']['captured'] == False, planets))
-        planets = sorted(planets, reverse=True, key=lambda x: x['state']['difficulty'])
-        planets = sorted(planets, reverse=False, key=lambda x: x['state']['current_players'])
+    # locate uncaptured planet and join it
+    planets = game.get_planets()
+    planets = list(filter(lambda x: not x['state']['captured'], planets))
+    planets = map(lambda x: game.get_planet(x['id']), planets)
 
-        if not planets:
-            LOG.error("No uncaputred planets left :(")
-            raise SystemExit
+    for planet in planets:
+        planet['n_hard_zones'] = list(map(lambda x: x['difficulty'], filter(lambda y: not y['captured'], planet['zones']))).count(3)
 
-        LOG.info("Joining planet..")
-        game.join_planet(planets[0]['id'])
+    planets = sorted(planets, reverse=True, key=lambda x: x['n_hard_zones'])
+#   planets = sorted(planets, reverse=False, key=lambda x: x['state']['current_players'])
+
+    if not planets:
+        LOG.error("No uncaputred planets left :(")
+        raise SystemExit
+
+    LOG.info("Joining planet %s..", planets[0]['id'])
+    game.join_planet(planets[0]['id'])
+    deadline = time() + 60 * 30
 
     game.refresh_player_info()
     game.refresh_planet_info()
@@ -281,10 +292,8 @@ while True:
 
     # zone
     LOG.info("Finding conflict zone...")
-    if 'active_zone_position' in game.player_info:
-        game.leave_current_zone()
 
-    while game.planet and not game.planet['state']['captured']:
+    while time() < deadline and game.planet and not game.planet['state']['captured']:
         zones = game.planet['zones']
         zones = list(filter(lambda x: x['captured'] == False, zones))
         boss_zones = list(filter(lambda x: x['type'] == 4, zones))
@@ -303,7 +312,7 @@ while True:
         zone_id = zones[0]['zone_position']
         difficulty = zones[0]['difficulty']
 
-        while game.planet and not game.planet['zones'][zone_id]['captured']:
+        while time() < deadline and game.planet and not game.planet['zones'][zone_id]['captured']:
             game.print_player_info()
             if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 4777282:
                 game.represent_clan(4777282)
