@@ -17,8 +17,16 @@
 2. Extract the contents of this script to the same folder
 3. Run the script: `php cheat.php`
 
+You can also provide token directly in CLI, to ease running multiple accounts: `php cheat.php aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+
 ## Python
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
 1. `pip install requests tqdm`
 2. Run the script: `python cheat.py`
+
+## Docker
+1. Extract contents of this script somewhere.
+2. To build: `docker build . -t steamdb/saliencheat`
+3. To run: `docker run -it --init --rm -e TOKEN=<32 character token from gettoken url> steamdb/saliencheat`
+4. To stop running, Ctrl+C
