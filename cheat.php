@@ -125,11 +125,23 @@ function GetFirstAvailablePlanet()
 		return null;
 	}
 
-	foreach( $Planets[ 'response' ][ 'planets' ] as $Planet )
+	$Planets = $Planets[ 'response' ][ 'planets' ];
+
+	usort( $Planets, function( $a, $b )
+	{
+		if( $b[ 'state' ][ 'difficulty' ] === $a[ 'state' ][ 'difficulty' ] )
+		{
+			return $a[ 'state' ][ 'current_players' ] - $b[ 'state' ][ 'current_players' ];
+		}
+		
+		return $b[ 'state' ][ 'difficulty' ] - $a[ 'state' ][ 'difficulty' ];
+	} );
+
+	foreach( $Planets as $Planet )
 	{
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
-			Msg( 'Got planet ' . $Planet[ 'id' ] );
+			Msg( 'Got planet ' . $Planet[ 'id' ] . ' with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
 
 			return $Planet[ 'id' ];
 		}
