@@ -353,6 +353,7 @@ while True:
                 game.represent_clan(4777282)
 
             game.log("Fighting in zone %s (%s) for 2mins", zone_id, difficulty)
+            game.log("Player EXP: %s / %s", game.player_info['score'], game.player_info['next_level_score'])
             game.join_zone(zone_id)
             game.refresh_player_info()
 
