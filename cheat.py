@@ -299,8 +299,9 @@ while True:
         difficulty = zones[0]['difficulty']
 
         while game.planet and not game.planet['zones'][zone_id]['captured']:
-            game.represent_clan(4777282)
             game.print_player_info()
+            if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 4777282:
+                game.represent_clan(4777282)
             game.print_planet_progress()
             game.print_zone_progress(zone_id)
 
