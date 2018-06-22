@@ -159,8 +159,8 @@ do
 		$Data = $Data[ 'response' ];
 
 		Msg(
-			'>> Score: {lightred}' . number_format( $Data[ 'old_score' ] ) . '{normal} XP => {lightblue}' . number_format( $Data[ 'new_score' ] ) .
-			'{normal} XP - Current level: {lightblue}' . $Data[ 'new_level' ] .
+			'>> Score: {lightred}' . number_format( $Data[ 'old_score' ] ) . '{normal} XP => {green}' . number_format( $Data[ 'new_score' ] ) .
+			'{normal} XP - Current level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
 		);
 		
@@ -466,7 +466,6 @@ function Msg( $Message, $EOL = PHP_EOL )
 			'{green}',
 			'{yellow}',
 			'{lightred}',
-			'{lightblue}',
 			'{grey}',
 		],
 		[
@@ -474,7 +473,6 @@ function Msg( $Message, $EOL = PHP_EOL )
 			"\033[0;32m",
 			"\033[1;33m",
 			"\033[1;31m",
-			"\033[1;34m",
 			"\033[0;36m",
 		],
 	$Message, $Count );
