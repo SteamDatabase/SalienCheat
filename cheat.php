@@ -9,12 +9,21 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 }
 
 $token_txt = 'token.txt';
+$Token = '';
 if ($argc == 2)
 {
 	$token_txt = $argv[1];
 }
 
-$Token = trim( file_get_contents( __DIR__ . '/' . $token_txt ) );
+if (file_exists(__DIR__ . '/' . $token_txt))
+{
+	$Token = trim( file_get_contents( __DIR__ . '/' . $token_txt ) );
+}
+else
+{
+	$Token = $token_txt;
+}
+
 $ParsedToken = json_decode( $Token, true );
 
 if( is_string( $ParsedToken ) )
