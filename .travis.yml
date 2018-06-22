@@ -1,0 +1,21 @@
+sudo: required
+
+services:
+  - docker
+
+branches:
+  only:
+  - master
+
+stages:
+  - deploy
+
+jobs:
+  include:
+    - stage: deploy
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t $DOCKER_USERNAME/saliencheat .
+      - docker images
+      - docker tag $DOCKER_USERNAME/saliencheat:latest $DOCKER_USERNAME/saliencheat:$TRAVIS_COMMIT
+      - docker push $DOCKER_USERNAME/saliencheat
