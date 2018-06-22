@@ -9,7 +9,6 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 }
 
 $token_txt = 'token.txt';
-$Token = '';
 if ($argc == 2)
 {
 	$token_txt = $argv[1];
