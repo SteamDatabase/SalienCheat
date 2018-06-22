@@ -1,0 +1,35 @@
+{
+  "name": "salien-cheat",
+  "version": "1.0.0",
+  "description": "Cheating Salien minigame, the proper way.",
+  "keywords": [
+    "salien",
+    "steam",
+    "sale",
+    "game",
+    "script"
+  ],
+  "homepage": "https://github.com/SteamDatabase/SalienCheat",
+  "bugs": "https://github.com/SteamDatabase/SalienCheat/issues",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Alex Gabites",
+      "email": "hello@southpaw.co.nz",
+      "url": "http://southpaw.co.nz/"
+    }
+  ],
+  "files": [
+    "src"
+  ],
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SteamDatabase/SalienCheat.git"
+  },
+  "dependencies": {
+    "delay": "^3.0.0",
+    "fetch-retry": "^1.2.1"
+  },
+  "devDependencies": {}
+}
