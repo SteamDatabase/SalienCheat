@@ -61,13 +61,16 @@ do
 }
 while( !$CurrentPlanet && sleep( 5 ) === 0 );
 
-// Leave current game before trying to switch planets (it will report InvalidState otherwise)
-LeaveCurrentGame( $Token, true );
+do
+{
+	// Leave current game before trying to switch planets (it will report InvalidState otherwise)
+	LeaveCurrentGame( $Token, true );
 
-SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
+	SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
 
-// Set the planet to what Steam thinks is the active one, even though we sent JoinPlanet request
-$CurrentPlanet = LeaveCurrentGame( $Token, false );
+	$SteamThinksPlanet = LeaveCurrentGame( $Token, false );
+}
+while( $CurrentPlanet !== $SteamThinksPlanet );
 
 do
 {
@@ -80,6 +83,9 @@ do
 
 		goto lol_using_goto_in_2018;
 	}
+
+	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
+	LeaveCurrentGame( $Token, false );
 
 	do
 	{
@@ -344,8 +350,6 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 		}
 	}
 	while( true );
-
-	Msg( 'Current level is {yellow}' . $Data[ 'response' ][ 'level' ] . '{normal} with score of {yellow}' . $Data[ 'response' ][ 'score' ] );
 
 	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 	{
