@@ -268,7 +268,10 @@ while True:
     # locate uncaptured planet and join it
     planets = game.get_planets()
     planets = list(filter(lambda x: not x['state']['captured'], planets))
-    planets = map(lambda x: game.get_planet(x['id']), planets)
+
+    LOG.info("Found %s uncaptured planets: %s", len(planets), list(map(lambda x: int(x['id']), planets)))
+
+    planets = list(map(lambda x: game.get_planet(x['id']), planets))
 
     for planet in planets:
         planet['n_hard_zones'] = list(map(lambda x: x['difficulty'], filter(lambda y: not y['captured'], planet['zones']))).count(3)
@@ -277,7 +280,7 @@ while True:
 #   planets = sorted(planets, reverse=False, key=lambda x: x['state']['current_players'])
 
     if not planets:
-        LOG.error("No uncaputred planets left :(")
+        LOG.error("No uncaptured planets left :(")
         raise SystemExit
 
     LOG.info("Joining planet %s..", planets[0]['id'])
