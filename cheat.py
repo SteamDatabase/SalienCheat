@@ -353,7 +353,7 @@ while True:
             game.refresh_player_info()
 
             try:
-                for i in range(120 / 2):
+                for i in range(120 // 2):
                     sleep(2)
 
                     if i+1 % 10 == 0:
