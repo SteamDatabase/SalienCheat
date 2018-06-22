@@ -74,8 +74,9 @@ def update_script():
 
     if r.status_code == 200:
         update_hash = hashlib.sha1(r.content).hexdigest()
+
         data = open(sys.argv[0], 'r', encoding='utf-8').read()
-        current_hash = hashlib.md5(data.encode()).hexdigest()
+        current_hash = hashlib.sha1(data.encode()).hexdigest()
 
         LOG.info("Current hash: {}".format(current_hash))
         LOG.info("Update hash: {}".format(update_hash))
