@@ -153,29 +153,23 @@ do
 		$Data = $Data[ 'response' ];
 
 		Msg(
-			'>> Score: {lightred}' . $Data[ 'old_score' ] . '{normal} => {lightblue}' . $Data[ 'new_score' ] .
-			'{grey} (next level: ' . $Data[ 'next_level_score' ] .
-			' in ' . ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) . '){normal} - Current level: {lightblue}' . $Data[ 'new_level' ] .
+			'>> Score: {lightred}' . number_format( $Data[ 'old_score' ] ) . '{normal} XP => {lightblue}' . number_format( $Data[ 'new_score' ] ) .
+			'{normal} XP - Current level: {lightblue}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
 		);
 		
-		SetTitle( $Data[ 'new_level' ], $Data[ 'new_score' ], $Data[ 'next_level_score' ] );
+		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => 3 ] ) * 2;
+		$Hours = floor( $Time / 60 );
+		$Minutes = $Time % 60;
+		
+		Msg(
+			'>> Next level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
+			'{normal} XP - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
+			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm'
+		);
 	}
 }
 while( true );
-
-function SetTitle( $Level, $Score, $NextLevelScore )
-{
-	$Time = ( $NextLevelScore - $Score ) / GetScoreForZone( [ 'difficulty' => 3 ] ) * 2;
-	$Hours = floor( $Time / 60 );
-	$Minutes = $Time % 60;
-
-	@cli_set_process_title(
-		'Level ' . $Level .
-		' (' . number_format( $Score ) . ' XP)' .
-		' - ETA: ' . $Hours . 'h ' . $Minutes . 'm'
-	);
-}
 
 function GetScoreForZone( $Zone )
 {
@@ -336,7 +330,7 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 	}
 	while( true );
 
-	SetTitle( $Data[ 'response' ][ 'level' ], $Data[ 'response' ][ 'score' ], $Data[ 'response' ][ 'next_level_score' ] );
+	Msg( 'Current level is {yellow}' . $Data[ 'response' ][ 'level' ] . '{normal} with score of {yellow}' . $Data[ 'response' ][ 'score' ] );
 
 	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 	{

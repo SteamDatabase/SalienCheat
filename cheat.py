@@ -231,9 +231,10 @@ class Saliens(requests.Session):
             self.level_pbar.desc = "Player Level {level}".format(**player_info)
             self.level_pbar.total = int(player_info['next_level_score'])
             self.level_pbar.n = int(player_info['score'])
-            print(self.level_pbar)
+            sys.stdout.write(str(self.level_pbar))
         else:
             self.level_pbar = tqdm(ascii=True,
+                                   file=sys.stdout,
                                    position=0,
                                    dynamic_ncols=True,
                                    desc="Player Level {level}".format(**player_info),
@@ -241,6 +242,8 @@ class Saliens(requests.Session):
                                    initial=int(player_info['score']),
                                    bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                    )
+        sys.stdout.write("\n")
+        sys.stdout.flush()
 
     def print_planet_progress(self):
         planet = self.planet
@@ -252,9 +255,10 @@ class Saliens(requests.Session):
         if getattr(self, 'planet_pbar', None):
             self.planet_pbar.desc="Planet ({id}) progress".format(**planet)
             self.planet_pbar.n = current_progress
-            print(self.planet_pbar)
+            sys.stdout.write(str(self.planet_pbar))
         else:
             self.planet_pbar = tqdm(ascii=True,
+                                    file=sys.stdout,
                                     position=0,
                                     dynamic_ncols=True,
                                     desc="Planet ({id}) progress".format(**planet),
@@ -262,6 +266,8 @@ class Saliens(requests.Session):
                                     initial=current_progress,
                                     bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                     )
+        sys.stdout.write("\n")
+        sys.stdout.flush()
 
     def print_zone_progress(self, zone=None):
         if not self.planet:
@@ -275,9 +281,10 @@ class Saliens(requests.Session):
         if getattr(self, 'zone_pbar', None):
             self.zone_pbar.desc="Zone ({zone_position}) progress".format(**zone)
             self.zone_pbar.n = current_progress
-            print(self.zone_pbar)
+            sys.stdout.write(str(self.zone_pbar))
         else:
             self.zone_pbar = tqdm(ascii=True,
+                                  file=sys.stdout,
                                   position=0,
                                   dynamic_ncols=True,
                                   desc="Zone ({zone_position}) progress".format(**zone),
@@ -285,6 +292,8 @@ class Saliens(requests.Session):
                                   initial=current_progress,
                                   bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
                                   )
+        sys.stdout.write("\n")
+        sys.stdout.flush()
 
 # ------- MAIN ----------
 
