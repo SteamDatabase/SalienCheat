@@ -290,7 +290,7 @@ function SendPOST( $Method, $Data )
 
 		$Data = json_decode( $Data, true );
 	}
-	while( !isset( $Data[ 'response' ] ) );
+	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
 
 	curl_close( $c );
 	
@@ -325,7 +325,7 @@ function SendGET( $Method, $Data )
 		$Data = curl_exec( $c );
 		$Data = json_decode( $Data, true );
 	}
-	while( !isset( $Data[ 'response' ] ) );
+	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
 
 	curl_close( $c );
 	
