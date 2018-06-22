@@ -262,6 +262,7 @@ game.print_player_info()
 # join battle
 while True:
     LOG.info("Finding planet...")
+    game.refresh_player_info()
     game.leave_all()
 
     # locate uncaptured planet and join it
@@ -280,11 +281,19 @@ while True:
         raise SystemExit
 
     LOG.info("Joining planet %s..", planets[0]['id'])
-    game.join_planet(planets[0]['id'])
+
+    planet_id = planets[0]['id']
+    game.join_planet(planet_id)
     deadline = time() + 60 * 30
 
     game.refresh_player_info()
     game.refresh_planet_info()
+
+    # if join didnt work for retry
+    if game.planet['id'] != planet_id:
+        sleep(2)
+        continue
+
     LOG.info("Planet name: {name} ({id})".format(id=game.planet['id'], **game.planet['state']))
     LOG.info("Current players: {current_players}".format(**game.planet['state']))
     LOG.info("Giveaway AppIDs: {giveaway_apps}".format(**game.planet))
