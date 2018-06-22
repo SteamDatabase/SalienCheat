@@ -12,9 +12,9 @@ if( isset( $ParsedToken[ 'token' ] ) )
 
 unset( $ParsedToken );
 
-// Please do not change our clanid if you are going to use this script
-// If you want to cheat for your own group, come up with up with your own approach, thank you
-SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+Msg( 'This script will not work until you have joined our group:' );
+Msg( 'https://steamcommunity.com/groups/SteamDB' );
+echo PHP_EOL . PHP_EOL;
 
 $SkippedPlanets = [];
 
@@ -46,7 +46,7 @@ do
 	{
 		$SkippedPlanets[ $CurrentPlanet ] = true;
 
-		Msg( 'There are no zones to join in this planet, restarting...' );
+		Msg( '!! There are no zones to join in this planet, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -55,7 +55,7 @@ do
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
-		Msg( 'Failed to join a zone, waiting 15 seconds and trying again' );
+		Msg( '!! Failed to join a zone, waiting 15 seconds and trying again' );
 
 		sleep( 15 );
 
@@ -64,7 +64,12 @@ do
 
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 	
-	Msg( 'Joined zone ' . $Zone[ 'zone_position' ] . ' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '% - Difficulty: ' . $Zone[ 'difficulty' ] );
+	Msg(
+		'>> Joined zone ' . $Zone[ 'zone_position' ] . ' on planet ' . $CurrentPlanet .
+		' - Captured: ' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) .
+		'% - Difficulty: ' . $Zone[ 'difficulty' ] .
+		' - Leader: ' . ( isset( $Zone[ 'leader' ][ 'url' ] ) ? $Zone[ 'leader' ][ 'url' ] : 'no leader yet' )
+	);
 	
 	sleep( 120 );
 	
@@ -74,7 +79,12 @@ do
 	{
 		$Data = $Data[ 'response' ];
 
-		Msg( 'Score: ' . $Data[ 'old_score' ] . ' => ' . $Data[ 'new_score' ] . ' (next level: ' . $Data[ 'next_level_score' ] . ') - Current level: ' . $Data[ 'new_level' ] );
+		Msg(
+			'>> Score: ' . $Data[ 'old_score' ] . ' => ' . $Data[ 'new_score' ] .
+			' (next level: ' . $Data[ 'next_level_score' ] .
+			' in ' . ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) . ') - Current level: ' . $Data[ 'new_level' ] .
+			' (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
+		);
 	}
 }
 while( true );
@@ -93,7 +103,7 @@ function GetScoreForZone( $Zone )
 
 function GetFirstAvailableZone( $Planet )
 {
-	$Zones = SendGET( 'GetPlanet', 'id=' . $Planet );
+	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet );
 
 	if( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) )
 	{
@@ -117,7 +127,7 @@ function GetFirstAvailableZone( $Planet )
 		}
 		else if( $Zone[ 'type' ] != 3 )
 		{
-			Msg( 'Unknown zone type: ' . $Zone[ 'type' ] );
+			Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
 		if( $Zone[ 'capture_progress' ] < 0.95 )
@@ -146,7 +156,7 @@ function GetFirstAvailableZone( $Planet )
 
 function GetFirstAvailablePlanet( $SkippedPlanets )
 {
-	$Planets = SendGET( 'GetPlanets', 'active_only=1' );
+	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1' );
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
 	{
@@ -174,7 +184,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
-			Msg( 'Got planet ' . $Planet[ 'id' ] . ' with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
+			Msg( '>> Got planet ' . $Planet[ 'id' ] . ' with ' . $Planet[ 'state' ][ 'current_players' ] . ' joined players' );
 
 			return $Planet[ 'id' ];
 		}
@@ -186,8 +196,19 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 	do
 	{
 		$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+
+		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) || $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 4777282 )
+		{
+			// Please do not change our clanid if you are going to use this script
+			// If you want to cheat for your own group, come up with up with your own approach, thank you
+			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+		}
+		else
+		{
+			break;
+		}
 	}
-	while( !isset( $Data[ 'response' ][ 'clan_info' ] ) );
+	while( true );
 
 	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 	{
@@ -233,7 +254,7 @@ function SendPOST( $Method, $Data )
 
 	do
 	{
-		Msg( 'Sending ' . $Method . '...' );
+		Msg( 'Sending ' . $Method . '...', ' ' );
 
 		$Data = curl_exec( $c );
 
@@ -243,7 +264,14 @@ function SendPOST( $Method, $Data )
 
 		preg_match( '/X-eresult: ([0-9]+)/', $Header, $EResult ) === 1 ? $EResult = (int)$EResult[ 1 ] : $EResult = 0;
 
-		Msg( 'EResult: ' . $EResult . ' - ' . $Data );
+		if( $EResult === 1 )
+		{
+			echo 'OK' . PHP_EOL;
+		}
+		else
+		{
+			echo 'EResult: ' . $EResult . ' - ' . $Data . PHP_EOL;
+		}
 
 		$Data = json_decode( $Data, true );
 	}
@@ -259,7 +287,7 @@ function SendGET( $Method, $Data )
 	$c = curl_init( );
 
 	curl_setopt_array( $c, [
-		CURLOPT_URL            => 'https://community.steam-api.com/ITerritoryControlMinigameService/' . $Method . '/v0001/?' . $Data,
+		CURLOPT_URL            => 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data,
 		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
@@ -289,7 +317,7 @@ function SendGET( $Method, $Data )
 	return $Data;
 }
 
-function Msg( $Message )
+function Msg( $Message, $EOL = PHP_EOL )
 {
-	echo date( DATE_RSS ) . ' - ' . $Message . PHP_EOL;
+	echo date( DATE_RSS ) . ' - ' . $Message . $EOL;
 }
