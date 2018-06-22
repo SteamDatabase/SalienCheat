@@ -17,7 +17,7 @@ from getpass import getpass
 import requests
 from tqdm import tqdm
 
-UPDATE_URL = "https://raw.githubusercontent.com/LaBlazer/SalienCheat/master/cheat.py"
+UPDATE_URL = "https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.py"
 
 logging.basicConfig(level=logging.DEBUG if sys.argv[-1] == 'debug' else logging.INFO,
                     format="%(asctime)s | %(message)s")
@@ -100,6 +100,8 @@ def update_script():
                 sys.exit()
             else:
                 LOG.info("Skipping update...")
+        else:
+            LOG.info("You are already on the newest version")
 
 class Saliens(requests.Session):
     api_url = 'https://community.steam-api.com/%s/v0001/'
