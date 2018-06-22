@@ -75,7 +75,7 @@ function GetScoreForZone( $Zone )
 		case 3: $Score = 20; break;
 	}
 	
-	return $Score * 120 - $Score;
+	return $Score * 120;
 }
 
 function GetFirstAvailableZone( $Planet )
