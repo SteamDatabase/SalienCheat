@@ -279,7 +279,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
 		{
-			if( !$Zone[ 'captured' ] && $Zone[ 'difficulty' ] === 3 )
+			if( !$Zone[ 'captured' ] && $Zone[ 'difficulty' ] === 3 && ( empty( $Zone[ 'capture_progress' ] ) || $Zone[ 'capture_progress' ] < 0.95 ) )
 			{
 				$Planet[ 'hard_zones' ]++;
 			}
@@ -295,12 +295,17 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			return $a[ 'id' ] - $b[ 'id' ];
 		}
 		
-		return $b[ 'hard_zones' ] - $a[ 'hard_zones' ];
+		return $a[ 'hard_zones' ] - $b[ 'hard_zones' ];
 	} );
 
 	foreach( $Planets as $Planet )
 	{
 		if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
+		{
+			continue;
+		}
+
+		if( !$Planet[ 'hard_zones' ] )
 		{
 			continue;
 		}
@@ -316,6 +321,9 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			return $Planet[ 'id' ];
 		}
 	}
+
+	// If there are no planets with hard zones, just return first one
+	return $Planets[ 0 ][ 'id' ];
 }
 
 function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
