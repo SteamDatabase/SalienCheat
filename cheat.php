@@ -45,9 +45,8 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-Msg( 'This script will not work until you have joined our group:' );
-Msg( 'https://steamcommunity.com/groups/SteamDB' );
-echo PHP_EOL . PHP_EOL;
+Msg( '{green}This script will not work until you have joined our group:' );
+Msg( '{yellow}https://steamcommunity.com/groups/SteamDB', PHP_EOL . PHP_EOL );
 
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
@@ -72,10 +71,12 @@ $CurrentPlanet = LeaveCurrentGame( $Token, false );
 
 do
 {
+	echo PHP_EOL;
+
 	// Check for a new planet every hour
 	if( time() - $LastRestart > 3600 )
 	{
-		Msg( '!! Idled this planet for one hour, restarting to check for new planets' );
+		Msg( '{lightred}!! Idled this planet for one hour, restarting to check for new planets' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -90,7 +91,7 @@ do
 	{
 		$SkippedPlanets[ $CurrentPlanet ] = true;
 
-		Msg( '!! There are no zones to join in this planet, restarting...' );
+		Msg( '{lightred}!! There are no zones to join in this planet, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -102,7 +103,7 @@ do
 
 	if( !$HardZones && time() - $LastRestart > 60 )
 	{
-		Msg( '!! This planet does not have any hard zones left, restarting...' );
+		Msg( '{lightred}!! This planet does not have any hard zones left, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -111,7 +112,7 @@ do
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
-		Msg( '!! Failed to join a zone, waiting 15 seconds and trying again' );
+		Msg( '{lightred}!! Failed to join a zone, restarting in 15 seconds...' );
 
 		sleep( 15 );
 
@@ -121,16 +122,16 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Planet ' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
-		' - Players: ' . number_format( $PlanetPlayers ) .
-		' - Captured: ' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
-		' - Hard zones: ' . $HardZones
+		'>> Planet {green}' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
+		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
+		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
+		'{normal} - Hard zones: {yellow}' . $HardZones
 	);
 
 	Msg(
-		'>> Zone ' . $Zone[ 'zone_position' ] .
-		' - Captured: ' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
-		' - Difficulty: ' . $Zone[ 'difficulty' ]
+		'>> Zone {yellow}' . $Zone[ 'zone_position' ] .
+		'{normal} - Captured: {yellow}' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
+		'{normal} - Difficulty: {yellow}' . $Zone[ 'difficulty' ]
 	);
 
 	if( isset( $Zone[ 'top_clans' ] ) )
@@ -152,11 +153,10 @@ do
 		$Data = $Data[ 'response' ];
 
 		Msg(
-			'>> Score: ' . $Data[ 'old_score' ] . ' => ' . $Data[ 'new_score' ] .
-			' (next level: ' . $Data[ 'next_level_score' ] .
-			' in ' . ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) . ') - Current level: ' . $Data[ 'new_level' ] .
-			' (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)',
-			PHP_EOL . PHP_EOL
+			'>> Score: {lightred}' . $Data[ 'old_score' ] . '{normal} => {lightblue}' . $Data[ 'new_score' ] .
+			'{grey} (next level: ' . $Data[ 'next_level_score' ] .
+			' in ' . ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) . '){normal} - Current level: {lightblue}' . $Data[ 'new_level' ] .
+			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
 		);
 		
 		SetTitle( $Data[ 'new_level' ], $Data[ 'new_score' ], $Data[ 'next_level_score' ] );
@@ -284,7 +284,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			}
 		}
 
-		Msg( '>> Planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ') has ' . $Planet[ 'hard_zones' ] . ' hard zones' );
+		Msg( '>> Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . '){normal} has {yellow}' . $Planet[ 'hard_zones' ] . '{normal} hard zones' );
 	}
 
 	usort( $Planets, function( $a, $b )
@@ -307,9 +307,9 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
 			Msg(
-				'>> Selected planet ' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
-				' - Players: ' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-				' - Hard zones: ' . $Planet[ 'hard_zones' ]
+				'>> Selected planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
+				'{normal} - Players: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
+				'{normal} - Hard zones: {yellow}' . $Planet[ 'hard_zones' ]
 			);
 
 			return $Planet[ 'id' ];
@@ -382,7 +382,7 @@ function SendPOST( $Method, $Data )
 
 	do
 	{
-		Msg( 'Sending ' . $Method . '...', ' ' );
+		Msg( '{grey}Sending ' . $Method . '...', ' ' );
 
 		$Data = curl_exec( $c );
 
@@ -433,7 +433,7 @@ function SendGET( $Method, $Data )
 
 	do
 	{
-		Msg( 'Sending ' . $Method . '...' );
+		Msg( '{grey}Sending ' . $Method . '...' );
 		
 		$Data = curl_exec( $c );
 		$Data = json_decode( $Data, true );
@@ -447,5 +447,29 @@ function SendGET( $Method, $Data )
 
 function Msg( $Message, $EOL = PHP_EOL )
 {
-	echo date( DATE_RSS ) . ' - ' . $Message . $EOL;
+	$Message = str_replace(
+		[
+			'{normal}',
+			'{green}',
+			'{yellow}',
+			'{lightred}',
+			'{lightblue}',
+			'{grey}',
+		],
+		[
+			"\033[0m",
+			"\033[0;32m",
+			"\033[1;33m",
+			"\033[1;31m",
+			"\033[1;34m",
+			"\033[1;90m",
+		],
+	$Message, $Count );
+
+	if( $Count > 0 )
+	{
+		$Message .= "\033[0m";
+	}
+
+	echo '[' . date( 'H:i:s' ) . '] ' . $Message . $EOL;
 }
