@@ -8,6 +8,7 @@ import re
 import sys
 import json
 import logging
+from io import open
 from time import sleep
 from getpass import getpass
 
@@ -31,7 +32,7 @@ def get_access_token(force_input=False):
 
     if not force_input:
         if os.path.isfile(token_path):
-            data = open(token_path, 'r').read()
+            data = open(token_path, 'r', encoding='utf-8').read()
 
             try:
                 token = json.loads(data)['token']
@@ -54,7 +55,7 @@ def get_access_token(force_input=False):
         while not token_re.match(token):
             token = _input("Enter valid token: ").strip()
 
-    with open(token_path, 'wb') as fp:
+    with open(token_path, 'w', encoding='utf-8') as fp:
         fp.write(token)
 
     return token
@@ -298,6 +299,7 @@ while True:
         difficulty = zones[0]['difficulty']
 
         while game.planet and not game.planet['zones'][zone_id]['captured']:
+            game.represent_clan(4777282)
             game.print_player_info()
             game.print_planet_progress()
             game.print_zone_progress(zone_id)
