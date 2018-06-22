@@ -23,7 +23,7 @@ You can also provide token directly in CLI, to ease running multiple accounts: `
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
 1. `pip install requests tqdm`
-2. Run the script: `python cheat.py`
+2. Run the script: `python cheat.py [token]`
 
 ## Docker
 1. Extract contents of this script somewhere.

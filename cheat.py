@@ -96,7 +96,7 @@ class Saliens(requests.Session):
                 resp = self.post(self.api_url % endpoint, data=form_fields)
 
                 if resp.status_code != 200:
-                    raise Exception("Not HTTP 200")
+                    raise Exception("HTTP %s" % resp.status_code)
                 rdata = resp.json()
                 if 'response' not in rdata:
                     raise Exception("No response is json")
@@ -122,7 +122,7 @@ class Saliens(requests.Session):
                 resp = self.get(self.api_url % endpoint, params=query_params)
 
                 if resp.status_code != 200:
-                    raise Exception("Not HTTP 200")
+                    raise Exception("HTTP %s" % resp.status_code)
                 rdata = resp.json()
                 if 'response' not in rdata:
                     raise Exception("No response is json")
@@ -199,21 +199,21 @@ class Saliens(requests.Session):
                                desc="Player Level",
                                total=0,
                                initial=0,
-                               bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
+                               bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
                                )
         self.planet_pbar = tqdm(ascii=True,
                                 dynamic_ncols=True,
                                 desc="Planet progress",
                                 total=0,
                                 initial=0,
-                                bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
+                                bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
                                 )
         self.zone_pbar = tqdm(ascii=True,
                               dynamic_ncols=True,
                               desc="Zone progress",
                               total=0,
                               initial=0,
-                              bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>10}',
+                              bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
                               )
 
     def pbar_refresh(self):
