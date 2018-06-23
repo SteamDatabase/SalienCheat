@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 try:
     _input = raw_input
-except:
+except NameError:
     _input = input
 
 
