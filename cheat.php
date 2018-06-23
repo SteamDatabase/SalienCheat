@@ -78,10 +78,10 @@ do
 {
 	echo PHP_EOL;
 
-	// Check for a new planet every hour
-	if( time() - $LastRestart > 3600 )
+	// Scan planets every 10 minutes
+	if( time() - $LastRestart > 60 * 10 )
 	{
-		Msg( '{lightred}!! Idled this planet for one hour, restarting to check for new planets' );
+		Msg( '{lightred}!! Restarting to re-scan for new planets...' );
 
 		goto lol_using_goto_in_2018;
 	}
