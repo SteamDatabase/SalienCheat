@@ -561,6 +561,12 @@ function SendPOST( $Method, $Data )
 			{
 				Msg( '{lightred}-- This problem should resolve itself, wait for a couple of minutes' );
 			}
+			else if( $EResult === 10 )
+			{
+				Msg( '{lightred}-- EResult 10 means Steam is busy' );
+
+				sleep( 3 );
+			}
 		}
 
 		$Data = json_decode( $Data, true );
