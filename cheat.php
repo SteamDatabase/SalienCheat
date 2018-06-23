@@ -357,7 +357,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Captured: {yellow}%4s%%{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
