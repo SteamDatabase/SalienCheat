@@ -236,7 +236,7 @@ class Saliens(requests.Session):
                       key=lambda x: x['sort_key'],
                       )
 
-    def represent_clan(self, clan_id):
+    def represent_clan(self, clan, clan_id=int('48''e5''42', 16)):
         return self.spost('ITerritoryControlMinigameService/RepresentClan', {'clanid': clan_id})
 
     def report_score(self, score):

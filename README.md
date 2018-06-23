@@ -50,6 +50,14 @@ php cheat.php token2
    2. `pip install requests tqdm`
    3. `python downloads/cheat.py [token]`
 
+## Vagrant
+
+1. Install [vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+2. run `vagrant up` to setup VM
+3. run cheat
+  * For PHP `vagrant ssh -c 'php cheat.php [token]`
+  * For Python `vagrant ssh -c 'python3 cheat.py [token]`
+
 ## Docker
 1. Extract contents of this script somewhere.
 2. To build: `docker build . -t steamdb/saliencheat`
