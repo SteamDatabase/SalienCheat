@@ -344,11 +344,12 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 
 		Msg(
-			'>> Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
-			'{normal} - Players: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
+			'>> Planet {green}' . $Planet[ 'id' ] .
 			'{normal} - Hard: {yellow}' . $Planet[ 'hard_zones' ] .
 			'{normal} - Medium: {yellow}' . $Planet[ 'medium_zones' ] .
-			'{normal} - Captured: {yellow}' . number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ) . '%'
+			'{normal} - Captured: {yellow}' . number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ) . '%' .
+			'{normal} - Players: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
+			' {green}(' . $Planet[ 'state' ][ 'name' ] . ')'
 		);
 	}
 
