@@ -423,7 +423,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 
 		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
 		{
-			if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.97 )
+			if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.93 )
 			{
 				continue;
 			}
