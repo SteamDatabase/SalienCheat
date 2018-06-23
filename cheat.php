@@ -214,11 +214,6 @@ function GetFirstAvailableZone( $Planet )
 			continue;
 		}
 
-		if( $Zone[ 'difficulty' ] === 3 )
-		{
-			$HardZones++;
-		}
-
 		// Always join boss zone
 		if( $Zone[ 'type' ] == 4 )
 		{
@@ -234,6 +229,11 @@ function GetFirstAvailableZone( $Planet )
 		if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.95 )
 		{
 			continue;
+		}
+
+		if( $Zone[ 'difficulty' ] === 3 )
+		{
+			$HardZones++;
 		}
 
 		$CleanZones[] = $Zone;
