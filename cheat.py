@@ -1,6 +1,9 @@
 """Plays SALIEN for you
 
+Setup:
+apt-get install python-pip
 pip install requests tqdm
+
 """
 
 import os
@@ -181,26 +184,7 @@ class Saliens(requests.Session):
         if planet:
             planet['easy_zones'] = sorted((z for z in planet['zones']
                                            if (not z['captured']
-                                               and z['difficulty'] == 1
-                                               and z.get('capture_progress', 0) < 0.95)),
-                                          reverse=True,
-                                          key=lambda x: x['zone_position'])
-
-            planet['medium_zones'] = sorted((z for z in planet['zones']
-                                             if (not z['captured']
-                                                 and z['difficulty'] == 2
-                                                 and z.get('capture_progress', 0) < 0.95)),
-                                            reverse=True,
-                                            key=lambda x: x['zone_position'])
-
-            planet['hard_zones'] = sorted((z for z in planet['zones']
-                                           if (not z['captured']
-                                               and z['difficulty'] == 3
-                                               and z.get('capture_progress', 0) < 0.95)),
-                                          reverse=True,
-                                          key=lambda x: x['zone_position'])
-            planet['boss_zones'] = sorted((z for z in planet['zones']
-                                           if not z['captured'] and z['type'] == 4),
+                                               and z['difficulty'] == 1)),
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
 
@@ -212,12 +196,6 @@ class Saliens(requests.Session):
 
             if len(planet['easy_zones']):
                 sort_key += 99 - len(planet['easy_zones'])
-            if len(planet['medium_zones']):
-                sort_key += 10**2 * (99 - len(planet['medium_zones']))
-            if len(planet['hard_zones']):
-                sort_key += 10**4 * (99 - len(planet['hard_zones']))
-            if len(planet['boss_zones']):
-                sort_key += 10**6 * (99 - len(planet['boss_zones']))
 
             planet['sort_key'] = sort_key
 
@@ -231,8 +209,9 @@ class Saliens(requests.Session):
 
     def get_uncaptured_planets(self):
         planets = self.get_planets()
-        return sorted((game.get_planet(p['id']) for p in planets if not p['state']['captured']),
-                      reverse=True,
+        planets = (game.get_planet(p['id']) for p in planets if not p['state']['captured'])
+        return sorted((p for p in planets if len(p['easy_zones'])),
+                      reverse=False,
                       key=lambda x: x['sort_key'],
                       )
 
@@ -264,6 +243,7 @@ class Saliens(requests.Session):
 
     def pbar_init(self):
         self.level_pbar = tqdm(ascii=True,
+                               disable=True,
                                dynamic_ncols=True,
                                desc="Player Level",
                                total=0,
@@ -271,6 +251,7 @@ class Saliens(requests.Session):
                                bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
                                )
         self.planet_pbar = tqdm(ascii=True,
+                                disable=True,
                                 dynamic_ncols=True,
                                 desc="Planet progress",
                                 total=0,
@@ -278,6 +259,7 @@ class Saliens(requests.Session):
                                 bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
                                 )
         self.zone_pbar = tqdm(ascii=True,
+                              disable=True,
                               dynamic_ncols=True,
                               desc="Zone progress",
                               total=0,
@@ -299,7 +281,7 @@ class Saliens(requests.Session):
         player_info = self.player_info
 
         def avg_time(pbar, n):
-            curr_t = pbar._time()
+            curr_t = time()
 
             if pbar.n == 0:
                 pbar.avg_time = 0
@@ -382,7 +364,13 @@ planets = game.get_uncaptured_planets()
 
 # join battle
 try:
-    while planets:
+    while True:
+        if not planets:
+            game.log("No planets with easy zones left. Sleeping..")
+            sleep(31)
+            planets = game.get_uncaptured_planets()
+            continue
+
         game.log("Found %s uncaptured planets: %s", len(planets), [x['id'] for x in planets])
         planet_id = planets[0]['id']
         game.leave_zone()
@@ -413,24 +401,15 @@ try:
         planet_name = game.planet['state']['name']
         curr_players = game.planet['state']['current_players']
         giveaway_appds = game.planet['giveaway_apps']
-        n_boss = len(game.planet['boss_zones'])
-        n_hard = len(game.planet['hard_zones'])
-        n_med = len(game.planet['medium_zones'])
         n_easy = len(game.planet['easy_zones'])
 
         game.log("Planet name: %s (%s)", planet_name, planet_id)
         game.log("Current players: %s", curr_players)
         game.log("Giveaway AppIDs: %s", giveaway_appds)
-        game.log("Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
-        if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 0O022162502:
-            game.log("Join SteamDB: https://steamcommunity.com/groups/SteamDB")
 
         # zone
         while game.planet and game.planet['id'] == planets[0]['id']:
-            zones = (game.planet['boss_zones']
-                     + game.planet['hard_zones']
-                     + game.planet['medium_zones']
-                     + game.planet['easy_zones'])
+            zones = game.planet['easy_zones']
 
             if not zones:
                 game.log("No open zones left on planet")
@@ -455,8 +434,7 @@ try:
 
             while (game.planet
                    and time() < deadline
-                   and not game.planet['zones'][zone_id]['captured']
-                   and game.planet['zones'][zone_id].get('capture_progress', 0) < 0.95):
+                   and not game.planet['zones'][zone_id]['captured']):
 
                 if ('clan_info' not in game.player_info
                    or game.player_info['clan_info']['accountid'] != 0x48e542):
