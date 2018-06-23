@@ -149,8 +149,12 @@ do
 			}, $Zone[ 'top_clans' ] ) )
 		);
 	}
-
-	sleep( 110 );
+	
+	for ($i = 110; $i > 0; $i--)
+	{
+		print('           >> Time left: ' . $i . " \r");
+		sleep( 1 );
+	}
 	
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
