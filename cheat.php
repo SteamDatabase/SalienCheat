@@ -126,14 +126,15 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Planet {green}' . $CurrentPlanet . ' (' . $CurrentPlanetName . ')' .
-		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
+		'>> Planet {green}' . $CurrentPlanet .
 		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
-		'{normal} - Hard zones: {yellow}' . $HardZones
+		'{normal} - Hard zones: {yellow}' . $HardZones .
+		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
+		'{green} (' . $CurrentPlanetName . ')'
 	);
 
 	Msg(
-		'>> Zone {yellow}' . $Zone[ 'zone_position' ] .
+		'>> Zone {green}' . $Zone[ 'zone_position' ] .
 		'{normal} - Captured: {yellow}' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
@@ -344,12 +345,16 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 
 		Msg(
-			'>> Planet {green}' . $Planet[ 'id' ] .
-			'{normal} - Hard: {yellow}' . $Planet[ 'hard_zones' ] .
-			'{normal} - Medium: {yellow}' . $Planet[ 'medium_zones' ] .
-			'{normal} - Captured: {yellow}' . number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ) . '%' .
-			'{normal} - Players: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-			' {green}(' . $Planet[ 'state' ][ 'name' ] . ')'
+			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Captured: {yellow}%4s%%{normal} - Players: {yellow}%8s {green}(%s)',
+			PHP_EOL,
+			[
+				$Planet[ 'id' ],
+				$Planet[ 'hard_zones' ],
+				$Planet[ 'medium_zones' ],
+				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
+				number_format( $Planet[ 'state' ][ 'current_players' ] ),
+				$Planet[ 'state' ][ 'name' ],
+			]
 		);
 	}
 
@@ -542,7 +547,7 @@ function SendGET( $Method, $Data )
 	return $Data;
 }
 
-function Msg( $Message, $EOL = PHP_EOL )
+function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 {
 	$Message = str_replace(
 		[
@@ -566,5 +571,14 @@ function Msg( $Message, $EOL = PHP_EOL )
 		$Message .= "\033[0m";
 	}
 
-	echo '[' . date( 'H:i:s' ) . '] ' . $Message . $EOL;
+	$Message = '[' . date( 'H:i:s' ) . '] ' . $Message . $EOL;
+
+	if( !empty( $printf ) )
+	{
+		printf( $Message, ...$printf );
+	}
+	else
+	{
+		echo $Message;
+	}
 }
