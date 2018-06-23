@@ -262,6 +262,7 @@ class Saliens(requests.Session):
                               initial=0,
                               bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
                               )
+
     def end(self):
         self.level_pbar.close()
         self.planet_pbar.close()
@@ -305,7 +306,8 @@ class Saliens(requests.Session):
         if self.planet:
             planet = self.planet
             state = planet['state']
-            planet_progress = mul if state['captured'] else int(state['capture_progress'] * mul)
+            planet_progress = (mul if state['captured']
+                               else int(state.get('capture_progress', 0) * mul))
             self.planet_pbar.desc = "Planet ({id}) progress".format(**planet)
             self.planet_pbar.total = mul
             avg_time(self.planet_pbar, planet_progress)
@@ -320,7 +322,8 @@ class Saliens(requests.Session):
         # zone capture progress bar
         if self.planet and self.zone_id is not None:
             zone = self.planet['zones'][self.zone_id]
-            zone_progress = mul if zone['captured'] else int(zone['capture_progress'] * mul)
+            zone_progress = (mul if zone['captured']
+                             else int(zone.get('capture_progress', 0) * mul))
             self.zone_pbar.desc = "Zone ({zone_position}) progress".format(**zone)
             self.zone_pbar.total = mul
             avg_time(self.zone_pbar, zone_progress)
@@ -420,8 +423,6 @@ try:
                    and not game.planet['zones'][zone_id]['captured']
                    and game.planet['zones'][zone_id]['capture_progress'] < 0.95):
 
-                game.pbar_refresh()
-
                 if ('clan_info' not in game.player_info
                    or game.player_info['clan_info']['accountid'] != 4777282):
                     game.represent_clan(4777282)
@@ -429,6 +430,7 @@ try:
                 game.log("Fighting in zone %s (%s) for 110sec",
                          zone_id,
                          dmap.get(difficulty, difficulty))
+
                 game.join_zone(zone_id)
                 game.refresh_player_info()
 
