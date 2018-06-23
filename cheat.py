@@ -42,7 +42,7 @@ def get_access_token(force_input=False):
                 if not token_re.match(token):
                     token = ''
                 else:
-                    game.log("Loaded token from token.txt")
+                    game.log("+++ Loaded token from token.txt")
 
     if not token:
         token = _input("Login to steamcommunity.com\n"
@@ -97,18 +97,17 @@ class Saliens(requests.Session):
             try:
                 resp = self.post(self.api_url % endpoint, data=form_fields)
 
+                eresult = resp.headers.get('X-eresult', -1)
                 if resp.status_code != 200:
-                    raise Exception("HTTP %s" % resp.status_code)
-
-                if 'X-eresult' in resp.headers:
-                    self.LOG.debug('EResult: %s', resp.headers['X-eresult'])
+                    raise Exception("HTTP %s EResult %s\n%s" % (resp.status_code, eresult, resp.text))
 
                 rdata = resp.json()
                 if 'response' not in rdata:
-                    raise Exception("No response is json")
+                    raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
             except Exception as exp:
-                self.log("spost error: %s", str(exp))
+                self.log("--- POST %-46s %s", endpoint, str(exp))
             else:
+                self.log("    POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
@@ -126,14 +125,17 @@ class Saliens(requests.Session):
             try:
                 resp = self.get(self.api_url % endpoint, params=query_params)
 
+                eresult = resp.headers.get('X-eresult', -1)
                 if resp.status_code != 200:
-                    raise Exception("HTTP %s" % resp.status_code)
+                    raise Exception("HTTP %s EResult %s\n%s" % (resp.status_code, eresult, resp.text))
+
                 rdata = resp.json()
                 if 'response' not in rdata:
-                    raise Exception("No response is json")
+                    raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
             except Exception as exp:
-                self.log("spost error: %s", str(exp))
+                self.log("--- GET  %-46s %s", endpoint, str(exp))
             else:
+                self.log("    GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
@@ -268,21 +270,21 @@ class Saliens(requests.Session):
                                desc="Player Level",
                                total=0,
                                initial=0,
-                               bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
+                               bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
                                )
         self.planet_pbar = tqdm(ascii=True,
                                 dynamic_ncols=True,
                                 desc="Planet progress",
                                 total=0,
                                 initial=0,
-                                bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
+                                bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {remaining:>8}',
                                 )
         self.zone_pbar = tqdm(ascii=True,
                               dynamic_ncols=True,
                               desc="Zone progress",
                               total=0,
                               initial=0,
-                              bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
+                              bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {remaining:>8}',
                               )
 
     def end(self):
@@ -292,6 +294,11 @@ class Saliens(requests.Session):
 
     def pbar_refresh(self):
         mul = 100000000
+        dmap = {
+            1: 'Easy',
+            2: 'Medium',
+            3: 'Hard',
+            }
 
         if not self.player_info:
             return
@@ -319,7 +326,7 @@ class Saliens(requests.Session):
             pbar.n = n
 
         # level progress bar
-        self.level_pbar.desc = "Player Level {level}".format(**player_info)
+        self.level_pbar.desc = "Level {level}".format(**player_info)
         self.level_pbar.total = int(player_info['next_level_score'])
         avg_time(self.level_pbar, int(player_info['score']))
         self.level_pbar.refresh()
@@ -330,11 +337,11 @@ class Saliens(requests.Session):
             state = planet['state']
             planet_progress = (mul if state['captured']
                                else int(state.get('capture_progress', 0) * mul))
-            self.planet_pbar.desc = "Planet ({id}) progress".format(**planet)
+            self.planet_pbar.desc = "Planet #{}".format(planet['id'])
             self.planet_pbar.total = mul
             avg_time(self.planet_pbar, planet_progress)
         else:
-            self.planet_pbar.desc = "Planet progress"
+            self.planet_pbar.desc = "Planet"
             self.planet_pbar.n = 0
             self.planet_pbar.total = 0
             self.planet_pbar.last_print_t = time()
@@ -346,11 +353,13 @@ class Saliens(requests.Session):
             zone = self.planet['zones'][self.zone_id]
             zone_progress = (mul if zone['captured']
                              else int(zone.get('capture_progress', 0) * mul))
-            self.zone_pbar.desc = "Zone ({zone_position}) progress".format(**zone)
+            self.zone_pbar.desc = "Zone #{} - {}".format(zone['zone_position'],
+                                                         dmap.get(zone['difficulty'],
+                                                                  zone['difficulty']))
             self.zone_pbar.total = mul
             avg_time(self.zone_pbar, zone_progress)
         else:
-            self.zone_pbar.desc = "Zone  progress"
+            self.zone_pbar.desc = "Zone"
             self.zone_pbar.n = 0
             self.zone_pbar.total = 0
             self.zone_pbar.last_print_t = time()
@@ -358,7 +367,7 @@ class Saliens(requests.Session):
         self.zone_pbar.refresh()
 
     def log(self, text, *args):
-        self.level_pbar.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " | " + (text % args))
+        self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + (text % args))
         self.pbar_refresh()
 
 
@@ -373,9 +382,9 @@ while not game.is_access_token_valid():
     game.access_token = get_access_token(True)
 
 # display current stats
-game.log("Getting player info...")
+game.log("+++ Getting player info...")
 game.represent_clan(4777282)
-game.log("Scanning for planets...")
+game.log("+++ Scanning for planets...")
 game.refresh_player_info()
 game.refresh_planet_info()
 planets = game.get_uncaptured_planets()
@@ -383,12 +392,12 @@ planets = game.get_uncaptured_planets()
 # join battle
 try:
     while planets:
-        game.log("Found %s uncaptured planets: %s", len(planets), [x['id'] for x in planets])
+        game.log("+++ Found %s uncaptured planets: %s", len(planets), [x['id'] for x in planets])
         planet_id = planets[0]['id']
         game.leave_zone()
 
         if not game.planet or game.planet['id'] != planet_id:
-            game.log("Joining toughest planet %s..", planets[0]['id'])
+            game.log("+++ Joining toughest planet %s..", planets[0]['id'])
 
             for i in range(3):
                 game.join_planet(planet_id)
@@ -398,14 +407,14 @@ try:
                 if game.player_info['active_planet'] == planet_id:
                     break
 
-                game.log("Failed to join planet. Retrying...")
+                game.log("--- Failed to join planet. Retrying...")
                 game.leave_planet()
 
             if i >= 2 and game.player_info['active_planet'] != planet_id:
                 continue
 
         else:
-            game.log("Remaining on current planet")
+            game.log("+++ Remaining on current planet")
 
         game.refresh_planet_info()
 
@@ -417,13 +426,16 @@ try:
         n_hard = len(game.planet['hard_zones'])
         n_med = len(game.planet['medium_zones'])
         n_easy = len(game.planet['easy_zones'])
+        top_clans = [c['clan_info']['url'] for c in game.planet.get('top_clans', [])][:5]
 
-        game.log("Planet name: %s (%s)", planet_name, planet_id)
-        game.log("Current players: %s", curr_players)
-        game.log("Giveaway AppIDs: %s", giveaway_appds)
-        game.log("Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
+        game.log("    Planet name: %s (%s)", planet_name, planet_id)
+        game.log("    Current players: %s", curr_players)
+        game.log("    Giveaway AppIDs: %s", giveaway_appds)
+        game.log("    Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
+        if top_clans:
+            game.log("    Top clans: %s", ', '.join(top_clans))
         if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 0O022162502:
-            game.log("Join SteamDB: https://steamcommunity.com/groups/SteamDB")
+            game.log("    Join SteamDB: https://steamcommunity.com/groups/SteamDB")
 
         # zone
         while game.planet and game.planet['id'] == planets[0]['id']:
@@ -447,7 +459,7 @@ try:
                 3: 'hard',
                 }
 
-            game.log("Selecting %szone %s (%s)....",
+            game.log("+++ Selecting %szone %s (%s)....",
                      'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                      zone_id,
                      dmap.get(difficulty, difficulty),
@@ -462,7 +474,7 @@ try:
                    or game.player_info['clan_info']['accountid'] != 0x48e542):
                     game.represent_clan(0b10010001110010101000010)
 
-                game.log("Fighting in %szone %s (%s) for 110sec",
+                game.log("+++ Fighting in %szone %s (%s) for 110sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                          zone_id,
                          dmap.get(difficulty, difficulty))
@@ -484,13 +496,13 @@ try:
                     game.pbar_refresh()
 
                 score = 120 * (5 * (2**(difficulty - 1)))
-                game.log("Submitting score of %s...", score)
+                game.log("+++ Submitting score of %s...", score)
                 game.report_score(score)
 
                 game.refresh_player_info()
                 game.refresh_planet_info()
 
-            game.log("Rescanning planets...")
+            game.log("+++ Rescanning planets...")
             planets = game.get_uncaptured_planets()
             game.refresh_planet_info()
 
@@ -499,5 +511,5 @@ except KeyboardInterrupt:
     sys.exit()
 
 # end game
-game.log("No uncaptured planets left. We done!")
+game.log("+++ No uncaptured planets left. We done!")
 game.close()
