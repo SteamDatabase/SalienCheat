@@ -49,7 +49,10 @@ $WaitTime = 110;
 $KnownPlanets = [];
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
-$LastZone = ['', 0.0];
+$ZonePaces =
+[
+	'Planet' => 0,
+];
 
 lol_using_goto_in_2018:
 
@@ -89,7 +92,7 @@ do
 
 	do
 	{
-		$Zone = GetFirstAvailableZone( $CurrentPlanet, $LastZone );
+		$Zone = GetFirstAvailableZone( $CurrentPlanet, $ZonePaces );
 	}
 	while( $Zone === null && sleep( 5 ) === 0 );
 
@@ -234,13 +237,22 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetFirstAvailableZone( $Planet, &$LastZone )
+function GetFirstAvailableZone( $Planet, &$ZonePaces )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
 	if( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) )
 	{
 		return null;
+	}
+
+	if( $ZonePaces[ 'Planet' ] != $Planet )
+	{
+		$ZonePaces =
+		[
+			'Planet' => $Planet,
+			'Zones' => [],
+		];
 	}
 
 	global $CurrentPlanetName;
@@ -254,7 +266,7 @@ function GetFirstAvailableZone( $Planet, &$LastZone )
 	$MediumZones = 0;
 	$EasyZones = 0;
 	
-	foreach( $Zones as $Zone )
+	foreach( $Zones as &$Zone )
 	{
 		if( empty( $Zone[ 'capture_progress' ] ) )
 		{
@@ -278,13 +290,25 @@ function GetFirstAvailableZone( $Planet, &$LastZone )
 
 		$PaceCutoff = 0.97;
 
-		if( $LastZone[ 0 ] === $Planet . '.' . $Zone[ 'zone_position' ] )
+		if( isset( $ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ] ) )
 		{
-			$PaceCutoff = $Zone[ 'capture_progress' ] - $LastZone[ 1 ];
+			$Paces = $ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ];
+			$Paces[] = $Zone[ 'capture_progress' ];
+			$Differences = [];
 
-			Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%' );
+			for( $i = count( $Paces ) - 1; $i > 0; $i-- )
+			{
+				$Differences[] = $Paces[ $i ] - $Paces[ $i - 1 ];
+			}
 
-			$PaceCutoff = 0.95 - $PaceCutoff;
+			$PaceCutoff = array_sum( $Differences ) / count( $Differences );
+
+			if ( $PaceCutoff > 0.02 )
+			{
+				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%' );
+			}
+
+			$PaceCutoff = 0.98 - $PaceCutoff;
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
@@ -303,7 +327,26 @@ function GetFirstAvailableZone( $Planet, &$LastZone )
 
 		$CleanZones[] = $Zone;
 	}
-	
+
+	unset( $Zone );
+
+	foreach( $Zones as $Zone )
+	{
+		if( !isset( $ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ] ) )
+		{
+			$ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ] = [ $Zone[ 'capture_progress' ] ];
+		}
+		else
+		{
+			if( count( $ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ] ) > 4 )
+			{
+				array_shift( $ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ] );
+			}
+
+			$ZonePaces[ 'Zones' ][ $Zone[ 'zone_position' ] ][] = $Zone[ 'capture_progress' ];
+		}
+	}
+
 	if( empty( $CleanZones ) )
 	{
 		return false;
@@ -325,12 +368,6 @@ function GetFirstAvailableZone( $Planet, &$LastZone )
 	$Zone[ 'easy_zones' ] = $EasyZones;
 	$Zone[ 'planet_captured' ] = $PlanetCaptured;
 	$Zone[ 'planet_players' ] = $PlanetPlayers;
-
-	$LastZone =
-	[
-		$Planet . '.' . $Zone[ 'zone_position' ],
-		$Zone[ 'capture_progress' ]
-	];
 
 	return $Zone;
 }
@@ -497,7 +534,7 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 		{
 			// Please do not change our clanid if you are going to use this script
 			// If you want to cheat for your own group, come up with up with your own approach, thank you
-			SendPOST( 'ITerritoryControlMinigameService/Repre' . 'sentC' . 'lan', 'cl' . 'anid=4' . 777 . '282&access_token=' . $Token );
+			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4' . 777 . '282&access_token=' . $Token );
 		}
 		else
 		{
