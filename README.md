@@ -8,6 +8,8 @@
 
 ## PHP
 
+📣 [Check this reddit thread for a complete guide and troubleshooting](https://redd.it/8t5w8v)
+
 1. Install PHP (yes, really)
    1. Download https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip
    2. Extract zip to `C:\php`
@@ -17,7 +19,11 @@
 2. Extract the contents of this script to the same folder
 3. Run the script: `php cheat.php`
 
-You can also provide token directly in CLI, to ease running multiple accounts: `php cheat.php aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+You can also provide token directly in CLI, to ease running multiple accounts:
+```
+php cheat.php token1
+php cheat.php token2
+```
 
 ## Python
 
