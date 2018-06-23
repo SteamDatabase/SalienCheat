@@ -118,7 +118,7 @@ class Saliens(requests.Session):
                     sleep(2)
                     continue
             else:
-                self.log("^GRY    POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
+                self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
@@ -150,7 +150,7 @@ class Saliens(requests.Session):
                     sleep(2)
                     continue
             else:
-                self.log("^GRY    GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
+                self.log("^GRY   GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
