@@ -45,6 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$KnownPlanets = [];
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
 
@@ -54,7 +55,7 @@ $LastRestart = time();
 
 do
 {
-	$CurrentPlanet = GetFirstAvailablePlanet( $SkippedPlanets );
+	$CurrentPlanet = GetFirstAvailablePlanet( $SkippedPlanets, $KnownPlanets );
 }
 while( !$CurrentPlanet && sleep( 5 ) === 0 );
 
@@ -84,9 +85,6 @@ do
 		goto lol_using_goto_in_2018;
 	}
 
-	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
-	LeaveCurrentGame( $Token );
-
 	do
 	{
 		$Zone = GetFirstAvailableZone( $CurrentPlanet );
@@ -107,7 +105,7 @@ do
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
-	if( !$HardZones && time() - $LastRestart > 600 )
+	if( !$HardZones && IsThereAnyNewPlanets( $KnownPlanets ) )
 	{
 		Msg( '{lightred}!! This planet does not have any hard zones left, restarting...' );
 
@@ -174,6 +172,9 @@ do
 			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm'
 		);
 	}
+
+	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
+	LeaveCurrentGame( $Token );
 }
 while( true );
 
@@ -277,7 +278,29 @@ function GetFirstAvailableZone( $Planet )
 	return $Zone;
 }
 
-function GetFirstAvailablePlanet( $SkippedPlanets )
+function IsThereAnyNewPlanets( $KnownPlanets )
+{
+	Msg( 'Checking for any new planets...' );
+
+	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
+
+	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
+	{
+		return false;
+	}
+
+	foreach( $Planets[ 'response' ][ 'planets' ] as $Planet )
+	{
+		if( !isset( $KnownPlanets[ $Planet[ 'id' ] ] ) )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -290,6 +313,8 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 
 	foreach( $Planets as &$Planet )
 	{
+		$KnownPlanets[ $Planet[ 'id' ] ] = true;
+
 		do
 		{
 			$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet[ 'id' ] . '&language=english' );
@@ -368,12 +393,12 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 		{
 			Msg( '>> Selected planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
-			return (int)$Planet[ 'id' ];
+			return $Planet[ 'id' ];
 		}
 	}
 
 	// If there are no planets with hard or medium zones, just return first one
-	return (int)$Planets[ 0 ][ 'id' ];
+	return $Planets[ 0 ][ 'id' ];
 }
 
 function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
@@ -405,7 +430,7 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 		return 0;
 	}
 
-	$ActivePlanet = (int)$Data[ 'response' ][ 'active_planet' ];
+	$ActivePlanet = $Data[ 'response' ][ 'active_planet' ];
 
 	if( $LeaveCurrentPlanet > 0 && $LeaveCurrentPlanet !== $ActivePlanet )
 	{
