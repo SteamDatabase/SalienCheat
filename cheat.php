@@ -352,6 +352,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 
 		$Planet[ 'hard_zones' ] = 0;
 		$Planet[ 'medium_zones' ] = 0;
+		$Planet[ 'easy_zones' ] = 0;
 
 		$HasBossZone = false;
 
@@ -381,6 +382,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 			{
 				case 3: $Planet[ 'hard_zones' ]++; break;
 				case 2: $Planet[ 'medium_zones' ]++; break;
+				case 1: $Planet[ 'easy_zones' ]++; break;
 			}
 		}
 
@@ -408,28 +410,26 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 	// https://bugs.php.net/bug.php?id=71454
 	unset( $Planet );
 
-	usort( $Planets, function( $a, $b )
+	$Priority = [ 'hard_zones', 'medium_zones', 'easy_zones' ];
+
+	usort( $Planets, function( $a, $b ) use ( $Priority )
 	{
-		if( $b[ 'hard_zones' ] === $a[ 'hard_zones' ] )
+		// Sort planets by least amount of zones
+		for( $i = 0; $i < 3; $i++ )
 		{
-			if( $b[ 'medium_zones' ] === $a[ 'medium_zones' ] )
+			$Key = $Priority[ $i ];
+
+			if( $a[ $Key ] !== $b[ $Key ] )
 			{
-				// If the hard and medium zones are equal, sort by most capture progress
-				return $b[ 'state' ][ 'capture_progress' ] - $a[ 'state' ][ 'capture_progress' ];
+				return $a[ $Key ] - $b[ $Key ];
 			}
-			
-			// If the hard zones are equal, sort by least medium zones
-			return $a[ 'medium_zones' ] - $b[ 'medium_zones' ];
 		}
-		
-		// Sort planets by least amount of hard zones
-		return $a[ 'hard_zones' ] - $b[ 'hard_zones' ];
+
+		return $a[ 'id' ] - $b[ 'id' ];
 	} );
 
-	$Priority = [ 'hard_zones', 'medium_zones' ];
-
-	// Loop twice - first loop tries to find planet with hard zones, second loop - medium zones
-	for( $i = 0; $i < 2; $i++ )
+	// Loop three times - first loop tries to find planet with hard zones, second loop - medium zones, and then easies
+	for( $i = 0; $i < 3; $i++ )
 	foreach( $Planets as &$Planet )
 	{
 		if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
@@ -450,7 +450,6 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 	}
 
-	// If there are no planets with hard or medium zones, just return first one
 	return $Planets[ 0 ][ 'id' ];
 }
 
