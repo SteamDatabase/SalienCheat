@@ -50,6 +50,7 @@ $WaitTime = 110;
 $KnownPlanets = [];
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
+$LastZone = ['', 0.0];
 
 lol_using_goto_in_2018:
 
@@ -89,7 +90,7 @@ do
 
 	do
 	{
-		$Zone = GetFirstAvailableZone( $CurrentPlanet );
+		$Zone = GetFirstAvailableZone( $CurrentPlanet, $LastZone );
 	}
 	while( $Zone === null && sleep( 5 ) === 0 );
 
@@ -105,6 +106,7 @@ do
 	// Find a new planet if there are no hard zones left
 	$HardZones = $Zone[ 'hard_zones' ];
 	$MediumZones = $Zone[ 'medium_zones' ];
+	$EasyZones = $Zone[ 'easy_zones' ];
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
@@ -143,13 +145,14 @@ do
 		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
 		'{normal} - Hard: {yellow}' . $HardZones .
 		'{normal} - Medium: {yellow}' . $MediumZones .
+		'{normal} - Easy: {yellow}' . $EasyZones .
 		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
 		'{green} (' . $CurrentPlanetName . ')'
 	);
 
 	Msg(
 		'>> Zone {green}' . $Zone[ 'zone_position' ] .
-		'{normal} - Captured: {yellow}' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
+		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
@@ -232,7 +235,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetFirstAvailableZone( $Planet )
+function GetFirstAvailableZone( $Planet, &$LastZone )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -250,9 +253,15 @@ function GetFirstAvailableZone( $Planet )
 	$CleanZones = [];
 	$HardZones = 0;
 	$MediumZones = 0;
+	$EasyZones = 0;
 	
 	foreach( $Zones as $Zone )
 	{
+		if( empty( $Zone[ 'capture_progress' ] ) )
+		{
+			$Zone[ 'capture_progress' ] = 0.0;
+		}
+
 		if( $Zone[ 'captured' ] )
 		{
 			continue;
@@ -268,9 +277,20 @@ function GetFirstAvailableZone( $Planet )
 			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
+		$PaceCutoff = 0.97;
+
+		if( $LastZone[ 0 ] === $Planet . '.' . $Zone[ 'zone_position' ] )
+		{
+			$PaceCutoff = $Zone[ 'capture_progress' ] - $LastZone[ 1 ];
+
+			Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%' );
+
+			$PaceCutoff = 0.95 - $PaceCutoff;
+		}
+
 		// If a zone is close to completion, skip it because Valve does not reward points
 		// and replies with 42 NoMatch instead
-		if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.97 )
+		if( $Zone[ 'capture_progress' ] > $PaceCutoff )
 		{
 			continue;
 		}
@@ -279,6 +299,7 @@ function GetFirstAvailableZone( $Planet )
 		{
 			case 3: $HardZones++; break;
 			case 2: $MediumZones++; break;
+			case 1: $EasyZones++; break;
 		}
 
 		$CleanZones[] = $Zone;
@@ -302,8 +323,15 @@ function GetFirstAvailableZone( $Planet )
 	$Zone = $CleanZones[ 0 ];
 	$Zone[ 'hard_zones' ] = $HardZones;
 	$Zone[ 'medium_zones' ] = $MediumZones;
+	$Zone[ 'easy_zones' ] = $EasyZones;
 	$Zone[ 'planet_captured' ] = $PlanetCaptured;
 	$Zone[ 'planet_players' ] = $PlanetPlayers;
+
+	$LastZone =
+	[
+		$Planet . '.' . $Zone[ 'zone_position' ],
+		$Zone[ 'capture_progress' ]
+	];
 
 	return $Zone;
 }
@@ -388,12 +416,13 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Easy: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
 				$Planet[ 'hard_zones' ],
 				$Planet[ 'medium_zones' ],
+				$Planet[ 'easy_zones' ],
 				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
 				number_format( $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
@@ -465,11 +494,11 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 		}
 
-		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) || $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 4777282 )
+		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) || $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 0x48E542 )
 		{
 			// Please do not change our clanid if you are going to use this script
 			// If you want to cheat for your own group, come up with up with your own approach, thank you
-			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+			SendPOST( 'ITerritoryControlMinigameService/Repre' . 'sentC' . 'lan', 'cl' . 'anid=4' . 777 . '282&access_token=' . $Token );
 		}
 		else
 		{
@@ -555,6 +584,12 @@ function SendPOST( $Method, $Data )
 			else if( $EResult === 0 || $EResult === 11 )
 			{
 				Msg( '{lightred}-- This problem should resolve itself, wait for a couple of minutes' );
+			}
+			else if( $EResult === 10 )
+			{
+				Msg( '{lightred}-- EResult 10 means Steam is busy' );
+
+				sleep( 3 );
 			}
 		}
 
