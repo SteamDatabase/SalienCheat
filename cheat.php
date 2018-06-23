@@ -168,7 +168,7 @@ do
 		);
 	}
 
-	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds for the game to end...' );
+	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds for this round to end...' );
 
 	sleep( $WaitTime );
 	
