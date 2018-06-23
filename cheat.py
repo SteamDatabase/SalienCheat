@@ -1,4 +1,4 @@
-"""Plays SALIENT for you
+"""Plays SALIEN for you
 
 pip install requests tqdm
 """
