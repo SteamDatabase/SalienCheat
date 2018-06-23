@@ -99,6 +99,10 @@ class Saliens(requests.Session):
 
                 if resp.status_code != 200:
                     raise Exception("HTTP %s" % resp.status_code)
+
+                if 'X-eresult' in resp.headers:
+                    self.LOG.debug('EResult: %s', resp.headers['X-eresult'])
+
                 rdata = resp.json()
                 if 'response' not in rdata:
                     raise Exception("No response is json")
@@ -365,6 +369,7 @@ game.log("Getting player info...")
 game.represent_clan(4777282)
 game.log("Scanning for planets...")
 game.refresh_player_info()
+game.refresh_planet_info()
 planets = game.get_uncaptured_planets()
 
 # join battle
