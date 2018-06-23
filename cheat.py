@@ -10,6 +10,7 @@ import json
 import logging
 from io import open
 from time import sleep, time
+from itertools import count
 from datetime import datetime
 from getpass import getpass
 
@@ -352,12 +353,17 @@ while True:
             if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 4777282:
                 game.represent_clan(4777282)
 
-            game.log("Fighting in zone %s (%s) for 2mins", zone_id, difficulty)
+            game.log("Fighting in zone %s (%s) for 110sec", zone_id, difficulty)
             game.join_zone(zone_id)
             game.refresh_player_info()
 
+            stoptime = time() + 110
+
             try:
-                for i in range(120 // 2):
+                for i in count():
+                    if time() >= stoptime:
+                        break
+
                     sleep(2)
 
                     if i+1 % 10 == 0:
