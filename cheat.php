@@ -188,6 +188,11 @@ do
 			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm'
 		);
 	}
+	else
+	{
+		// If ReportScore failed (e.g. zone got captured), rescan planets
+		goto lol_using_goto_in_2018;
+	}
 
 	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
 	if( LeaveCurrentGame( $Token ) !== $CurrentPlanet )
@@ -413,8 +418,8 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 				return $b[ 'state' ][ 'capture_progress' ] - $a[ 'state' ][ 'capture_progress' ];
 			}
 			
-			// If the hard zones are equal, sort by most medium zones
-			return $b[ 'medium_zones' ] - $a[ 'medium_zones' ];
+			// If the hard zones are equal, sort by least medium zones
+			return $a[ 'medium_zones' ] - $b[ 'medium_zones' ];
 		}
 		
 		// Sort planets by least amount of hard zones
