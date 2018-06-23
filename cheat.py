@@ -399,7 +399,6 @@ try:
             game.log("Remaining on current planet")
 
         game.refresh_planet_info()
-        deadline = time() + 60 * 30  # 30minutes recheck
 
         planet_id = game.planet['id']
         planet_name = game.planet['state']['name']
@@ -425,6 +424,7 @@ try:
 
             zone_id = zones[0]['zone_position']
             difficulty = zones[0]['difficulty']
+            deadline = time() + 60 * 10  # rescan planets every 10min
 
             dmap = {
                 1: 'easy',
@@ -435,6 +435,7 @@ try:
             game.log("Selecting zone %s (%s)....", zone_id, dmap.get(difficulty, difficulty))
 
             while (game.planet
+                   and time() < deadline
                    and not game.planet['zones'][zone_id]['captured']
                    and game.planet['zones'][zone_id]['capture_progress'] < 0.95):
 
