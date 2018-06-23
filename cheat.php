@@ -368,12 +368,12 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 		{
 			Msg( '>> Selected planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
-			return $Planet[ 'id' ];
+			return (int)$Planet[ 'id' ];
 		}
 	}
 
 	// If there are no planets with hard or medium zones, just return first one
-	return $Planets[ 0 ][ 'id' ];
+	return (int)$Planets[ 0 ][ 'id' ];
 }
 
 function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
