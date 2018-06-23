@@ -422,7 +422,7 @@ try:
         game.log("Current players: %s", curr_players)
         game.log("Giveaway AppIDs: %s", giveaway_appds)
         game.log("Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
-        if game.player_info['clan_info']['accountid'] != 0O022162502:
+        if 'clan_info' not in game.player_info and game.player_info['clan_info']['accountid'] != 0O022162502:
             game.log("Join SteamDB: https://steamcommunity.com/groups/SteamDB")
 
         # zone
