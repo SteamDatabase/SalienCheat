@@ -106,6 +106,10 @@ class Saliens(requests.Session):
                     raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
             except Exception as exp:
                 self.log("--- POST %-46s %s", endpoint, str(exp))
+
+                if resp.status_code >= 500:
+                    sleep(2)
+                    continue
             else:
                 self.log("    POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
@@ -134,6 +138,10 @@ class Saliens(requests.Session):
                     raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
             except Exception as exp:
                 self.log("--- GET  %-46s %s", endpoint, str(exp))
+
+                if resp.status_code >= 500:
+                    sleep(2)
+                    continue
             else:
                 self.log("    GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
