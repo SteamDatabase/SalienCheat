@@ -2,6 +2,8 @@
 
 set_time_limit( 0 );
 
+$filetime = filemtime(__FILE__);
+
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
 	Msg( 'You forgot to download cacert.pem file' );
@@ -176,6 +178,13 @@ do
 
 	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
 	LeaveCurrentGame( $Token );
+	
+	clearstatcache();
+	if ($filetime != filemtime(__FILE__))
+	{
+		Msg("{lightred}Script Changed! Restarting.");
+		exit;
+	}
 }
 while( true );
 
