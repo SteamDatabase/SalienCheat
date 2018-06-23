@@ -107,7 +107,7 @@ do
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
-	if( !$HardZones && time() - $LastRestart > 60 )
+	if( !$HardZones && time() - $LastRestart > 600 )
 	{
 		Msg( '{lightred}!! This planet does not have any hard zones left, restarting...' );
 
