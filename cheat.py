@@ -114,7 +114,8 @@ class Saliens(requests.Session):
             if not retry:
                 break
 
-            sleep(1)
+            if not data:
+                sleep(1)
 
         return data
 
@@ -138,7 +139,8 @@ class Saliens(requests.Session):
             if not retry:
                 break
 
-            sleep(1)
+            if not data:
+                sleep(1)
 
         return data
 
@@ -390,6 +392,7 @@ try:
 
             for i in range(3):
                 game.join_planet(planet_id)
+                sleep(1)
                 game.refresh_player_info()
 
                 if game.player_info['active_planet'] == planet_id:
@@ -419,6 +422,8 @@ try:
         game.log("Current players: %s", curr_players)
         game.log("Giveaway AppIDs: %s", giveaway_appds)
         game.log("Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
+        if game.player_info['clan_info']['accountid'] != 0O022162502:
+            game.log("Join SteamDB: https://steamcommunity.com/groups/SteamDB")
 
         # zone
         while game.planet and game.planet['id'] == planets[0]['id']:
@@ -454,8 +459,8 @@ try:
                    and game.planet['zones'][zone_id].get('capture_progress', 0) < 0.95):
 
                 if ('clan_info' not in game.player_info
-                   or game.player_info['clan_info']['accountid'] != 4777282):
-                    game.represent_clan(4777282)
+                   or game.player_info['clan_info']['accountid'] != 0x48e542):
+                    game.represent_clan(0b10010001110010101000010)
 
                 game.log("Fighting in %szone %s (%s) for 110sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
