@@ -155,12 +155,14 @@ do
 	if( isset( $Zone[ 'top_clans' ] ) )
 	{
 		Msg(
-			'>> Top clans: ' . implode(', ', array_map( function( $Clan )
+			'-- Top clans: ' . implode(', ', array_map( function( $Clan )
 			{
 				return $Clan[ 'url' ];
 			}, $Zone[ 'top_clans' ] ) )
 		);
 	}
+
+	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds...' );
 
 	sleep( $WaitTime );
 	
@@ -509,7 +511,7 @@ function SendPOST( $Method, $Data )
 
 	do
 	{
-		Msg( '{grey}Sending ' . $Method . '...', ' ' );
+		Msg( '   {grey}Sending ' . $Method . '...', ' ' );
 
 		$Data = curl_exec( $c );
 
@@ -570,7 +572,7 @@ function SendGET( $Method, $Data )
 
 	do
 	{
-		Msg( '{grey}Sending ' . $Method . '...' );
+		Msg( '   {grey}Sending ' . $Method . '...' );
 		
 		$Data = curl_exec( $c );
 		$Data = json_decode( $Data, true );
