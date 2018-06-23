@@ -284,7 +284,7 @@ function GetFirstAvailableZone( $Planet, &$LastZone )
 
 			Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%' );
 
-			$PaceCutoff = 1.04 - $PaceCutoff;
+			$PaceCutoff = 0.95 - $PaceCutoff;
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
