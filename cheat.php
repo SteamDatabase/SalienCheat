@@ -309,7 +309,7 @@ function GetFirstAvailableZone( $Planet )
 
 function IsThereAnyNewPlanets( $KnownPlanets )
 {
-	Msg( 'Checking for any new planets...' );
+	Msg( '   {grey}Checking for any new planets...' );
 
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -554,7 +554,7 @@ function SendPOST( $Method, $Data )
 			}
 			else if( $EResult === 0 || $EResult === 11 )
 			{
-				Msg( '{lightred}-- This problem should resolve it self, wait for a couple of minutes' );
+				Msg( '{lightred}-- This problem should resolve itself, wait for a couple of minutes' );
 			}
 		}
 
