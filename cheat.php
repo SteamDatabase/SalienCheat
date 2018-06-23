@@ -282,28 +282,60 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 		while( empty( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] ) );
 
 		$Planet[ 'hard_zones' ] = 0;
+		$Planet[ 'medium_zones' ] = 0;
 
 		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
 		{
-			if( !$Zone[ 'captured' ] && $Zone[ 'difficulty' ] === 3 && ( empty( $Zone[ 'capture_progress' ] ) || $Zone[ 'capture_progress' ] < 0.95 ) )
+			if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.95 )
 			{
-				$Planet[ 'hard_zones' ]++;
+				continue;
+			}
+
+			if( $Zone[ 'captured' ] )
+			{
+				continue;
+			}
+
+			switch( $Zone[ 'difficulty' ] )
+			{
+				case 3: $Planet[ 'hard_zones' ]++; break;
+				case 2: $Planet[ 'medium_zones' ]++; break;
 			}
 		}
 
-		Msg( '>> Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . '){normal} has {yellow}' . $Planet[ 'hard_zones' ] . '{normal} hard zones' );
+		Msg(
+			'>> Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
+			'{normal} - PLAYERS: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
+			'{normal} - HARD: {yellow}' . $Planet[ 'hard_zones' ] .
+			'{normal} - MEDIUM: {yellow}' . $Planet[ 'medium_zones' ]
+		);
 	}
+
+	// https://bugs.php.net/bug.php?id=71454
+	unset( $Planet );
 
 	usort( $Planets, function( $a, $b )
 	{
 		if( $b[ 'hard_zones' ] === $a[ 'hard_zones' ] )
 		{
-			return $a[ 'id' ] - $b[ 'id' ];
+			if( $b[ 'medium_zones' ] === $a[ 'medium_zones' ] )
+			{
+				// If the hard and medium zones are equal, sort by most capture progress
+				return $b[ 'state' ][ 'capture_progress' ] - $a[ 'state' ][ 'capture_progress' ];
+			}
+			
+			// If the hard zones are equal, sort by most medium zones
+			return $b[ 'medium_zones' ] - $a[ 'medium_zones' ];
 		}
 		
+		// Sort planets by least amount of hard zones
 		return $a[ 'hard_zones' ] - $b[ 'hard_zones' ];
 	} );
 
+	$Priority = [ 'hard_zones', 'medium_zones' ];
+
+	// Loop twice - first loop tries to find planet with hard zones, second loop - medium zones
+	for( $i = 0; $i < 2; $i++ )
 	foreach( $Planets as &$Planet )
 	{
 		if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
@@ -311,24 +343,20 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 			continue;
 		}
 
-		if( !$Planet[ 'hard_zones' ] )
+		if( !$Planet[ $Priority[ $i ] ] )
 		{
 			continue;
 		}
 
 		if( !$Planet[ 'state' ][ 'captured' ]  )
 		{
-			Msg(
-				'>> Selected planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' .
-				'{normal} - Players: {yellow}' . number_format( $Planet[ 'state' ][ 'current_players' ] ) .
-				'{normal} - Hard zones: {yellow}' . $Planet[ 'hard_zones' ]
-			);
+			Msg( '>> Selected planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
 			return $Planet[ 'id' ];
 		}
 	}
 
-	// If there are no planets with hard zones, just return first one
+	// If there are no planets with hard or medium zones, just return first one
 	return $Planets[ 0 ][ 'id' ];
 }
 
