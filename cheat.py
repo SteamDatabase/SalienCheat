@@ -255,7 +255,7 @@ class Saliens(requests.Session):
         if self.planet:
             planet = self.planet
             state = planet['state']
-            planet_progress = mul if state['captured'] else int(state['capture_progress'] * mul)
+            planet_progress = mul if state['captured'] else int(state.get('capture_progress', 0) * mul)
             self.planet_pbar.desc="Planet ({id}) progress".format(**planet)
             self.planet_pbar.total = mul
             avg_time(self.planet_pbar, planet_progress)
@@ -270,7 +270,7 @@ class Saliens(requests.Session):
         # zone capture progress bar
         if self.planet and self.zone_id is not None:
             zone = self.planet['zones'][self.zone_id]
-            zone_progress = mul if zone['captured'] else int(zone['capture_progress'] * mul)
+            zone_progress = mul if zone['captured'] else int(zone.get('capture_progress', 0) * mul)
             self.zone_pbar.desc="Zone ({zone_position}) progress".format(**zone)
             self.zone_pbar.total = mul
             avg_time(self.zone_pbar, zone_progress)
