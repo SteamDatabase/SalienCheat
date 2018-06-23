@@ -370,6 +370,28 @@ class Saliens(requests.Session):
         self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + (text % args))
         self.pbar_refresh()
 
+    def print_planet(self, planet):
+        planet_id = planet['id']
+        planet_name = planet['state']['name'].split('Planet', 1)[1].replace('_', ' ')
+        curr_players = planet['state']['current_players']
+        n_boss = len(planet['boss_zones'])
+        n_hard = len(planet['hard_zones'])
+        n_med = len(planet['medium_zones'])
+        n_easy = len(planet['easy_zones'])
+
+        status = ('yes' if planet['state']['captured']
+                  else "{:.2f}".format(planet['state'].get('capture_progress', 0) * 100))
+
+        game.log(">>> Planet #{:>3} - {:>2} / {:>2} / {:>2} / {:>2} B/H/M/E"
+                 "- Captured: {} Players: {:,} ({})"
+                 "".format(planet_id,
+                           n_boss, n_hard, n_med, n_easy,
+                           status,
+                           curr_players,
+                           planet_name,
+                           )
+                 )
+
 
 # ------- MAIN ----------
 
@@ -392,10 +414,16 @@ planets = game.get_uncaptured_planets()
 # join battle
 try:
     while planets:
+        # show planet info
         game.log("+++ Found %s uncaptured planets: %s", len(planets), [x['id'] for x in planets])
+
+        for planet in planets:
+            game.print_planet(planet)
+
         planet_id = planets[0]['id']
         game.leave_zone()
 
+        # determine which planet to join
         if not game.planet or game.planet['id'] != planet_id:
             game.log("+++ Joining toughest planet %s..", planets[0]['id'])
 
@@ -418,26 +446,18 @@ try:
 
         game.refresh_planet_info()
 
-        planet_id = game.planet['id']
-        planet_name = game.planet['state']['name']
-        curr_players = game.planet['state']['current_players']
+        # show planet info
         giveaway_appds = game.planet['giveaway_apps']
-        n_boss = len(game.planet['boss_zones'])
-        n_hard = len(game.planet['hard_zones'])
-        n_med = len(game.planet['medium_zones'])
-        n_easy = len(game.planet['easy_zones'])
         top_clans = [c['clan_info']['url'] for c in game.planet.get('top_clans', [])][:5]
 
-        game.log("    Planet name: %s (%s)", planet_name, planet_id)
-        game.log("    Current players: %s", curr_players)
-        game.log("    Giveaway AppIDs: %s", giveaway_appds)
-        game.log("    Zones: %s boss, %s hard, %s medium, %s easy", n_boss, n_hard, n_med, n_easy)
+        game.print_planet(game.planet)
+        game.log(">>> Giveaway AppIDs: %s", giveaway_appds)
         if top_clans:
-            game.log("    Top clans: %s", ', '.join(top_clans))
+            game.log(">>> Top clans: %s", ', '.join(top_clans))
         if 'clan_info' not in game.player_info or game.player_info['clan_info']['accountid'] != 0O022162502:
-            game.log("    Join SteamDB: https://steamcommunity.com/groups/SteamDB")
+            game.log(">>> Join SteamDB: https://steamcommunity.com/groups/SteamDB")
 
-        # zone
+        # selecting zone
         while game.planet and game.planet['id'] == planets[0]['id']:
             zones = (game.planet['boss_zones']
                      + game.planet['hard_zones']
@@ -465,6 +485,7 @@ try:
                      dmap.get(difficulty, difficulty),
                      )
 
+            # fight in the zone
             while (game.planet
                    and time() < deadline
                    and not game.planet['zones'][zone_id]['captured']
@@ -484,6 +505,7 @@ try:
 
                 stoptime = time() + 110
 
+                # refresh progress bars while in battle
                 for i in count(start=8):
                     if time() >= stoptime:
                         break
@@ -502,6 +524,7 @@ try:
                 game.refresh_player_info()
                 game.refresh_planet_info()
 
+            # Rescan planets after zone is finished
             game.log("+++ Rescanning planets...")
             planets = game.get_uncaptured_planets()
             game.refresh_planet_info()
