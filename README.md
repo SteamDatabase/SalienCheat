@@ -35,7 +35,7 @@ php cheat.php token2
 
 ## Python
 
-### Windows
+### Linux/Cygwin
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
 1. `pip install requests tqdm`
