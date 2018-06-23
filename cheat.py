@@ -1,8 +1,7 @@
 """Plays SALIEN for you
 
 Setup:
-apt-get install python-pip
-pip install requests tqdm
+apt-get install python-pip python-requests
 
 """
 
@@ -17,7 +16,7 @@ from itertools import count
 from datetime import datetime
 
 import requests
-from tqdm import tqdm
+logging.basicConfig(format="%(message)s")
 
 try:
     _input = raw_input
@@ -81,13 +80,7 @@ class Saliens(requests.Session):
         self.headers['Origin'] = 'https://steamcommunity.com'
         self.headers['Referer'] = 'https://steamcommunity.com/saliengame/play'
         self.pbar_init()
-
-        class CustomHandler(logging.Handler):
-            def emit(_, record):
-                self.log("%s | %s | %s", record.levelname, record.name, record.msg % record.args)
-
         self.LOG = logging.getLogger()
-        self.LOG.addHandler(CustomHandler())
 
     def spost(self, endpoint, form_fields=None, retry=False):
         if not form_fields:
@@ -242,106 +235,16 @@ class Saliens(requests.Session):
                        retry=False)
 
     def pbar_init(self):
-        self.level_pbar = tqdm(ascii=True,
-                               disable=True,
-                               dynamic_ncols=True,
-                               desc="Player Level",
-                               total=0,
-                               initial=0,
-                               bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
-                               )
-        self.planet_pbar = tqdm(ascii=True,
-                                disable=True,
-                                dynamic_ncols=True,
-                                desc="Planet progress",
-                                total=0,
-                                initial=0,
-                                bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
-                                )
-        self.zone_pbar = tqdm(ascii=True,
-                              disable=True,
-                              dynamic_ncols=True,
-                              desc="Zone progress",
-                              total=0,
-                              initial=0,
-                              bar_format='{desc:<22} {percentage:3.0f}% |{bar}| {remaining:>8}',
-                              )
+        pass
 
     def end(self):
-        self.level_pbar.close()
-        self.planet_pbar.close()
-        self.zone_pbar.close()
+        pass
 
     def pbar_refresh(self):
-        mul = 100000000
-
-        if not self.player_info:
-            return
-
-        player_info = self.player_info
-
-        def avg_time(pbar, n):
-            curr_t = time()
-
-            if pbar.n == 0:
-                pbar.avg_time = 0
-                pbar.last_print_t = curr_t
-            else:
-                delta_n = n - pbar.n
-                delta_t = curr_t - pbar.last_print_t
-
-                if delta_n and delta_t:
-                    curr_avg_time = delta_t / delta_n
-                    pbar.avg_time = (pbar.smoothing * curr_avg_time
-                                     + (1-pbar.smoothing) * (pbar.avg_time
-                                                             if pbar.avg_time
-                                                             else curr_avg_time))
-                    pbar.last_print_t = curr_t
-
-            pbar.n = n
-
-        # level progress bar
-        self.level_pbar.desc = "Player Level {level}".format(**player_info)
-        self.level_pbar.total = int(player_info['next_level_score'])
-        avg_time(self.level_pbar, int(player_info['score']))
-        self.level_pbar.refresh()
-
-        # planet capture progress bar
-        if self.planet:
-            planet = self.planet
-            state = planet['state']
-            planet_progress = (mul if state['captured']
-                               else int(state.get('capture_progress', 0) * mul))
-            self.planet_pbar.desc = "Planet ({id}) progress".format(**planet)
-            self.planet_pbar.total = mul
-            avg_time(self.planet_pbar, planet_progress)
-        else:
-            self.planet_pbar.desc = "Planet progress"
-            self.planet_pbar.n = 0
-            self.planet_pbar.total = 0
-            self.planet_pbar.last_print_t = time()
-
-        self.planet_pbar.refresh()
-
-        # zone capture progress bar
-        if self.planet and self.zone_id is not None:
-            zone = self.planet['zones'][self.zone_id]
-            zone_progress = (mul if zone['captured']
-                             else int(zone.get('capture_progress', 0) * mul))
-            self.zone_pbar.desc = "Zone ({zone_position}) progress".format(**zone)
-            self.zone_pbar.total = mul
-            avg_time(self.zone_pbar, zone_progress)
-        else:
-            self.zone_pbar.desc = "Zone  progress"
-            self.zone_pbar.n = 0
-            self.zone_pbar.total = 0
-            self.zone_pbar.last_print_t = time()
-
-        self.zone_pbar.refresh()
+        pass
 
     def log(self, text, *args):
-        self.level_pbar.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " | " + (text % args))
-        self.pbar_refresh()
+        self.LOG.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " | " + (text % args))
 
 
 # ------- MAIN ----------
