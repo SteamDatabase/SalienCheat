@@ -10,7 +10,7 @@
 
 📣 [Check this reddit thread for a complete guide and troubleshooting](https://redd.it/8t5w8v)
 
-### Linux/Cygwin
+### Windows
 
 1. Install PHP (yes, really)
    1. Download https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip
