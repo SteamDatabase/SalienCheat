@@ -149,7 +149,7 @@ do
 	);
 
 	Msg(
-		'>> Zone {green}' . $Zone[ 'zone_position' ] .
+		'>> Zone {green}' . ( ( $Zone[ 'zone_position' ] ) + 1 ) .
 		'{normal} - Captured: {yellow}' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
