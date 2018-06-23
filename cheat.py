@@ -432,17 +432,17 @@ game.refresh_player_info()
 game.refresh_planet_info()
 planets = game.get_uncaptured_planets()
 
+# show planet info
+game.log("^GRN++^NOR Found %s uncaptured planets: %s",
+         len(planets),
+         [int(x['id']) for x in planets])
+
+for planet in planets:
+    game.print_planet(planet)
+
 # join battle
 try:
     while planets:
-        # show planet info
-        game.log("^GRN++^NOR Found %s uncaptured planets: %s",
-                 len(planets),
-                 [int(x['id']) for x in planets])
-
-        for planet in planets:
-            game.print_planet(planet)
-
         planet_id = planets[0]['id']
         game.leave_zone()
 
@@ -550,6 +550,10 @@ try:
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
             planets = game.get_uncaptured_planets()
+
+            for planet in planets:
+                game.print_planet(planet)
+
             game.refresh_planet_info()
 
 except KeyboardInterrupt:
