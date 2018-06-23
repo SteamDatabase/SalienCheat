@@ -194,10 +194,20 @@ class Saliens(requests.Session):
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
 
-            planet['sort_key'] = (len(planet['easy_zones'])
-                                  + 100 * len(planet['medium_zones'])
-                                  + 10000 * len(planet['hard_zones'])
-                                  )
+            # Example ordering (easy/med/hard):
+            # 20/5/1 > 20/5/5 > 20/1/0 > 1/20/0
+            # This should result in prefering planets that are nearing completion, but
+            # still prioritize ones that have high difficulty zone to maximize score gain
+            sort_key = 0
+
+            if len(planet['easy_zones']):
+                sort_key += 99 - len(planet['easy_zones'])
+            if len(planet['medium_zones']):
+                sort_key += 100 * (99 - len(planet['medium_zones']))
+            if len(planet['hard_zones']):
+                sort_key += 10000 * (99 - len(planet['hard_zones']))
+
+            planet['sort_key'] = sort_key
 
         return planet
 
