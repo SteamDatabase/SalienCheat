@@ -400,7 +400,7 @@ class Saliens(requests.Session):
         n_easy = len(planet['easy_zones'])
 
         status = ('yes' if planet['state']['captured']
-                  else "{:.2f}".format(planet['state'].get('capture_progress', 0) * 100))
+                  else "{:.2f}%%".format(planet['state'].get('capture_progress', 0) * 100))
 
         game.log("^YEL>>^NOR Planet ^GRN#{:>3}^NOR - ^YEL{:>2}^NOR / ^YEL{:>2}^NOR / ^YEL{:>2}^NOR "
                  "/ ^YEL{:>2}^NOR B/H/M/E - Captured: ^YEL{}^NOR Players: ^YEL{:,}^NOR ^GRN({})"
