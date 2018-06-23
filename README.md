@@ -10,6 +10,8 @@
 
 📣 [Check this reddit thread for a complete guide and troubleshooting](https://redd.it/8t5w8v)
 
+### Windows
+
 1. Install PHP (yes, really)
    1. Download https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip
    2. Extract zip to `C:\php`
@@ -18,6 +20,12 @@
    5. Save as `php.ini`
 2. Extract the contents of this script to the same folder
 3. Run the script: `php cheat.php`
+
+### Mac
+
+0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default.
+1. Extract the contents of this script to the Downloads folder.
+2. Launch Terminal and run the script: `php downloads/cheat.php`
 
 You can also provide token directly in CLI, to ease running multiple accounts:
 ```
