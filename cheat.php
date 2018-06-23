@@ -162,7 +162,7 @@ do
 		);
 	}
 
-	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds...' );
+	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds for the game to end...' );
 
 	sleep( $WaitTime );
 	
