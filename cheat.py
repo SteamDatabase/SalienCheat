@@ -12,7 +12,6 @@ from io import open
 from time import sleep, time
 from itertools import count
 from datetime import datetime
-from getpass import getpass
 
 import requests
 from tqdm import tqdm
@@ -63,6 +62,7 @@ def get_access_token(force_input=False):
 
     return token
 
+
 class Saliens(requests.Session):
     api_url = 'https://community.steam-api.com/%s/v0001/'
     player_info = None
@@ -90,7 +90,6 @@ class Saliens(requests.Session):
             form_fields = {}
         form_fields['access_token'] = self.access_token
 
-        tries = 0
         data = None
 
         while not data:
@@ -114,9 +113,7 @@ class Saliens(requests.Session):
 
         return data
 
-
     def sget(self, endpoint, query_params=None, retry=False):
-        tries = 0
         data = None
 
         while not data:
@@ -258,7 +255,7 @@ class Saliens(requests.Session):
         if self.planet:
             planet = self.planet
             state = planet['state']
-            planet_progress = mul if state['captured'] else int(state['capture_progress'] * mul)
+            planet_progress = mul if state['captured'] else int(state.get('capture_progress', 0) * mul)
             self.planet_pbar.desc="Planet ({id}) progress".format(**planet)
             self.planet_pbar.total = mul
             avg_time(self.planet_pbar, planet_progress)
@@ -273,7 +270,7 @@ class Saliens(requests.Session):
         # zone capture progress bar
         if self.planet and self.zone_id is not None:
             zone = self.planet['zones'][self.zone_id]
-            zone_progress = mul if zone['captured'] else int(zone['capture_progress'] * mul)
+            zone_progress = mul if zone['captured'] else int(zone.get('capture_progress', 0) * mul)
             self.zone_pbar.desc="Zone ({zone_position}) progress".format(**zone)
             self.zone_pbar.total = mul
             avg_time(self.zone_pbar, zone_progress)
@@ -288,7 +285,6 @@ class Saliens(requests.Session):
     def log(self, text, *args):
         self.level_pbar.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " | " + (text % args))
         self.pbar_refresh()
-
 
 
 # ------- MAIN ----------
@@ -315,7 +311,7 @@ while True:
     planets = game.get_planets()
     planets = list(filter(lambda x: not x['state']['captured'], planets))
 
-    game.log("Found %s uncaptured planets: %s", len(planets), list(map(lambda x: int(x['id']), planets)))
+    game.log("Found %s uncaptured planets: %s", len(planets), [int(x['id']) for x in planets])
 
     planets = list(map(lambda x: game.get_planet(x['id']), planets))
 
@@ -327,13 +323,12 @@ while True:
         planets = hard_planets
 
     planets = sorted(planets, reverse=False, key=lambda x: x['n_hard_zones'])
-#   planets = sorted(planets, reverse=False, key=lambda x: x['state']['current_players'])
 
     if not planets:
-        LOG.error("No uncaptured planets left :(")
+        game.log("No uncaptured planets left :(")
         raise SystemExit
 
-    game.log("Joining planet %s..", planets[0]['id'])
+    game.log("Joining planet %s...", planets[0]['id'])
 
     planet_id = planets[0]['id']
     game.join_planet(planet_id)
@@ -347,17 +342,17 @@ while True:
         sleep(2)
         continue
 
-    game.log("Planet name: {name} ({id})".format(id=game.planet['id'], **game.planet['state']))
-    game.log("Current players: {current_players}".format(**game.planet['state']))
-    game.log("Giveaway AppIDs: {giveaway_apps}".format(**game.planet))
+    game.log("Planet name: %s (%s)", game.planet['id'], game.planet['state']['name'])
+    game.log("Current players: %s", game.planet['state']['current_players'])
+    game.log("Giveaway AppIDs: %s", game.planet['giveaway_apps'])
 
     # zone
     game.log("Finding conflict zone...")
 
     while time() < deadline and game.planet and not game.planet['state']['captured']:
         zones = game.planet['zones']
-        zones = list(filter(lambda x: x['captured'] == False, zones))
-        boss_zones = list(filter(lambda x: x['type'] == 4, zones))
+        zones = [z for z in zones if not z['captured']]
+        boss_zones = [z for z in zones if z['type'] == 4]
 
         if boss_zones:
             zones = boss_zones
@@ -366,7 +361,7 @@ while True:
             zones = sorted(zones, reverse=True, key=lambda x: x['difficulty'])
 
         if not zones:
-            LOG.debug("No open zones left on planet")
+            game.log("No open zones left on planet")
             game.player_info.pop('active_planet')
             break
 
