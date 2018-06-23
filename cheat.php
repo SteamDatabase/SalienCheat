@@ -61,11 +61,14 @@ while( !$CurrentPlanet && sleep( 5 ) === 0 );
 do
 {
 	// Leave current game before trying to switch planets (it will report InvalidState otherwise)
-	LeaveCurrentGame( $Token, true );
+	$SteamThinksPlanet = LeaveCurrentGame( $Token, $CurrentPlanet );
 
-	SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
+	if( $CurrentPlanet !== $SteamThinksPlanet )
+	{
+		SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
 
-	$SteamThinksPlanet = LeaveCurrentGame( $Token, false );
+		$SteamThinksPlanet = LeaveCurrentGame( $Token );
+	}
 }
 while( $CurrentPlanet !== $SteamThinksPlanet );
 
@@ -82,7 +85,7 @@ do
 	}
 
 	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
-	LeaveCurrentGame( $Token, false );
+	LeaveCurrentGame( $Token );
 
 	do
 	{
@@ -373,7 +376,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets )
 	return $Planets[ 0 ][ 'id' ];
 }
 
-function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
+function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 {
 	do
 	{
@@ -402,12 +405,16 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 		return 0;
 	}
 
-	if( $LeaveCurrentPlanet )
+	$ActivePlanet = (int)$Data[ 'response' ][ 'active_planet' ];
+
+	if( $LeaveCurrentPlanet > 0 && $LeaveCurrentPlanet !== $ActivePlanet )
 	{
-		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_planet' ] );
+		Msg( 'Leaving planet {yellow}' . $ActivePlanet . '{normal} because we want to be on {yellow}' . $LeaveCurrentPlanet );
+	
+		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $ActivePlanet );
 	}
 
-	return $Data[ 'response' ][ 'active_planet' ];
+	return $ActivePlanet;
 }
 
 function SendPOST( $Method, $Data )
