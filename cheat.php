@@ -104,6 +104,7 @@ do
 	// Find a new planet if there are no hard zones left
 	$HardZones = $Zone[ 'hard_zones' ];
 	$MediumZones = $Zone[ 'medium_zones' ];
+	$EasyZones = $Zone[ 'easy_zones' ];
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
@@ -142,6 +143,7 @@ do
 		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
 		'{normal} - Hard: {yellow}' . $HardZones .
 		'{normal} - Medium: {yellow}' . $MediumZones .
+		'{normal} - Easy: {yellow}' . $EasyZones .
 		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
 		'{green} (' . $CurrentPlanetName . ')'
 	);
@@ -249,6 +251,7 @@ function GetFirstAvailableZone( $Planet )
 	$CleanZones = [];
 	$HardZones = 0;
 	$MediumZones = 0;
+	$EasyZones = 0;
 	
 	foreach( $Zones as $Zone )
 	{
@@ -278,6 +281,7 @@ function GetFirstAvailableZone( $Planet )
 		{
 			case 3: $HardZones++; break;
 			case 2: $MediumZones++; break;
+			case 1: $EasyZones++; break;
 		}
 
 		$CleanZones[] = $Zone;
@@ -301,6 +305,7 @@ function GetFirstAvailableZone( $Planet )
 	$Zone = $CleanZones[ 0 ];
 	$Zone[ 'hard_zones' ] = $HardZones;
 	$Zone[ 'medium_zones' ] = $MediumZones;
+	$Zone[ 'easy_zones' ] = $EasyZones;
 	$Zone[ 'planet_captured' ] = $PlanetCaptured;
 	$Zone[ 'planet_players' ] = $PlanetPlayers;
 
@@ -387,12 +392,13 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Easy: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
 				$Planet[ 'hard_zones' ],
 				$Planet[ 'medium_zones' ],
+				$Planet[ 'easy_zones' ],
 				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
 				number_format( $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
