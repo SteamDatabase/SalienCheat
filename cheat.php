@@ -45,9 +45,6 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-Msg( '{green}This script will not work until you have joined our group:' );
-Msg( '{yellow}https://steamcommunity.com/groups/SteamDB', PHP_EOL . PHP_EOL );
-
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
 
@@ -455,6 +452,16 @@ function SendPOST( $Method, $Data )
 		else
 		{
 			echo 'EResult: ' . $EResult . ' - ' . $Data . PHP_EOL;
+
+			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )
+			{
+				echo PHP_EOL;
+
+				Msg( '{green}You need to join the group for this script to work:' );
+				Msg( '{yellow}https://steamcommunity.com/groups/SteamDB' );
+
+				sleep( 10 );
+			}
 		}
 
 		$Data = json_decode( $Data, true );
