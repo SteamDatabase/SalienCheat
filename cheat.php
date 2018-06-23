@@ -190,7 +190,12 @@ do
 	}
 
 	// Some users get stuck in games after calling ReportScore, so we manually leave to fix this
-	LeaveCurrentGame( $Token );
+	if( LeaveCurrentGame( $Token ) !== $CurrentPlanet )
+	{
+		Msg( '{lightred}!! Wrong current planet, restarting...' );
+
+		goto lol_using_goto_in_2018;
+	}
 }
 while( true );
 
@@ -494,8 +499,8 @@ function SendPOST( $Method, $Data )
 		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => 10,
-		CURLOPT_CONNECTTIMEOUT => 10,
+		CURLOPT_TIMEOUT        => 15,
+		CURLOPT_CONNECTTIMEOUT => 15,
 		CURLOPT_HEADER         => 1,
 		CURLOPT_POST           => 1,
 		CURLOPT_POSTFIELDS     => $Data,
