@@ -543,6 +543,14 @@ function SendPOST( $Method, $Data )
 
 				sleep( 10 );
 			}
+			else if( $EResult === 42 && $Method === 'ITerritoryControlMinigameService/ReportScore' )
+			{
+				Msg( '{lightred}-- EResult 42 means zone has been captured while you were in it' );
+			}
+			else if( $EResult === 0 || $EResult === 11 )
+			{
+				Msg( '{lightred}-- This problem should resolve it self, wait for a couple of minutes' );
+			}
 		}
 
 		$Data = json_decode( $Data, true );
