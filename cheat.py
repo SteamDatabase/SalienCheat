@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Plays SALIENT for you
 
 pip install requests tqdm
