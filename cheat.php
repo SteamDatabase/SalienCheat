@@ -325,6 +325,8 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 		$Planet[ 'hard_zones' ] = 0;
 		$Planet[ 'medium_zones' ] = 0;
 
+		$HasBossZone = false;
+
 		foreach( $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ] as $Zone )
 		{
 			if( !empty( $Zone[ 'capture_progress' ] ) && $Zone[ 'capture_progress' ] > 0.97 )
@@ -335,6 +337,16 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 			if( $Zone[ 'captured' ] )
 			{
 				continue;
+			}
+
+			// Always join boss zone
+			if( $Zone[ 'type' ] == 4 )
+			{
+				$HasBossZone = true;
+			}
+			else if( $Zone[ 'type' ] != 3 )
+			{
+				Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
 			}
 
 			switch( $Zone[ 'difficulty' ] )
@@ -356,6 +368,13 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 				$Planet[ 'state' ][ 'name' ],
 			]
 		);
+
+		if( $HasBossZone )
+		{
+			Msg( '{green}>> This planet has a boss zone, selecting this planet' );
+
+			return $Planet[ 'id' ];
+		}
 	}
 
 	// https://bugs.php.net/bug.php?id=71454
