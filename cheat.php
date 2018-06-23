@@ -107,7 +107,7 @@ do
 
 	if( !$HardZones && IsThereAnyNewPlanets( $KnownPlanets ) )
 	{
-		Msg( '{lightred}!! This planet does not have any hard zones left, restarting...' );
+		Msg( '{lightred}!! Detected a new planet, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
@@ -238,7 +238,7 @@ function GetFirstAvailableZone( $Planet )
 		}
 		else if( $Zone[ 'type' ] != 3 )
 		{
-			Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
+			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
@@ -346,7 +346,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 			}
 			else if( $Zone[ 'type' ] != 3 )
 			{
-				Msg( '!! Unknown zone type: ' . $Zone[ 'type' ] );
+				Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 			}
 
 			switch( $Zone[ 'difficulty' ] )
