@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Plays SALIEN for you
 
 pip install requests tqdm
