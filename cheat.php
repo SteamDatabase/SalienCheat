@@ -152,7 +152,6 @@ do
 	
 	for ($i = 110; $i > 0; $i--)
 	{
-		flush();
 		print('           >> Time left: ' . $i . " \r");
 		sleep( 1 );
 	}
