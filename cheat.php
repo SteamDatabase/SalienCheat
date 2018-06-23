@@ -147,8 +147,11 @@ do
 		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
 		'{normal} - Hard: {yellow}' . $HardZones .
 		'{normal} - Medium: {yellow}' . $MediumZones .
-		'{normal} - Easy: {yellow}' . $EasyZones .
-		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
+		'{normal} - Easy: {yellow}' . $EasyZones 
+	);
+	
+	Msg(
+		'-- Players: {yellow}' . number_format( $PlanetPlayers ) .
 		'{green} (' . $CurrentPlanetName . ')'
 	);
 
