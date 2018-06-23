@@ -378,6 +378,11 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 	{
 		$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
 
+		if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
+		{
+			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
+		}
+
 		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) || $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 4777282 )
 		{
 			// Please do not change our clanid if you are going to use this script
@@ -390,11 +395,6 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet )
 		}
 	}
 	while( true );
-
-	if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
-	{
-		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
-	}
 
 	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
 	{
