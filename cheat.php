@@ -45,6 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$WaitTime = 110;
 $KnownPlanets = [];
 $SkippedPlanets = [];
 $CurrentPlanetName = '??';
@@ -102,14 +103,25 @@ do
 
 	// Find a new planet if there are no hard zones left
 	$HardZones = $Zone[ 'hard_zones' ];
+	$MediumZones = $Zone[ 'medium_zones' ];
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
-	if( !$HardZones && IsThereAnyNewPlanets( $KnownPlanets ) )
+	if( !$HardZones )
 	{
-		Msg( '{lightred}!! Detected a new planet, restarting...' );
+		if( !$MediumZones && time() - $LastRestart > $WaitTime )
+		{
+			Msg( '{lightred}!! No hard or medium zones on this planet, restarting...' );
 
-		goto lol_using_goto_in_2018;
+			goto lol_using_goto_in_2018;
+		}
+		
+		if( IsThereAnyNewPlanets( $KnownPlanets ) )
+		{
+			Msg( '{lightred}!! Detected a new planet, restarting...' );
+
+			goto lol_using_goto_in_2018;
+		}
 	}
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
@@ -128,7 +140,8 @@ do
 	Msg(
 		'>> Planet {green}' . $CurrentPlanet .
 		'{normal} - Captured: {yellow}' . number_format( $PlanetCaptured * 100, 2 ) . '%' .
-		'{normal} - Hard zones: {yellow}' . $HardZones .
+		'{normal} - Hard: {yellow}' . $HardZones .
+		'{normal} - Medium: {yellow}' . $MediumZones .
 		'{normal} - Players: {yellow}' . number_format( $PlanetPlayers ) .
 		'{green} (' . $CurrentPlanetName . ')'
 	);
@@ -149,7 +162,7 @@ do
 		);
 	}
 
-	sleep( 110 );
+	sleep( $WaitTime );
 	
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
@@ -163,7 +176,7 @@ do
 			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
 		);
 		
-		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( 110 / 60 );
+		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
 		$Hours = floor( $Time / 60 );
 		$Minutes = $Time % 60;
 		
@@ -223,6 +236,7 @@ function GetFirstAvailableZone( $Planet )
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
 	$HardZones = 0;
+	$MediumZones = 0;
 	
 	foreach( $Zones as $Zone )
 	{
@@ -248,9 +262,10 @@ function GetFirstAvailableZone( $Planet )
 			continue;
 		}
 
-		if( $Zone[ 'difficulty' ] === 3 )
+		switch( $Zone[ 'difficulty' ] )
 		{
-			$HardZones++;
+			case 3: $HardZones++; break;
+			case 2: $MediumZones++; break;
 		}
 
 		$CleanZones[] = $Zone;
@@ -273,6 +288,7 @@ function GetFirstAvailableZone( $Planet )
 
 	$Zone = $CleanZones[ 0 ];
 	$Zone[ 'hard_zones' ] = $HardZones;
+	$Zone[ 'medium_zones' ] = $MediumZones;
 	$Zone[ 'planet_captured' ] = $PlanetCaptured;
 	$Zone[ 'planet_players' ] = $PlanetPlayers;
 
