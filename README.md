@@ -35,9 +35,19 @@ php cheat.php token2
 
 ## Python
 
+### Windows
+
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
 1. `pip install requests tqdm`
 2. Run the script: `python cheat.py [token]`
+
+### Mac
+
+0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have Python 2.7.10 included by default.
+1. Launch Terminal and run the following scripts:
+   1. `sudo easy_install pip`
+   2. `pip install requests tqdm`
+   3. `python cheat.py [token]`
 
 ## Docker
 1. Extract contents of this script somewhere.
