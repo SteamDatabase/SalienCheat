@@ -137,7 +137,7 @@ do
 	Msg(
 		'>> Zone {yellow}' . $Zone[ 'zone_position' ] .
 		'{normal} - Captured: {yellow}' . number_format( empty( $Zone[ 'capture_progress' ] ) ? 0 : ( $Zone[ 'capture_progress' ] * 100 ), 2 ) . '%' .
-		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone[ 'difficulty' ] )
+		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
 	if( isset( $Zone[ 'top_clans' ] ) )
@@ -189,17 +189,19 @@ function GetScoreForZone( $Zone )
 	return $Score * 120;
 }
 
-function GetNameForDifficulty( $Difficulty )
+function GetNameForDifficulty( $Zone )
 {
-	switch( $Difficulty )
+	$Boss = $Zone[ 'type' ] === 4 ? 'BOSS - ' : '';
+	$Difficulty = $Zone[ 'difficulty' ];
+
+	switch( $Zone[ 'difficulty' ] )
 	{
-		case 4: return '!! BOSS !!';
-		case 3: return 'Hard';
-		case 2: return 'Medium';
-		case 1: return 'Low';
+		case 2: $Difficulty = 'Medium'; break;
+		case 3: $Difficulty = 'Hard'; break;
+		case 1: $Difficulty = 'Low'; break;
 	}
 
-	return $Difficulty;
+	return $Boss . $Difficulty;
 }
 
 function GetFirstAvailableZone( $Planet )
