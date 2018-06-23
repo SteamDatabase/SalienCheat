@@ -108,13 +108,13 @@ class Saliens(requests.Session):
                     raise Exception("No response is json")
             except Exception as exp:
                 self.log("spost error: %s", str(exp))
-                if retry:
-                    sleep(1)
             else:
                 data = rdata['response']
 
             if not retry:
                 break
+
+            sleep(1)
 
         return data
 
@@ -132,13 +132,13 @@ class Saliens(requests.Session):
                     raise Exception("No response is json")
             except Exception as exp:
                 self.log("spost error: %s", str(exp))
-                if retry:
-                    sleep(1)
             else:
                 data = rdata['response']
 
             if not retry:
                 break
+
+            sleep(1)
 
         return data
 
@@ -180,21 +180,21 @@ class Saliens(requests.Session):
             planet['easy_zones'] = sorted((z for z in planet['zones']
                                            if (not z['captured']
                                                and z['difficulty'] == 1
-                                               and z['capture_progress'] < 0.95)),
+                                               and z.get('capture_progress', 0) < 0.95)),
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
 
             planet['medium_zones'] = sorted((z for z in planet['zones']
                                              if (not z['captured']
                                                  and z['difficulty'] == 2
-                                                 and z['capture_progress'] < 0.95)),
+                                                 and z.get('capture_progress', 0) < 0.95)),
                                             reverse=True,
                                             key=lambda x: x['zone_position'])
 
             planet['hard_zones'] = sorted((z for z in planet['zones']
                                            if (not z['captured']
                                                and z['difficulty'] == 3
-                                               and z['capture_progress'] < 0.95)),
+                                               and z.get('capture_progress', 0) < 0.95)),
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
             planet['boss_zones'] = sorted((z for z in planet['zones']
@@ -451,7 +451,7 @@ try:
             while (game.planet
                    and time() < deadline
                    and not game.planet['zones'][zone_id]['captured']
-                   and game.planet['zones'][zone_id]['capture_progress'] < 0.95):
+                   and game.planet['zones'][zone_id].get('capture_progress', 0) < 0.95):
 
                 if ('clan_info' not in game.player_info
                    or game.player_info['clan_info']['accountid'] != 4777282):
