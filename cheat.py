@@ -107,7 +107,7 @@ class Saliens(requests.Session):
             try:
                 resp = self.post(self.api_url % endpoint, data=form_fields)
 
-                eresult = resp.headers.get('X-eresult', -1)
+                eresult = int(resp.headers.get('X-eresult', -1))
                 if resp.status_code != 200:
                     raise Exception("HTTP %s EResult %s\n%s" % (resp.status_code, eresult, resp.text))
 
@@ -121,7 +121,8 @@ class Saliens(requests.Session):
                     sleep(2)
                     continue
             else:
-                self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
+                if eresult != 1:
+                    self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
@@ -140,7 +141,7 @@ class Saliens(requests.Session):
             try:
                 resp = self.get(self.api_url % endpoint, params=query_params)
 
-                eresult = resp.headers.get('X-eresult', -1)
+                eresult = int(resp.headers.get('X-eresult', -1))
                 if resp.status_code != 200:
                     raise Exception("HTTP %s EResult %s\n%s" % (resp.status_code, eresult, resp.text))
 
@@ -154,7 +155,8 @@ class Saliens(requests.Session):
                     sleep(2)
                     continue
             else:
-                self.log("^GRY   GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
+                if eresult != 1:
+                    self.log("^GRY   GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
                 data = rdata['response']
 
             if not retry:
