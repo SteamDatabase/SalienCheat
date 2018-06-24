@@ -340,7 +340,7 @@ function GetFirstAvailableZone( $Planet, &$ZonePaces, $WaitTime )
 				$Minutes = floor( $PaceTime / 60 );
 				$Seconds = $PaceTime % 60;
 
-				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%{normal} ETA: {green}' . $Minutes . 'm ' . $Seconds . 's' );
+				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%{normal} Cutoff: {green}' . number_format( (0.98 - $PaceCutoff) * 100, 2 ) . '%{normal} ETA: {green}' . $Minutes . 'm ' . $Seconds . 's' );
 			}
 
 			$PaceCutoff = 0.98 - $PaceCutoff;
