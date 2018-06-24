@@ -94,12 +94,14 @@ class Saliens(requests.Session):
 
         data = None
         resp = None
+        deadline = time() + 60
 
         while not data:
             try:
                 resp = self.post(self.api_url % endpoint, data=form_fields)
 
-                eresult = resp.headers.get('X-eresult', -1)
+                eresult = int(resp.headers.get('X-eresult', -1))
+
                 if resp.status_code != 200:
                     raise Exception("HTTP %s EResult %s\n%s" % (resp.status_code, eresult, resp.text))
 
@@ -114,6 +116,11 @@ class Saliens(requests.Session):
                     continue
             else:
                 self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
+
+                if eresult == 93 and time() < deadline:
+                    sleep(5)
+                    continue
+
                 data = rdata['response']
 
             if not retry:
