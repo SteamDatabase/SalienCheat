@@ -114,7 +114,7 @@ do
 
 	if( !$HardZones )
 	{
-		if( !$MediumZones && time() - $LastRestart > $WaitTime )
+		if( !$MediumZones && time() - $LastRestart > 60 * 10 )
 		{
 			Msg( '{lightred}!! No hard or medium zones on this planet, restarting...' );
 
