@@ -583,6 +583,11 @@ function SendPOST( $Method, $Data )
 			'Referer: https://steamcommunity.com/saliengame/play',
 		],
 	] );
+	
+	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
+	{
+		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
+	}
 
 	do
 	{
@@ -658,6 +663,11 @@ function SendGET( $Method, $Data )
 			'Referer: https://steamcommunity.com/saliengame/play',
 		],
 	] );
+	
+	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
+	{
+		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
+	}
 
 	do
 	{
