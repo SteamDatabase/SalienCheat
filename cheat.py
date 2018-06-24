@@ -473,7 +473,7 @@ try:
 
         # show planet info
         giveaway_appds = game.planet['giveaway_apps']
-        top_clans = [c['clan_info']['url'] for c in game.planet.get('top_clans', [])][:5]
+        top_clans = [c['clan_info']['url'] for c in game.planet.get('top_clans', []) if 'url' in c['clan_info']][:5]
 
         game.print_planet(game.planet)
         game.log("^YEL>>^NOR Giveaway AppIDs: %s", giveaway_appds)
