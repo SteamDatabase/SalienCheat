@@ -232,6 +232,9 @@ class Saliens(requests.Session):
             if len(planet['boss_zones']):
                 sort_key += 10**6 * (99 - len(planet['boss_zones']))
 
+            if len(planet['hard_zones']) and planet['id'] in ('15', '16'):
+                sort_key += 10**8
+
             planet['sort_key'] = sort_key
 
         return planet
