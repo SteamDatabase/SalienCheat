@@ -1,6 +1,6 @@
 @echo off
 
-if not exist php\php.exe (
+if not exist C:\php\php.exe (
 	echo PHP wasn't detected; we'll download and install it for you.
 	PowerShell -ExecutionPolicy Unrestricted -File "downloadphp.ps1"
 )
@@ -13,5 +13,5 @@ if not exist token.txt (
 echo The script can be terminated at any time by pressing Ctrl-C
 
 :start
-php\php.exe -f cheat.php
+C:\php\php.exe -f cheat.php
 goto start
