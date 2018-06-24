@@ -154,8 +154,10 @@ do
 	{
 		$Data = $Data[ 'response' ];
 
+		echo PHP_EOL;
+
 		Msg(
-			'>> Your Score: {green}' . number_format( $Data[ 'new_score' ] ) .
+			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
 			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
@@ -188,7 +190,7 @@ function GetScoreForZone( $Zone )
 
 function GetNameForDifficulty( $Zone )
 {
-	$Boss = $Zone[ 'type' ] === 4 ? 'BOSS - ' : '';
+	$Boss = $Zone[ 'type' ] == 4 ? 'BOSS - ' : '';
 	$Difficulty = $Zone[ 'difficulty' ];
 
 	switch( $Zone[ 'difficulty' ] )
@@ -238,7 +240,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
-		$PaceCutoff = 0.97;
+		$Cutoff = 0.97;
 
 		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
 		{
@@ -252,6 +254,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			}
 
 			$PaceCutoff = array_sum( $Differences ) / count( $Differences );
+			$Cutoff = $Cutoff - $PaceCutoff * 1.6;
 
 			if( $PaceCutoff > 0.02 )
 			{
@@ -265,20 +268,18 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 					[
 						$Zone[ 'zone_position' ],
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
-						number_format( ( 0.98 - $PaceCutoff ) * 100, 2 ),
+						number_format( ( $Cutoff - $PaceCutoff ) * 100, 2 ),
 						number_format( $PaceCutoff * 100, 2 ),
 						$Minutes,
 						$Seconds,
 					]
 				);
 			}
-
-			$PaceCutoff = 0.97 - $PaceCutoff;
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
 		// and replies with 42 NoMatch instead
-		if( $Zone[ 'capture_progress' ] > $PaceCutoff )
+		if( $Zone[ 'capture_progress' ] >= $Cutoff )
 		{
 			continue;
 		}
@@ -400,6 +401,13 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 				$Planet[ 'state' ][ 'name' ],
 			]
 		);
+
+		if( $Zone !== false && $Zone[ 'best_zone' ][ 'type' ] == 4 )
+		{
+			Msg( '{green}>> This planet has an uncaptured boss, selecting this planet...' );
+
+			return $Planet;
+		}
 	}
 
 	// https://bugs.php.net/bug.php?id=71454
