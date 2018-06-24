@@ -467,7 +467,7 @@ game.log("^GRN-- Welcome to SalienCheat for SteamDB")
 
 if 'clan_info' not in game.player_info:
     game.log("^GRN-- You are currently not representing any clan, so you are now part of SteamDB")
-    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^NOR on Steam")
+    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^GRN on Steam")
     game.represent_clan(4777282)
 
 elif game.player_info['clan_info']['accountid'] != 4777282:
