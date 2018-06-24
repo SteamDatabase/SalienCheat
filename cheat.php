@@ -93,7 +93,7 @@ do
 
 	do
 	{
-		$Zone = GetFirstAvailableZone( $CurrentPlanet, $ZonePaces );
+		$Zone = GetFirstAvailableZone( $CurrentPlanet, $ZonePaces, $WaitTime );
 	}
 	while( $Zone === null && sleep( 5 ) === 0 );
 
@@ -238,7 +238,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetFirstAvailableZone( $Planet, &$ZonePaces )
+function GetFirstAvailableZone( $Planet, &$ZonePaces, $WaitTime )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -304,12 +304,12 @@ function GetFirstAvailableZone( $Planet, &$ZonePaces )
 
 			$PaceCutoff = array_sum( $Differences ) / count( $Differences );
 
-			if ( $PaceCutoff > 0.02 )
+			if( $PaceCutoff > 0.02 )
 			{
-				global $WaitTime;
-				$Time = ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime );
-				$Minutes = floor( $Time / 60 );
-				$Seconds = $Time % 60;
+				$PaceTime = ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime );
+				$Minutes = floor( $PaceTime / 60 );
+				$Seconds = $PaceTime % 60;
+
 				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%{normal} ETA: {green}' . $Minutes . 'm ' . $Seconds . 's' );
 			}
 
