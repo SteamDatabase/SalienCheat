@@ -193,6 +193,8 @@ class Saliens(requests.Session):
         return self.planet
 
     def _clan_key(self, top_clans):
+        if not top_clans:
+            return 0
         for i, clan in enumerate(reversed(top_clans)):
             if clan['accountid'] == 4777282:
                 return i + 1
@@ -211,7 +213,7 @@ class Saliens(requests.Session):
         return sorted(
             pos_sort,
             reverse=True,
-            key=lambda z: self._clan_key(z['top_clans']),
+            key=lambda z: self._clan_key(z.get('top_clans', None)),
         )
 
     def get_planet(self, pid):
@@ -532,10 +534,11 @@ try:
 
                 game.join_zone(zone_id)
                 game.refresh_player_info()
-                game.log(
-                    "    Zone leaders: %s",
-                    [c['name'] for c in zones[0]['top_clans']],
-                )
+                if 'top_clans' in  zones[0]:
+                    game.log(
+                        "    Zone leaders: %s",
+                        [c['name'] for c in zones[0]['top_clans']],
+                    )
 
                 stoptime = time() + 110
 
