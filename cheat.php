@@ -401,6 +401,8 @@ function IsThereAnyNewPlanets( $KnownPlanets )
 
 function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 {
+	Msg( '   {grey}Finding the best planet...' );
+
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
@@ -563,18 +565,26 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 
 function SendPOST( $Method, $Data )
 {
+	return ExecuteRequest( 'https://community.steam-api.com/' . $Method . '/v0001/', $Data );
+}
+
+function SendGET( $Method, $Data )
+{
+	return ExecuteRequest( 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data );
+}
+
+function ExecuteRequest( $URL, $Data = [] )
+{
 	$c = curl_init( );
 
 	curl_setopt_array( $c, [
-		CURLOPT_URL            => 'https://community.steam-api.com/' . $Method . '/v0001/',
+		CURLOPT_URL            => $URL,
 		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => 60,
+		CURLOPT_TIMEOUT        => empty( $Data ) ? 10 : 60,
 		CURLOPT_CONNECTTIMEOUT => 10,
 		CURLOPT_HEADER         => 1,
-		CURLOPT_POST           => 1,
-		CURLOPT_POSTFIELDS     => $Data,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
 		CURLOPT_HTTPHEADER     =>
 		[
@@ -584,7 +594,13 @@ function SendPOST( $Method, $Data )
 			'Referer: https://steamcommunity.com/saliengame/play',
 		],
 	] );
-	
+
+	if( !empty( $Data ) )
+	{
+		curl_setopt( $c, CURLOPT_POST, 1 );
+		curl_setopt( $c, CURLOPT_POSTFIELDS, $Data );
+	}
+
 	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
 	{
 		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
@@ -592,8 +608,6 @@ function SendPOST( $Method, $Data )
 
 	do
 	{
-		Msg( '   {grey}Sending ' . $Method . '...', ' ' );
-
 		$Data = curl_exec( $c );
 
 		$HeaderSize = curl_getinfo( $c, CURLINFO_HEADER_SIZE );
@@ -602,13 +616,9 @@ function SendPOST( $Method, $Data )
 
 		preg_match( '/X-eresult: ([0-9]+)/', $Header, $EResult ) === 1 ? $EResult = (int)$EResult[ 1 ] : $EResult = 0;
 
-		if( $EResult === 1 )
+		if( $EResult !== 1 )
 		{
-			echo 'OK' . PHP_EOL;
-		}
-		else
-		{
-			echo 'EResult: ' . $EResult . ' - ' . $Data . PHP_EOL;
+			Msg( '{lightred}!! ' . $Method . ' failed - EResult: ' . $EResult . ' - ' . $Data );
 
 			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )
 			{
@@ -640,47 +650,7 @@ function SendPOST( $Method, $Data )
 	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
 
 	curl_close( $c );
-	
-	return $Data;
-}
 
-function SendGET( $Method, $Data )
-{
-	$c = curl_init( );
-
-	curl_setopt_array( $c, [
-		CURLOPT_URL            => 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data,
-		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => 10,
-		CURLOPT_CONNECTTIMEOUT => 10,
-		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
-		CURLOPT_HTTPHEADER     =>
-		[
-			'Accept: */*',
-			'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
-			'Origin: https://steamcommunity.com',
-			'Referer: https://steamcommunity.com/saliengame/play',
-		],
-	] );
-	
-	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
-	{
-		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
-	}
-
-	do
-	{
-		Msg( '   {grey}Sending ' . $Method . '...' );
-		
-		$Data = curl_exec( $c );
-		$Data = json_decode( $Data, true );
-	}
-	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
-
-	curl_close( $c );
-	
 	return $Data;
 }
 
