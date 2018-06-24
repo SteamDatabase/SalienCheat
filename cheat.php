@@ -615,7 +615,8 @@ function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 
 	if( !empty( $printf ) )
 	{
-		printf( $Message, ...$printf );
+		array_unshift( $printf, $Message );
+		call_user_func_array( 'printf', $printf );
 	}
 	else
 	{
