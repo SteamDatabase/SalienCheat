@@ -241,8 +241,6 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
-		$Cutoff = 0.97;
-
 		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
 		{
 			$Paces = $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ];
@@ -255,7 +253,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			}
 
 			$PaceCutoff = array_sum( $Differences ) / count( $Differences );
-			$Cutoff = $Cutoff - $PaceCutoff * 1.6;
+			$Cutoff = 0.97 - $PaceCutoff * 1.6;
 
 			if( $PaceCutoff > 0.02 )
 			{
@@ -276,6 +274,11 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 					]
 				];
 			}
+		}
+		else
+		{
+			// If we just started and don't have any pace information, play it safe
+			$Cutoff = 0.80;
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
