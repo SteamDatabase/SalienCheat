@@ -2,6 +2,9 @@
 
 set_time_limit( 0 );
 
+// set title to prevent screenshottting usertoken by accident
+cli_set_process_title('PHP Saliens Cheat');
+
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
 	Msg( 'You forgot to download cacert.pem file' );
