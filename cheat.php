@@ -54,6 +54,12 @@ $ZonePaces =
 	'Planet' => 0,
 ];
 
+echo PHP_EOL;
+echo "   \033[37;44m             SalienCheat for SteamDB             \033[0m" . PHP_EOL;
+echo "   \033[30;42m    If you want to support us, join our group:   \033[0m" . PHP_EOL;
+echo "   \033[30;42m    https://steamcommunity.com/groups/steamdb    \033[0m" . PHP_EOL;
+echo PHP_EOL;
+
 lol_using_goto_in_2018:
 
 $LastDifficulty = -1;
@@ -538,10 +544,10 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 		}
 
-		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) || $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 0x48E542 )
+		if( isset( $Data[ 'response' ][ 'score' ] ) && !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) )
 		{
-			// Please do not change our clanid if you are going to use this script
-			// If you want to cheat for your own group, come up with up with your own approach, thank you
+			Msg( '{green}-- You are currently not representing any clan, will try to represent SteamDB' );
+
 			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4' . 777 . '282&access_token=' . $Token );
 		}
 	}
@@ -625,7 +631,8 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 			{
 				echo PHP_EOL;
 
-				Msg( '{green}You need to join the group for this script to work:' );
+				Msg( '{green}This script was designed for SteamDB' );
+				Msg( '{green}If you want to support it, join the group and represent it in game:' );
 				Msg( '{yellow}https://steamcommunity.com/groups/SteamDB' );
 
 				sleep( 10 );
