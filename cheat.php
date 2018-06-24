@@ -56,6 +56,7 @@ $ZonePaces =
 
 lol_using_goto_in_2018:
 
+$LastDifficulty = -1;
 $LastRestart = time();
 
 do
@@ -105,6 +106,13 @@ do
 		goto lol_using_goto_in_2018;
 	}
 
+	if( $LastDifficulty > $Zone[ 'difficulty' ] )
+	{
+		Msg( '{lightred}!! Difficulty has been lowered on this planet, restarting...' );
+
+		goto lol_using_goto_in_2018;
+	}
+
 	// Find a new planet if there are no hard zones left
 	$HardZones = $Zone[ 'hard_zones' ];
 	$MediumZones = $Zone[ 'medium_zones' ];
@@ -112,21 +120,11 @@ do
 	$PlanetCaptured = $Zone[ 'planet_captured' ];
 	$PlanetPlayers = $Zone[ 'planet_players' ];
 
-	if( !$HardZones )
+	if( !$HardZones && IsThereAnyNewPlanets( $KnownPlanets ) )
 	{
-		if( !$MediumZones && time() - $LastRestart > $WaitTime )
-		{
-			Msg( '{lightred}!! No hard or medium zones on this planet, restarting...' );
+		Msg( '{lightred}!! Detected a new planet, restarting...' );
 
-			goto lol_using_goto_in_2018;
-		}
-		
-		if( IsThereAnyNewPlanets( $KnownPlanets ) )
-		{
-			Msg( '{lightred}!! Detected a new planet, restarting...' );
-
-			goto lol_using_goto_in_2018;
-		}
+		goto lol_using_goto_in_2018;
 	}
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
