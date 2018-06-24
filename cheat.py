@@ -262,13 +262,15 @@ class Saliens(requests.Session):
         self.zone_id = pos
         return self.spost('ITerritoryControlMinigameService/JoinZone', {'zone_position': pos})
 
-    def leave_zone(self):
+    def leave_zone(self, clear_rate=True):
         if 'active_zone_game' in self.player_info:
             self.spost('IMiniGameService/LeaveGame',
                        {'gameid': self.player_info['active_zone_game']},
                        retry=False)
         self.zone_id = None
-        self.zone_capture_rate = 0
+
+        if clear_rate:
+            self.zone_capture_rate = 0
 
     def leave_planet(self):
         if 'active_planet' in self.player_info:
@@ -614,7 +616,7 @@ try:
                     game.refresh_planet_info()
 
                 # incase user gets stuck
-                game.leave_zone()
+                game.leave_zone(False)
 
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
