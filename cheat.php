@@ -541,12 +541,8 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 			// If you want to cheat for your own group, come up with up with your own approach, thank you
 			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4' . 777 . '282&access_token=' . $Token );
 		}
-		else
-		{
-			break;
-		}
 	}
-	while( true );
+	while( !isset( $Data[ 'response' ][ 'score' ] ) );
 
 	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
 	{
