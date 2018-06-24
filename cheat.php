@@ -257,10 +257,11 @@ function GetFirstAvailableZone( $Planet, &$ZonePaces, $WaitTime )
 	}
 
 	global $CurrentPlanetName;
-	$CurrentPlanetName = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'name' ];
 
-	$PlanetCaptured = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'capture_progress' ];
-	$PlanetPlayers = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ][ 'current_players' ];
+	$State = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'state' ];
+	$CurrentPlanetName = $State[ 'name' ];
+	$PlanetCaptured = empty( $State[ 'capture_progress' ] ) ? 0.0 : $State[ 'capture_progress' ];
+	$PlanetPlayers = empty( $State[ 'current_players' ] ) ? 0 : $State[ 'current_players' ];
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
 	$HardZones = 0;
@@ -467,7 +468,7 @@ function GetFirstAvailablePlanet( $SkippedPlanets, &$KnownPlanets )
 				$Planet[ 'medium_zones' ],
 				$Planet[ 'easy_zones' ],
 				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
-				number_format( $Planet[ 'state' ][ 'current_players' ] ),
+				number_format( empty( $Planet[ 'state' ][ 'current_players' ] ) ? 0 : $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
 			]
 		);
