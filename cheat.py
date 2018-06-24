@@ -535,6 +535,10 @@ try:
 
         # selecting zone
         while game.planet and game.planet['id'] == planets[0]['id']:
+            # retry represent on free agents
+            if 'clan_info' not in game.player_info:
+                game.represent_clan(4777282)
+
             zones = (game.planet['boss_zones']
                      + game.planet['hard_zones']
                      + game.planet['medium_zones']
