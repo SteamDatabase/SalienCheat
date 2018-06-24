@@ -406,12 +406,11 @@ class Saliens(requests.Session):
     _plog_text = None
 
     def log(self, text, *args):
+        text = text % args
         text += "^NOR"
 
         for k, v in self.colors:
             text = text.replace(k, v)
-
-        text = text % args
 
         max_collapsed = 10
 
