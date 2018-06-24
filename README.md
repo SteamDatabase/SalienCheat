@@ -41,6 +41,12 @@ php cheat.php token2
 1. `pip install requests tqdm`
 2. Run the script: `python cheat.py [token]`
 
+If you've cloned the repo then here is one-liner to auto-update every 30 minutes:
+
+```bash
+while true; do git pull && timeout -s SIGKILL 1800 python cheat.py; echo -e "\n\nUpdating Salien Cheat..."; sleep 1; done
+```
+
 ### Mac
 
 0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have Python 2.7.10 included by default.
