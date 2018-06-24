@@ -573,7 +573,7 @@ try:
                         + min(game.zone_capture_rate, 0.1) < 1)
                    ):
 
-                game.log("^GRN++^NOR Fighting in ^YEL%szone^NOR %s (^YEL%s^NOR) for ^YEL110sec",
+                game.log("^GRN++^NOR Fighting in ^YEL%szone^NOR %s (^YEL%s^NOR) for ^YEL120sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                          zone_id,
                          dmap.get(difficulty, difficulty))
@@ -581,7 +581,7 @@ try:
                 game.join_zone(zone_id)
                 game.refresh_player_info()
 
-                stoptime = time() + 110
+                stoptime = time() + 120
 
                 # refresh progress bars while in battle
                 for i in count(start=1):
@@ -591,7 +591,7 @@ try:
 
                     sleep(1)
 
-                    if (i % 11) == 0:
+                    if (i % 12) == 0:
                         game.refresh_planet_info()
 
                     game.pbar_refresh()
@@ -599,7 +599,7 @@ try:
                 if game.planet['zones'][zone_id]['captured']:
                     game.log("^RED-- Zone was captured before we could submit score")
                 else:
-                    score = 120 * (5 * (2**(difficulty - 1)))
+                    score = 119 * (5 * (2**(difficulty - 1)))
                     game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
                     game.report_score(score)
                     game.refresh_player_info()
