@@ -249,7 +249,7 @@ class Saliens(requests.Session):
                       key=lambda x: x['sort_key'],
                       )
 
-    def represent_clan(self, clan, clan_id=int('48''e5''42', 16)):
+    def represent_clan(self, clan_id):
         return self.spost('ITerritoryControlMinigameService/RepresentClan', {'clanid': clan_id})
 
     def report_score(self, score):
@@ -461,7 +461,22 @@ game.access_token = get_access_token()
 # display current stats
 game.log("^GRN++^NOR Getting player info...")
 game.refresh_player_info()
-game.represent_clan(4777282)
+
+# fair play
+game.log("^GRN-- Welcome to SalienCheat for SteamDB")
+
+if 'clan_info' not in game.player_info:
+    game.log("^GRN-- You are currently not representing any clan, so you are now part of SteamDB")
+    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^NOR on Steam")
+    game.represent_clan(4777282)
+
+elif game.player_info['clan_info']['accountid'] != 4777282:
+    game.log("^GRN-- If you want to support us, join our group")
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/groups/steamdb")
+    game.log("^GRN-- and set us as your clan on")
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/saliengame/play/")
+    game.log("^GRN-- Happy farming!")
+
 game.log("^GRN++^NOR Scanning for planets...")
 game.refresh_planet_info()
 
@@ -557,10 +572,6 @@ try:
                    and (game.planet['zones'][zone_id].get('capture_progress', 0)
                         + min(game.zone_capture_rate, 0.1) < 1)
                    ):
-
-                if ('clan_info' not in game.player_info
-                   or game.player_info['clan_info']['accountid'] != 0x48e542):
-                    game.represent_clan(0b10010001110010101000010)
 
                 game.log("^GRN++^NOR Fighting in ^YEL%szone^NOR %s (^YEL%s^NOR) for ^YEL110sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
