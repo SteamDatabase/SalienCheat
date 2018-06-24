@@ -150,6 +150,15 @@ do
 
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
+	if( $Data[ 'eresult' ] == 93 )
+	{
+		Msg( '{lightred}-- EResult 93 means time is out of sync, waiting 5 seconds and submitting again...' );
+
+		sleep( 5 );
+
+		$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
+	}
+
 	if( isset( $Data[ 'response' ][ 'new_score' ] ) )
 	{
 		$Data = $Data[ 'response' ];
@@ -613,6 +622,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		}
 
 		$Data = json_decode( $Data, true );
+		$Data[ 'eresult' ] = $EResult;
 	}
 	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
 
