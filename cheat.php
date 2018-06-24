@@ -345,6 +345,16 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 	foreach( $Planets as &$Planet )
 	{
+		if( empty( $Planet[ 'state' ][ 'capture_progress' ] ) )
+		{
+			$Planet[ 'state' ][ 'capture_progress' ] = 0.0;
+		}
+
+		if( empty( $Planet[ 'state' ][ 'current_players' ] ) )
+		{
+			$Planet[ 'state' ][ 'current_players' ] = 0;
+		}
+
 		$KnownPlanets[ $Planet[ 'id' ] ] = true;
 
 		if( !isset( $ZonePaces[ $Planet[ 'id' ] ] ) )
@@ -379,11 +389,11 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
-				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
+				number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ),
 				$Planet[ 'hard_zones' ],
 				$Planet[ 'medium_zones' ],
 				$Planet[ 'easy_zones' ],
-				number_format( empty( $Planet[ 'state' ][ 'current_players' ] ) ? 0 : $Planet[ 'state' ][ 'current_players' ] ),
+				number_format( $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
 			]
 		);
