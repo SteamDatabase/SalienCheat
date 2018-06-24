@@ -565,15 +565,15 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 
 function SendPOST( $Method, $Data )
 {
-	return ExecuteRequest( 'https://community.steam-api.com/' . $Method . '/v0001/', $Data );
+	return ExecuteRequest( $Method, 'https://community.steam-api.com/' . $Method . '/v0001/', $Data );
 }
 
 function SendGET( $Method, $Data )
 {
-	return ExecuteRequest( 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data );
+	return ExecuteRequest( $Method, 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data );
 }
 
-function ExecuteRequest( $URL, $Data = [] )
+function ExecuteRequest( $Method, $URL, $Data = [] )
 {
 	$c = curl_init( );
 
