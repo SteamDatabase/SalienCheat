@@ -54,11 +54,32 @@ $ZonePaces =
 	'Planet' => 0,
 ];
 
-echo PHP_EOL;
-echo "   \033[37;44m             SalienCheat for SteamDB             \033[0m" . PHP_EOL;
-echo "   \033[30;42m    If you want to support us, join our group:   \033[0m" . PHP_EOL;
-echo "   \033[30;42m    https://steamcommunity.com/groups/steamdb    \033[0m" . PHP_EOL;
-echo PHP_EOL;
+Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+
+do
+{
+	$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+
+	if( isset( $Data[ 'response' ][ 'score' ] ) )
+	{
+		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) )
+		{
+			Msg( '{green}-- You are currently not representing any clan, so you are now part of SteamDB' );
+			Msg( '{green}-- Make sure to join{yellow} https://steamcommunity.com/groups/steamdb {green}on Steam' );
+	
+			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
+		}
+		else if( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 4777282 )
+		{
+			Msg( '{green}-- If you want to support us, join our group' );
+			Msg( '{green}--{yellow} https://steamcommunity.com/groups/steamdb' );
+			Msg( '{green}-- and set us as your clan on' );
+			Msg( '{green}--{yellow} https://steamcommunity.com/saliengame/play' );
+			Msg( '{green}-- Happy farming!' );
+		}
+	}
+}
+while( !isset( $Data[ 'response' ][ 'score' ] ) );
 
 lol_using_goto_in_2018:
 
@@ -542,13 +563,6 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 		if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 		{
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
-		}
-
-		if( isset( $Data[ 'response' ][ 'score' ] ) && !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) )
-		{
-			Msg( '{green}-- You are currently not representing any clan, will try to represent SteamDB' );
-
-			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4' . 777 . '282&access_token=' . $Token );
 		}
 	}
 	while( !isset( $Data[ 'response' ][ 'score' ] ) );
