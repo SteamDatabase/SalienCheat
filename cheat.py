@@ -192,29 +192,24 @@ class Saliens(requests.Session):
 
         return self.planet
 
-    def _clan_key(self, top_clans):
-        if not top_clans:
-            return 0
-        for i, clan in enumerate(reversed(top_clans)):
-            if clan['accountid'] == 4777282:
-                return i + 1
-        return 0
+    def _sort_key(self, zone):
+        progress = zone.get('capture_progress', 0)
+        pos = zone['zone_position']
+        clan_weight = 0
+        if 'top_clans' in zone:
+            for i, clan in enumerate(reversed(zone['top_clans'])):
+                if clan['accountid'] == 4777282:
+                    clan_weight = i + 1
+        return (clan_weight, progress, pos)
 
     def sort_zones(self, zones, difficulty):
         # first sort by position
-        pos_sort = sorted((z for z in zones
+        return sorted((z for z in zones
                        if (not z['captured']
                            and z['difficulty'] == difficulty
                            and z.get('capture_progress', 0) < 0.95)),
                       reverse=True,
-                      key=lambda x: x['zone_position'])
-
-        # prioritize reinforcing leading zones first
-        return sorted(
-            pos_sort,
-            reverse=True,
-            key=lambda z: self._clan_key(z.get('top_clans', None)),
-        )
+                      key=self._sort_key)
 
     def get_planet(self, pid):
         planet = self.sget('ITerritoryControlMinigameService/GetPlanet',
