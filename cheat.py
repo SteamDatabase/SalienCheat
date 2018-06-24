@@ -413,18 +413,18 @@ class Saliens(requests.Session):
 
         max_collapsed = 5
 
-        if text == self._plog_text and self._plog_c < max_collapsed:
+        if text == self._plog_text:
             self._plog_c += 1
-        else:
-            if self._plog_c > 1:
+
+        if ((text == self._plog_text and self._plog_c >= max_collapsed)
+           or (text != self._plog_text and self._plog_c > 0)):
                 ptext = self._plog_text + " x" + str(self._plog_c)
                 self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + ptext)
+                self._plog_c = 0
 
-            if self._plog_c < max_collapsed:
-                self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + text)
-
-            if self._plog_c > 1:
-                self._plog_c = 0 if max_collapsed < 5 else 1
+        if text != self._plog_text:
+            self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + text)
+            self._plog_c = 0
 
         self._plog_text = text
         self.pbar_refresh()
@@ -576,14 +576,14 @@ try:
                 stoptime = time() + 110
 
                 # refresh progress bars while in battle
-                for i in count(start=8):
+                for i in count(start=1):
                     # stop when battle is finished or zone was captured
                     if time() >= stoptime or game.planet['zones'][zone_id]['captured']:
                         break
 
-                    sleep(2)
+                    sleep(1)
 
-                    if ((i+1) % 11) == 0:
+                    if (i % 11) == 0:
                         game.refresh_planet_info()
 
                     game.pbar_refresh()
