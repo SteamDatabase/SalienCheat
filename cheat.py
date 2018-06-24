@@ -16,6 +16,8 @@ from datetime import datetime
 import requests
 from tqdm import tqdm
 
+from update_web_interface import update
+
 try:
     _input = raw_input
 except:
@@ -422,10 +424,15 @@ class Saliens(requests.Session):
                 ptext = self._plog_text + " x" + str(self._plog_c)
                 self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + ptext)
                 self._plog_c = 0
+                # update html code
+                update(self.access_token, self, ptext)
 
         if text != self._plog_text:
             self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + text)
             self._plog_c = 0
+            if (self.access_token is not None):
+                # update html code
+                update(self.access_token, self, text)
 
         self._plog_text = text
         self.pbar_refresh()
