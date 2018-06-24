@@ -100,6 +100,7 @@ class Saliens(requests.Session):
         form_fields['access_token'] = self.access_token
 
         data = None
+        resp = None
 
         while not data:
             try:
@@ -115,7 +116,7 @@ class Saliens(requests.Session):
             except Exception as exp:
                 self.log("^RED-- POST %-46s %s", endpoint, str(exp))
 
-                if resp.status_code >= 500:
+                if resp is None or resp.status_code >= 500:
                     sleep(2)
                     continue
             else:
@@ -132,6 +133,7 @@ class Saliens(requests.Session):
 
     def sget(self, endpoint, query_params=None, retry=False):
         data = None
+        resp = None
 
         while not data:
             try:
@@ -147,7 +149,7 @@ class Saliens(requests.Session):
             except Exception as exp:
                 self.log("^RED-- GET  %-46s %s", endpoint, str(exp))
 
-                if resp.status_code >= 500:
+                if resp is None or resp.status_code >= 500:
                     sleep(2)
                     continue
             else:
