@@ -305,10 +305,11 @@ function GetFirstAvailableZone( $Planet, &$ZonePaces )
 
 			if ( $PaceCutoff > 0.02 )
 			{
-				$Time = ceil((1-$Zone[ 'capture_progress' ])/$PaceCutoff*110);
+				global $WaitTime;
+				$Time = ceil( ( 1 - $Zone[ 'capture_progress' ]) / $PaceCutoff * $WaitTime );
 				$Minutes = floor( $Time / 60 );
 				$Seconds = $Time % 60;
-				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%{normal} ETA: {green}' . $Minutes . 'm ' . $Seconds . 's');
+				Msg( '-- Current pace for Zone {green}' . $Zone[ 'zone_position' ] . '{normal} is {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%{normal} ETA: {green}' . $Minutes . 'm ' . $Seconds . 's' );
 			}
 
 			$PaceCutoff = 0.98 - $PaceCutoff;
