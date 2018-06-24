@@ -217,6 +217,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$HardZones = 0;
 	$MediumZones = 0;
 	$EasyZones = 0;
+	$ZoneMessages = [];
 	
 	foreach( $Zones as &$Zone )
 	{
@@ -262,18 +263,18 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 				$Minutes = floor( $PaceTime / 60 );
 				$Seconds = $PaceTime % 60;
 
-				Msg(
+				$ZoneMessages[] =
+				[
 					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
-					PHP_EOL,
 					[
 						$Zone[ 'zone_position' ],
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
-						number_format( ( $Cutoff - $PaceCutoff ) * 100, 2 ),
+						number_format( $Cutoff * 100, 2 ),
 						number_format( $PaceCutoff * 100, 2 ),
 						$Minutes,
 						$Seconds,
 					]
-				);
+				];
 			}
 		}
 
@@ -333,6 +334,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		'medium_zones' => $MediumZones,
 		'easy_zones' => $EasyZones,
 		'best_zone' => $CleanZones[ 0 ],
+		'messages' => $ZoneMessages,
 	];
 }
 
@@ -402,11 +404,19 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 			]
 		);
 
-		if( $Zone !== false && $Zone[ 'best_zone' ][ 'type' ] == 4 )
+		if( $Zone !== false )
 		{
-			Msg( '{green}>> This planet has an uncaptured boss, selecting this planet...' );
+			foreach( $Zone[ 'messages' ] as $Message )
+			{
+				Msg( $Message[ 0 ], PHP_EOL, $Message[ 1 ] );
+			}
 
-			return $Planet;
+			if( $Zone[ 'best_zone' ][ 'type' ] == 4 )
+			{
+				Msg( '{green}>> This planet has an uncaptured boss, selecting this planet...' );
+
+				return $Planet;
+			}
 		}
 	}
 
