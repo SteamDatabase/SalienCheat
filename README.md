@@ -3,8 +3,8 @@
 ## First steps
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in same folder as `cheat.php`
-3. Select PHP or Python version of the script, you don't need both
+2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in the same folder as `cheat.php`
+3. Select PHP or Python version of the script. You don't need both
 
 ## PHP
 
@@ -23,8 +23,8 @@
 
 ### Mac
 
-0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default.
-1. Extract the contents of this script to the Downloads folder.
+0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default
+1. Extract the contents of this script to the Downloads folder
 2. Launch Terminal and run the script: `php downloads/cheat.php`
 
 You can also provide token directly in CLI, to ease running multiple accounts:
@@ -53,8 +53,8 @@ php cheat.php token2
 ## Vagrant
 
 1. Install [vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-2. run `vagrant up` to setup VM
-3. run cheat
+2. Run `vagrant up` to setup VM
+3. Run cheat
   * For PHP `vagrant ssh -c 'php cheat.php [token]`
   * For Python `vagrant ssh -c 'python3 cheat.py [token]`
 
