@@ -28,6 +28,11 @@ php cheat.php token1
 php cheat.php token2
 ```
 
+### Linux
+
+1. Install `php-curl` and enable it in `php.ini`
+2. You know what you are doing. 🐧
+
 ## Python
 
 ### Linux/Cygwin
