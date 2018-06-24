@@ -202,7 +202,7 @@ class Saliens(requests.Session):
             planet['medium_zones'] = sorted((z for z in planet['zones']
                                              if (not z['captured']
                                                  and z['difficulty'] == 2
-                                                 and z.get('capture_progress', 0) < 0.95)),
+                                                 and z.get('capture_progress', 0) < 0.96)),
                                             reverse=True,
                                             key=lambda x: x['zone_position'])
 
@@ -411,7 +411,7 @@ class Saliens(requests.Session):
 
         text = text % args
 
-        max_collapsed = 5
+        max_collapsed = 10
 
         if text == self._plog_text:
             self._plog_c += 1
@@ -493,12 +493,14 @@ for planet in planets:
 try:
     while planets:
         planet_id = planets[0]['id']
+        # ensures we are not stuck in a zone
         game.leave_zone()
 
         # determine which planet to join
         if not game.planet or game.planet['id'] != planet_id:
             game.log("^GRN++^NOR Joining toughest planet ^GRN%s^NOR..", planets[0]['id'])
 
+            # join planet and confirm it was success, otherwise retry
             for i in range(3):
                 game.join_planet(planet_id)
                 sleep(1)
@@ -536,19 +538,21 @@ try:
                      + game.planet['medium_zones']
                      + game.planet['easy_zones'])
 
+            # filter out zones that are very close to getting captured
+            while (zones
+                   and zones[0]['difficulty'] > 1
+                   and (zones[0].get('capture_progress', 0)
+                        + min(game.zone_capture_rate, 0.1) >= 1)):
+                zones.pop(0)
+
             if not zones:
-                game.log("No open zones left on planet")
+                game.log("^GRN++^NOR No open zones left on planet")
                 game.player_info.pop('active_planet')
                 break
 
-            i = 0
-            if (game.zone_id == zones[i]['zone_position']
-                and (zones[i].get('capture_progress', 0)
-                     + min(game.zone_capture_rate, 0.1) < 1)):
-                i += 1
-
-            zone_id = zones[i]['zone_position']
-            difficulty = zones[i]['difficulty']
+            # choose highest priority zone
+            zone_id = zones[0]['zone_position']
+            difficulty = zones[0]['difficulty']
             game.zone_capture_rate = 0
 
             deadline = time() + 60 * 10  # rescan planets every 10min
@@ -569,9 +573,14 @@ try:
             while (game.planet
                    and time() < deadline
                    and not game.planet['zones'][zone_id]['captured']
-                   and (game.planet['zones'][zone_id].get('capture_progress', 0)
-                        + min(game.zone_capture_rate, 0.1) < 1)
                    ):
+
+                # skip if zone is likely to get captured while we wait, except easy zones
+                if (game.planet['zones'][zone_id]['difficulty'] > 1
+                   and (game.planet['zones'][zone_id].get('capture_progress', 0)
+                        + min(game.zone_capture_rate, 0.1) >= 1)):
+                    game.log("^GRN++^NOR Zone likely to complete early. Moving on...")
+                    break
 
                 game.log("^GRN++^NOR Fighting in ^YEL%szone^NOR %s (^YEL%s^NOR) for ^YEL110sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
