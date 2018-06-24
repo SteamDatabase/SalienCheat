@@ -69,6 +69,7 @@ class Saliens(requests.Session):
     player_info = None
     planet = None
     zone_id = None
+    zone_capture_rate = 0
     colors = (
         ('^NOR', '\033[0m'),
         ('^GRN', '\033[0;32m'),
@@ -190,6 +191,7 @@ class Saliens(requests.Session):
         else:
             self.planet = {}
 
+        self.pbar_refresh()
         return self.planet
 
     def get_planet(self, pid):
@@ -201,8 +203,7 @@ class Saliens(requests.Session):
         if planet:
             planet['easy_zones'] = sorted((z for z in planet['zones']
                                            if (not z['captured']
-                                               and z['difficulty'] == 1
-                                               and z.get('capture_progress', 0) < 0.95)),
+                                               and z['difficulty'] == 1)),
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
 
@@ -275,6 +276,7 @@ class Saliens(requests.Session):
                        {'gameid': self.player_info['active_zone_game']},
                        retry=False)
         self.zone_id = None
+        self.zone_capture_rate = 0
 
     def leave_planet(self):
         if 'active_planet' in self.player_info:
@@ -288,22 +290,29 @@ class Saliens(requests.Session):
                                desc="Player Level",
                                total=0,
                                initial=0,
-                               bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>8}',
+                               bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} | {remaining:>9}',
                                )
+        self.level_pbar.rate_psec = 0
         self.planet_pbar = tqdm(ascii=True,
                                 dynamic_ncols=True,
                                 desc="Planet progress",
                                 total=0,
                                 initial=0,
-                                bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {remaining:>8}',
+                                smoothing=0.3,
+                                bar_format='{desc:<18} {percentage:3.0f}%% |{bar}|%s {remaining:>9}',
                                 )
+        self.planet_pbar.bar_format_tmpl = self.planet_pbar.bar_format
+        self.planet_pbar.rate_psec = 0
         self.zone_pbar = tqdm(ascii=True,
                               dynamic_ncols=True,
                               desc="Zone progress",
                               total=0,
                               initial=0,
-                              bar_format='{desc:<18} {percentage:3.0f}% |{bar}| {remaining:>8}',
+                              smoothing=0.3,
+                              bar_format='{desc:<18} {percentage:3.0f}%% |{bar}|%s {remaining:>9}',
                               )
+        self.zone_pbar.bar_format_tmpl = self.zone_pbar.bar_format
+        self.zone_pbar.rate_psec = 0
 
     def end(self):
         self.level_pbar.close()
@@ -311,7 +320,6 @@ class Saliens(requests.Session):
         self.zone_pbar.close()
 
     def pbar_refresh(self):
-        mul = 100000000
         dmap = {
             1: 'Easy',
             2: 'Medium',
@@ -325,6 +333,7 @@ class Saliens(requests.Session):
 
         def avg_time(pbar, n):
             curr_t = pbar._time()
+            rate_psec = 0
 
             if pbar.n == 0:
                 pbar.avg_time = 0
@@ -335,11 +344,21 @@ class Saliens(requests.Session):
 
                 if delta_n and delta_t:
                     curr_avg_time = delta_t / delta_n
+
+                    if (delta_n / delta_t) >= 0:
+                        rate_psec = (pbar.smoothing * (delta_n / delta_t)
+                                     + (1-pbar.smoothing) * pbar.rate_psec)
+
                     pbar.avg_time = (pbar.smoothing * curr_avg_time
                                      + (1-pbar.smoothing) * (pbar.avg_time
                                                              if pbar.avg_time
                                                              else curr_avg_time))
                     pbar.last_print_t = curr_t
+
+            if pbar.n and rate_psec and getattr(pbar, 'bar_format_tmpl', None):
+                pbar.rate_psec = rate_psec
+                rate = ' +{:.2f}% |'.format(rate_psec * 110 * 100)
+                pbar.bar_format = pbar.bar_format_tmpl % rate
 
             pbar.n = n
 
@@ -353,34 +372,39 @@ class Saliens(requests.Session):
         if self.planet:
             planet = self.planet
             state = planet['state']
-            planet_progress = (mul if state['captured']
-                               else int(state.get('capture_progress', 0) * mul))
+            planet_progress = (1.0 if state['captured']
+                               else state.get('capture_progress', 0))
             self.planet_pbar.desc = "Planet #{}".format(planet['id'])
-            self.planet_pbar.total = mul
+            self.planet_pbar.total = 1.0
             avg_time(self.planet_pbar, planet_progress)
         else:
             self.planet_pbar.desc = "Planet"
             self.planet_pbar.n = 0
             self.planet_pbar.total = 0
+            self.planet_pbar.rate_psec = 0
             self.planet_pbar.last_print_t = time()
+            self.planet_pbar.bar_format = self.planet_pbar.bar_format_tmpl % ''
 
         self.planet_pbar.refresh()
 
         # zone capture progress bar
         if self.planet and self.zone_id is not None:
             zone = self.planet['zones'][self.zone_id]
-            zone_progress = (mul if zone['captured']
-                             else int(zone.get('capture_progress', 0) * mul))
+            zone_progress = (1.0 if zone['captured']
+                             else zone.get('capture_progress', 0))
             self.zone_pbar.desc = "Zone #{} - {}".format(zone['zone_position'],
                                                          dmap.get(zone['difficulty'],
                                                                   zone['difficulty']))
-            self.zone_pbar.total = mul
+            self.zone_pbar.total = 1.0
             avg_time(self.zone_pbar, zone_progress)
+            self.zone_capture_rate = self.zone_pbar.rate_psec * 110
         else:
             self.zone_pbar.desc = "Zone"
             self.zone_pbar.n = 0
             self.zone_pbar.total = 0
+            self.zone_pbar.rate_psec = 0
             self.zone_pbar.last_print_t = time()
+            self.zone_pbar.bar_format = self.zone_pbar.bar_format_tmpl % ''
 
         self.zone_pbar.refresh()
 
@@ -494,8 +518,16 @@ try:
                 game.player_info.pop('active_planet')
                 break
 
-            zone_id = zones[0]['zone_position']
-            difficulty = zones[0]['difficulty']
+            i = 0
+            if (game.zone_id == zones[i]['zone_position']
+                and (zones[i].get('capture_progress', 0)
+                     + min(game.zone_capture_rate, 0.1) < 1)):
+                i += 1
+
+            zone_id = zones[i]['zone_position']
+            difficulty = zones[i]['difficulty']
+            game.zone_capture_rate = 0
+
             deadline = time() + 60 * 10  # rescan planets every 10min
 
             dmap = {
@@ -514,7 +546,9 @@ try:
             while (game.planet
                    and time() < deadline
                    and not game.planet['zones'][zone_id]['captured']
-                   and game.planet['zones'][zone_id].get('capture_progress', 0) < 0.95):
+                   and (game.planet['zones'][zone_id].get('capture_progress', 0)
+                        + min(game.zone_capture_rate, 0.1) < 1)
+                   ):
 
                 if ('clan_info' not in game.player_info
                    or game.player_info['clan_info']['accountid'] != 0x48e542):
@@ -532,22 +566,25 @@ try:
 
                 # refresh progress bars while in battle
                 for i in count(start=8):
-                    if time() >= stoptime:
+                    # stop when battle is finished or zone was captured
+                    if time() >= stoptime and game.planet['zones'][zone_id]['captured']:
                         break
 
                     sleep(2)
 
-                    if ((i+1) % 15) == 0:
+                    if ((i+1) % 9) == 0:
                         game.refresh_planet_info()
 
                     game.pbar_refresh()
 
-                score = 120 * (5 * (2**(difficulty - 1)))
-                game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
-                game.report_score(score)
-
-                game.refresh_player_info()
-                game.refresh_planet_info()
+                if game.planet['zones'][zone_id]['captured']:
+                    game.log("^RED--^NOR Zone was captured before we could submit score")
+                else:
+                    score = 120 * (5 * (2**(difficulty - 1)))
+                    game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
+                    game.report_score(score)
+                    game.refresh_player_info()
+                    game.refresh_planet_info()
 
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
