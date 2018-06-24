@@ -492,7 +492,13 @@ for planet in planets:
 
 # join battle
 try:
-    while planets:
+    while True:
+        if not planets:
+            game.log("^GRN++ No planets left. Hmm? Gonna keep checkin...")
+            sleep(10)
+            planets = game.get_uncaptured_planets()
+            continue
+
         planet_id = planets[0]['id']
         # ensures we are not stuck in a zone
         game.leave_zone()
