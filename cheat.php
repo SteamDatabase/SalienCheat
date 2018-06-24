@@ -196,10 +196,12 @@ do
 		);
 	}
 
-	Msg( '   {grey}Waiting ' . $WaitTime . ' seconds for this round to end...' );
+	$LagAdjustedWaitTime = $WaitTime - ( curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) );
 
-	sleep( $WaitTime );
-	
+	Msg( '   {grey}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' seconds for this round to end...' );
+
+	usleep( $LagAdjustedWaitTime * 1000000 );
+
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
 	if( isset( $Data[ 'response' ][ 'new_score' ] ) )
@@ -594,37 +596,62 @@ function SendGET( $Method, $Data )
 	return ExecuteRequest( $Method, 'https://community.steam-api.com/' . $Method . '/v0001/?' . $Data );
 }
 
-function ExecuteRequest( $Method, $URL, $Data = [] )
+function GetCurl( )
 {
+	global $c;
+
+	if( isset( $c ) )
+	{
+		return $c;
+	}
+
 	$c = curl_init( );
 
 	curl_setopt_array( $c, [
-		CURLOPT_URL            => $URL,
 		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => empty( $Data ) ? 10 : 60,
+		CURLOPT_TIMEOUT        => 30,
 		CURLOPT_CONNECTTIMEOUT => 10,
 		CURLOPT_HEADER         => 1,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
 		CURLOPT_HTTPHEADER     =>
 		[
 			'Accept: */*',
-			'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
 			'Origin: https://steamcommunity.com',
 			'Referer: https://steamcommunity.com/saliengame/play',
+			'Connection: Keep-Alive',
+			'Keep-Alive: 300'
 		],
 	] );
+
+	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
+	{
+		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
+	}
+
+	if( defined( 'CURL_HTTP_VERSION_2_0' ) )
+	{
+		curl_setopt( $c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0 );
+	}
+
+	return $c;
+}
+
+function ExecuteRequest( $Method, $URL, $Data = [] )
+{
+	$c = GetCurl( );
+
+	curl_setopt( $c, CURLOPT_URL, $URL );
 
 	if( !empty( $Data ) )
 	{
 		curl_setopt( $c, CURLOPT_POST, 1 );
 		curl_setopt( $c, CURLOPT_POSTFIELDS, $Data );
 	}
-
-	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
+	else
 	{
-		curl_setopt( $c, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
+		curl_setopt( $c, CURLOPT_HTTPGET, 1 );
 	}
 
 	do
@@ -635,7 +662,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		$Header = substr( $Data, 0, $HeaderSize );
 		$Data = substr( $Data, $HeaderSize );
 
-		preg_match( '/X-eresult: ([0-9]+)/', $Header, $EResult ) === 1 ? $EResult = (int)$EResult[ 1 ] : $EResult = 0;
+		preg_match( '/[Xx]-eresult: ([0-9]+)/', $Header, $EResult ) === 1 ? $EResult = (int)$EResult[ 1 ] : $EResult = 0;
 
 		if( $EResult !== 1 )
 		{
@@ -670,8 +697,6 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		$Data = json_decode( $Data, true );
 	}
 	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
-
-	curl_close( $c );
 
 	return $Data;
 }
