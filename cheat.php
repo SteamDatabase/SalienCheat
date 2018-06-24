@@ -106,9 +106,12 @@ do
 		goto lol_using_goto_in_2018;
 	}
 
-	if( $LastDifficulty > $Zone[ 'difficulty' ] )
+	$PreviousDifficulty = $LastDifficulty;
+	$LastDifficulty = $Zone[ 'difficulty' ];
+
+	if( $PreviousDifficulty > $LastDifficulty )
 	{
-		Msg( '{lightred}!! Difficulty has been lowered on this planet, restarting...' );
+		Msg( '{lightred}!! Difficulty has been lowered (from ' . $PreviousDifficulty . ' to ' . $LastDifficulty . ') on this planet, restarting...' );
 
 		goto lol_using_goto_in_2018;
 	}
