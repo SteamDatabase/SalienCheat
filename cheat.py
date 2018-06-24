@@ -588,9 +588,8 @@ try:
                          dmap.get(difficulty, difficulty))
 
                 game.join_zone(zone_id)
+                stoptime = time() + 109.6
                 game.refresh_player_info()
-
-                stoptime = time() + 110
 
                 # refresh progress bars while in battle
                 for i in count(start=1):
@@ -613,6 +612,9 @@ try:
                     game.report_score(score)
                     game.refresh_player_info()
                     game.refresh_planet_info()
+
+                # incase user gets stuck
+                game.leave_zone()
 
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
