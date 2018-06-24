@@ -192,6 +192,25 @@ class Saliens(requests.Session):
 
         return self.planet
 
+    def _sort_key(self, zone):
+        progress = zone.get('capture_progress', 0)
+        pos = zone['zone_position']
+        clan_weight = 0
+        if 'top_clans' in zone:
+            for i, clan in enumerate(reversed(zone['top_clans'])):
+                if clan['accountid'] == 4777282:
+                    clan_weight = i + 1
+        return (clan_weight, progress, pos)
+
+    def sort_zones(self, zones, difficulty):
+        # first sort by position
+        return sorted((z for z in zones
+                       if (not z['captured']
+                           and z['difficulty'] == difficulty
+                           and z.get('capture_progress', 0) < 0.95)),
+                      reverse=True,
+                      key=self._sort_key)
+
     def get_planet(self, pid):
         planet = self.sget('ITerritoryControlMinigameService/GetPlanet',
                            {'id': pid, '_': int(time())},
@@ -199,26 +218,9 @@ class Saliens(requests.Session):
                            ).get('planets', [{}])[0]
 
         if planet:
-            planet['easy_zones'] = sorted((z for z in planet['zones']
-                                           if (not z['captured']
-                                               and z['difficulty'] == 1
-                                               and z.get('capture_progress', 0) < 0.95)),
-                                          reverse=True,
-                                          key=lambda x: x['zone_position'])
-
-            planet['medium_zones'] = sorted((z for z in planet['zones']
-                                             if (not z['captured']
-                                                 and z['difficulty'] == 2
-                                                 and z.get('capture_progress', 0) < 0.95)),
-                                            reverse=True,
-                                            key=lambda x: x['zone_position'])
-
-            planet['hard_zones'] = sorted((z for z in planet['zones']
-                                           if (not z['captured']
-                                               and z['difficulty'] == 3
-                                               and z.get('capture_progress', 0) < 0.95)),
-                                          reverse=True,
-                                          key=lambda x: x['zone_position'])
+            planet['easy_zones'] = self.sort_zones(planet['zones'], 1)
+            planet['medium_zones'] = self.sort_zones(planet['zones'], 2)
+            planet['hard_zones'] = self.sort_zones(planet['zones'], 3)
             planet['boss_zones'] = sorted((z for z in planet['zones']
                                            if not z['captured'] and z['type'] == 4),
                                           reverse=True,
@@ -527,6 +529,11 @@ try:
 
                 game.join_zone(zone_id)
                 game.refresh_player_info()
+                if 'top_clans' in  zones[0]:
+                    game.log(
+                        "    Zone leaders: %s",
+                        [c['name'] for c in zones[0]['top_clans']],
+                    )
 
                 stoptime = time() + 110
 
