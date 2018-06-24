@@ -587,7 +587,7 @@ try:
                 # refresh progress bars while in battle
                 for i in count(start=8):
                     # stop when battle is finished or zone was captured
-                    if time() >= stoptime and game.planet['zones'][zone_id]['captured']:
+                    if time() >= stoptime or game.planet['zones'][zone_id]['captured']:
                         break
 
                     sleep(2)
