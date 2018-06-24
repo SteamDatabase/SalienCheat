@@ -420,7 +420,7 @@ class Saliens(requests.Session):
     def print_planet(self, planet):
         planet_id = planet['id']
         planet_name = planet['state']['name'].split('Planet', 1)[1].replace('_', ' ')
-        curr_players = planet['state']['current_players']
+        curr_players = planet['state'].get('current_players', 0)
         n_boss = len(planet['boss_zones'])
         n_hard = len(planet['hard_zones'])
         n_med = len(planet['medium_zones'])
