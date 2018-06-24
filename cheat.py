@@ -8,7 +8,6 @@ import os
 import re
 import sys
 import json
-import logging
 from io import open
 from time import sleep, time
 from itertools import count
@@ -87,13 +86,6 @@ class Saliens(requests.Session):
         self.headers['Origin'] = 'https://steamcommunity.com'
         self.headers['Referer'] = 'https://steamcommunity.com/saliengame/play'
         self.pbar_init()
-
-        class CustomHandler(logging.Handler):
-            def emit(_, record):
-                self.log("%s | %s | %s", record.levelname, record.name, record.msg % record.args)
-
-        self.LOG = logging.getLogger()
-        self.LOG.addHandler(CustomHandler())
 
     def spost(self, endpoint, form_fields=None, retry=False):
         if not form_fields:
@@ -464,7 +456,6 @@ class Saliens(requests.Session):
 
 
 game = Saliens(None)
-game.LOG.setLevel(logging.DEBUG if sys.argv[-1] == 'debug' else logging.INFO)
 game.access_token = get_access_token()
 
 while not game.is_access_token_valid():
