@@ -408,13 +408,33 @@ class Saliens(requests.Session):
 
         self.zone_pbar.refresh()
 
+    _plog_c = 0
+    _plog_text = None
+
     def log(self, text, *args):
         text += "^NOR"
 
         for k, v in self.colors:
             text = text.replace(k, v)
 
-        self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + (text % args))
+        text = text % args
+
+        max_collapsed = 5
+
+        if text == self._plog_text and self._plog_c < max_collapsed:
+            self._plog_c += 1
+        else:
+            if self._plog_c > 1:
+                ptext = self._plog_text + " x" + str(self._plog_c)
+                self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + ptext)
+
+            if self._plog_c < max_collapsed:
+                self.level_pbar.write(datetime.now().strftime("%H:%M:%S") + " | " + text)
+
+            if self._plog_c > 1:
+                self._plog_c = 0 if max_collapsed < 5 else 1
+
+        self._plog_text = text
         self.pbar_refresh()
 
     def print_planet(self, planet):
@@ -572,13 +592,13 @@ try:
 
                     sleep(2)
 
-                    if ((i+1) % 9) == 0:
+                    if ((i+1) % 11) == 0:
                         game.refresh_planet_info()
 
                     game.pbar_refresh()
 
                 if game.planet['zones'][zone_id]['captured']:
-                    game.log("^RED--^NOR Zone was captured before we could submit score")
+                    game.log("^RED-- Zone was captured before we could submit score")
                 else:
                     score = 120 * (5 * (2**(difficulty - 1)))
                     game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
