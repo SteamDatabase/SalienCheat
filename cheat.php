@@ -124,8 +124,8 @@ do
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
-	$LagAdjustedWaitTime = $WaitTime - ( curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) );
-	$LagAdjustedWaitTime += 0.1;
+	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) + 0.1;
+	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$PlanetCheckTime = microtime( true );
 
 	Msg( '   {grey}Waiting 60 seconds before rescanning planets...' );
@@ -152,9 +152,11 @@ do
 
 	if( $Data[ 'eresult' ] == 93 )
 	{
-		Msg( '{lightred}-- EResult 93 means time is out of sync, waiting 5 seconds and submitting again...' );
+		$LagAdjustedWaitTime = $SkippedLagTime + 0.3;
 
-		sleep( 5 );
+		Msg( '{lightred}-- EResult 93 means time is out of sync, trying again in ' . number_format( $LagAdjustedWaitTime, 3 ) . ' seconds...' );
+
+		usleep( $LagAdjustedWaitTime * 1000000 );
 
 		$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 	}
@@ -590,9 +592,9 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		{
 			Msg( '{lightred}!! ' . $Method . ' failed - EResult: ' . $EResult . ' - ' . $Data );
 
-			if( preg_match( '/[Xx]-error_message: (.+?)/', $Header, $ErrorMessage ) === 1 )
+			if( preg_match( '/[Xx]-error_message/', $Header, $ErrorMessage ) === 1 )
 			{
-				Msg( '{lightred}!! Valve error: ' . $ErrorMessage[ 1 ] );
+				Msg( '{lightred}!! ' . $Header );
 			}
 
 			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )
