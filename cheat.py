@@ -458,18 +458,15 @@ class Saliens(requests.Session):
 game = Saliens(None)
 game.access_token = get_access_token()
 
-while not game.is_access_token_valid():
-    game.access_token = get_access_token(True)
-
 # display current stats
 game.log("^GRN++^NOR Getting player info...")
+game.refresh_player_info()
 game.represent_clan(4777282)
 game.log("^GRN++^NOR Scanning for planets...")
-game.refresh_player_info()
 game.refresh_planet_info()
-planets = game.get_uncaptured_planets()
 
 # show planet info
+planets = game.get_uncaptured_planets()
 game.log("^GRN++^NOR Found %s uncaptured planets: %s",
          len(planets),
          [int(x['id']) for x in planets])
