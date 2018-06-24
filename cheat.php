@@ -118,17 +118,8 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Planet {green}' . $CurrentPlanet .
-		'{normal} - Captured: {yellow}' . number_format( $BestPlanetAndZone[ 'state' ][ 'capture_progress' ] * 100, 2 ) . '%' .
-		'{normal} - Hard: {yellow}' . $BestPlanetAndZone[ 'hard_zones' ] .
-		'{normal} - Medium: {yellow}' . $BestPlanetAndZone[ 'medium_zones' ] .
-		'{normal} - Easy: {yellow}' . $BestPlanetAndZone[ 'easy_zones' ] .
-		'{normal} - Players: {yellow}' . number_format( $BestPlanetAndZone[ 'state' ][ 'current_players' ] ) .
-		'{green} (' . $BestPlanetAndZone[ 'state' ][ 'name' ] . ')'
-	);
-
-	Msg(
-		'>> Zone {green}' . $Zone[ 'zone_position' ] .
+		'>> Joined Zone {green}' . $Zone[ 'zone_position' ] .
+		'{normal} on planet {green}' . $BestPlanetAndZone[ 'id' ] .
 		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
@@ -161,8 +152,9 @@ do
 		$Data = $Data[ 'response' ];
 
 		Msg(
-			'>> Score: {lightred}' . number_format( $Data[ 'old_score' ] ) . '{normal} XP => {green}' . number_format( $Data[ 'new_score' ] ) .
-			'{normal} XP - Current level: {green}' . $Data[ 'new_level' ] .
+			'>> Your Score: {green}' . number_format( $Data[ 'new_score' ] ) .
+			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
+			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
 		);
 		
@@ -265,14 +257,20 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 				$Seconds = $PaceTime % 60;
 
 				Msg(
-					'   Zone {green}' . $Zone[ 'zone_position' ] .
-					'{normal} - Pace: {green}+' . number_format( $PaceCutoff * 100, 2 ) . '%' .
-					'{normal} - Captured: {green}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
-					'{normal} - Cutoff: {green}' . number_format( ( 0.98 - $PaceCutoff ) * 100, 2 ) . '%' .
-					'{normal} - ETA: {green}' . $Minutes . 'm ' . $Seconds . 's' );
+					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
+					PHP_EOL,
+					[
+						$Zone[ 'zone_position' ],
+						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
+						number_format( ( 0.98 - $PaceCutoff ) * 100, 2 ),
+						number_format( $PaceCutoff * 100, 2 ),
+						$Minutes,
+						$Seconds,
+					]
+				);
 			}
 
-			$PaceCutoff = 0.98 - $PaceCutoff;
+			$PaceCutoff = 0.97 - $PaceCutoff;
 		}
 
 		// If a zone is close to completion, skip it because Valve does not reward points
@@ -377,14 +375,14 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Easy: {yellow}%2d{normal} - Captured: {yellow}%5s%%{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Easy: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
+				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
 				$Planet[ 'hard_zones' ],
 				$Planet[ 'medium_zones' ],
 				$Planet[ 'easy_zones' ],
-				number_format( empty( $Planet[ 'state' ][ 'capture_progress' ] ) ? 0 : ( $Planet[ 'state' ][ 'capture_progress' ] * 100 ), 2 ),
 				number_format( empty( $Planet[ 'state' ][ 'current_players' ] ) ? 0 : $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
 			]
