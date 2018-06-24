@@ -141,9 +141,12 @@ do
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
-	Msg( '   {grey}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' remaining seconds before submitting score...' );
+	if( $LagAdjustedWaitTime > 0 )
+	{
+		Msg( '   {grey}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' remaining seconds before submitting score...' );
 
-	usleep( $LagAdjustedWaitTime * 1000000 );
+		usleep( $LagAdjustedWaitTime * 1000000 );
+	}
 
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
