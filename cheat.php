@@ -592,7 +592,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		{
 			Msg( '{lightred}!! ' . $Method . ' failed - EResult: ' . $EResult . ' - ' . $Data );
 
-			if( preg_match( '/[Xx]-error_message/', $Header, $ErrorMessage ) === 1 )
+			if( preg_match( '/[Xx]-error_message: /', $Header, $ErrorMessage ) === 1 )
 			{
 				Msg( '{lightred}!! ' . $Header );
 			}
