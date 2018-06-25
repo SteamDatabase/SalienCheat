@@ -780,7 +780,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? sha1( $Data ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
