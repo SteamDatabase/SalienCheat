@@ -535,13 +535,13 @@ try:
                 sleep(1)
                 game.refresh_player_info()
 
-                if game.player_info['active_planet'] == planet_id:
+                if game.player_info.get('active_planet') == planet_id:
                     break
 
                 game.log("^RED-- Failed to join planet. Retrying...")
                 game.leave_planet()
 
-            if i >= 2 and game.player_info['active_planet'] != planet_id:
+            if i >= 2 and game.player_info.get('active_planet') != planet_id:
                 continue
 
         else:
