@@ -50,6 +50,14 @@ php cheat.php token2
    2. `pip install requests tqdm`
    3. `python downloads/cheat.py [token]`
 
+### Web UI
+
+After running `python cheat.py [token]`, file `[token].html' will be generated real-time and refreshed every 5 seconds.
+
+<img src="https://raw.githubusercontent.com/mikhail-j/SalienCheat/master/SalienCheat_webui.png"></img>
+
+   Snapshot of `[token].html`
+
 ## Vagrant
 
 1. Install [vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
