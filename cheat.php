@@ -155,7 +155,8 @@ do
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
 
-	usleep( $WaitTimeBeforeFirstScan * 1000000 );
+	//usleep( $WaitTimeBeforeFirstScan * 1000000 );
+	ProgressBar( $WaitTimeBeforeFirstScan * 1000000 );
 
 	do
 	{
@@ -169,7 +170,8 @@ do
 	{
 		Msg( '   {grey}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' remaining seconds before submitting score...' );
 
-		usleep( $LagAdjustedWaitTime * 1000000 );
+		//usleep( $LagAdjustedWaitTime * 1000000 );
+		ProgressBar( $LagAdjustedWaitTime * 1000000 );
 	}
 
 	$WaitedTimeAfterJoinZone = microtime( true ) - $WaitedTimeAfterJoinZone;
@@ -748,4 +750,33 @@ function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 	{
 		echo $Message;
 	}
+}
+
+function ProgressBar( $max, $min = 0 )
+{
+
+	$date = date( 'H:i:s' );
+
+	// Progress bar loop
+	while ( $min <= $max )
+	{
+
+		$perc = floor( ( $min / $max ) * 100 );
+		$left = 100 - $perc;
+
+		$write = sprintf(
+			"\33[2K\033[0G\033[0m[$date]    \033[0;36m[%'={$perc}s>%-{$left}s] - $perc%%",
+			"",
+			""
+		);
+
+		fwrite( STDERR, $write );
+
+		$min += 1000000;
+
+		usleep( 1000000 );
+	}
+
+	// Reset color and force new line
+	print( "\033[0m" . PHP_EOL );
 }
