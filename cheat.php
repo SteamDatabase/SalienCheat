@@ -164,6 +164,8 @@ do
 	if( isset( $Data[ 'response' ][ 'new_score' ] ) )
 	{
 		$Data = $Data[ 'response' ];
+		
+		$ScoreTable = array(0, 1200, 2400, 4800, 12000, 30000, 72000, 180000, 450000, 1200000, 2400000, 3600000, 4800000, 6000000);
 
 		echo PHP_EOL;
 
@@ -171,7 +173,7 @@ do
 			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
 			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
-			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
+			'{normal} (' . number_format( ($Data[ 'new_score' ] - $ScoreTable[ $Data[ 'new_level' ] - 1]) / ($Data[ 'next_level_score' ] - $ScoreTable[ $Data[ 'new_level' ] - 1 ] ) * 100, 2 ) . '%)'
 		);
 		
 		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
