@@ -8,8 +8,6 @@
 
 ## PHP
 
-📣 [Check this reddit thread for a complete guide and troubleshooting](https://redd.it/8t5w8v)
-
 ### Windows
 
 1. [Download this script](https://github.com/SteamDatabase/SalienCheat/archive/master.zip)
