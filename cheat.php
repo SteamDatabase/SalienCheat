@@ -124,7 +124,7 @@ do
 
 	Msg(
 		'>> Joined Zone {green}' . $Zone[ 'zone_position' ] .
-		'{normal} on planet {green}' . $BestPlanetAndZone[ 'id' ] .
+		'{normal} on Planet {green}' . $BestPlanetAndZone[ 'id' ] .
 		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
@@ -175,7 +175,7 @@ do
 		Msg(
 			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
-			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
+			'{normal} - Current Level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 		
@@ -184,7 +184,7 @@ do
 		$Minutes = $Time % 60;
 		
 		Msg(
-			'>> Next level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
+			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
 			'{normal} XP - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
 			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm'
 		);
@@ -242,8 +242,8 @@ function GetNameForDifficulty( $Zone )
 
 	switch( $Zone[ 'difficulty' ] )
 	{
+		case 3: $Difficulty = 'High'; break;
 		case 2: $Difficulty = 'Medium'; break;
-		case 3: $Difficulty = 'Hard'; break;
 		case 1: $Difficulty = 'Low'; break;
 	}
 
@@ -261,7 +261,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 	$Zones = $Zones[ 'response' ][ 'planets' ][ 0 ][ 'zones' ];
 	$CleanZones = [];
-	$HardZones = 0;
+	$HighZones = 0;
 	$MediumZones = 0;
 	$LowZones = 0;
 	$ZoneMessages = [];
@@ -310,9 +310,10 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 				$ZoneMessages[] =
 				[
-					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
+					'     Zone {yellow}%3d{normal} - Difficulty: {yellow}%s{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
 					[
 						$Zone[ 'zone_position' ],
+						GetNameForDifficulty( $Zone ),
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
 						number_format( $Cutoff * 100, 2 ),
 						number_format( $PaceCutoff * 100, 2 ),
@@ -337,7 +338,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 		switch( $Zone[ 'difficulty' ] )
 		{
-			case 3: $HardZones++; break;
+			case 3: $HighZones++; break;
 			case 2: $MediumZones++; break;
 			case 1: $LowZones++; break;
 		}
@@ -380,7 +381,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	} );
 
 	return [
-		'hard_zones' => $HardZones,
+		'high_zones' => $HighZones,
 		'medium_zones' => $MediumZones,
 		'low_zones' => $LowZones,
 		'best_zone' => $CleanZones[ 0 ],
@@ -428,25 +429,25 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		{
 			$ZonePaces[ $Planet[ 'id' ] ] = [];
 			$SkippedPlanets[ $Planet[ 'id' ] ] = true;
-			$Planet[ 'hard_zones' ] = 0;
+			$Planet[ 'high_zones' ] = 0;
 			$Planet[ 'medium_zones' ] = 0;
 			$Planet[ 'low_zones' ] = 0;
 		}
 		else
 		{
-			$Planet[ 'hard_zones' ] = $Zone[ 'hard_zones' ];
+			$Planet[ 'high_zones' ] = $Zone[ 'high_zones' ];
 			$Planet[ 'medium_zones' ] = $Zone[ 'medium_zones' ];
 			$Planet[ 'low_zones' ] = $Zone[ 'low_zones' ];
 			$Planet[ 'best_zone' ] = $Zone[ 'best_zone' ];
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - High: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
 				number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ),
-				$Planet[ 'hard_zones' ],
+				$Planet[ 'high_zones' ],
 				$Planet[ 'medium_zones' ],
 				$Planet[ 'low_zones' ],
 				number_format( $Planet[ 'state' ][ 'current_players' ] ),
@@ -473,7 +474,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 	// https://bugs.php.net/bug.php?id=71454
 	unset( $Planet );
 
-	$Priority = [ 'hard_zones', 'medium_zones', 'low_zones' ];
+	$Priority = [ 'high_zones', 'medium_zones', 'low_zones' ];
 
 	usort( $Planets, function( $a, $b ) use ( $Priority )
 	{
@@ -491,7 +492,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		return $a[ 'id' ] - $b[ 'id' ];
 	} );
 
-	// Loop three times - first loop tries to find planet with hard zones, second loop - medium zones, and then easies
+	// Loop three times - first loop tries to find planet with high zones, second loop - medium zones, and then lows
 	for( $i = 0; $i < 3; $i++ )
 	foreach( $Planets as &$Planet )
 	{
@@ -507,7 +508,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !$Planet[ 'state' ][ 'captured' ] )
 		{
-			Msg( '>> Next zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+			Msg( '>> Next Zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
 			return $Planet;
 		}
