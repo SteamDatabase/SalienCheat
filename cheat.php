@@ -398,6 +398,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 	}
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
+	$TotalPlayers = 0;
 
 	foreach( $Planets as &$Planet )
 	{
@@ -410,6 +411,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		{
 			$Planet[ 'state' ][ 'current_players' ] = 0;
 		}
+		$TotalPlayers += $Planet[ 'state' ][ 'current_players' ];
 
 		$KnownPlanets[ $Planet[ 'id' ] ] = true;
 
@@ -507,7 +509,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !$Planet[ 'state' ][ 'captured' ] )
 		{
-			Msg( '>> Next zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+			Msg( '>> Next zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . '){normal} - Total Players: {yellow}' . number_format( $TotalPlayers ) . '{normal}' );
 
 			return $Planet;
 		}
