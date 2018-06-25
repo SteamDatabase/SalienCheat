@@ -55,11 +55,6 @@ $ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
 
-if ( $LocalScriptHash !== $RepositoryScriptHash)
-{
-	Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
-}
-
 do
 {
 	$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
@@ -161,14 +156,14 @@ do
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	if ( $LocalScriptHash === $RepositoryScriptHash )
+	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
 		$RepositoryScriptHash = GetRepositoryScriptHash( );
 	}
 
-	if ( $LocalScriptHash !== $RepositoryScriptHash )
+	if( $LocalScriptHash !== $RepositoryScriptHash )
 	{
-		Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
 	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
@@ -363,12 +358,12 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 				$ZoneMessages[] =
 				[
-					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
+					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}%6s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
 					[
 						$Zone[ 'zone_position' ],
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
 						number_format( $Cutoff * 100, 2 ),
-						number_format( $PaceCutoff * 100, 2 ),
+						'+' . number_format( $PaceCutoff * 100, 2 ),
 						$Minutes,
 						$Seconds,
 					]
@@ -735,8 +730,8 @@ function GetRepositoryScriptHash( )
 {
 	$c_r = curl_init( );
 
-	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
 	curl_setopt_array( $c_r, [
+		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php',
 		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
@@ -749,17 +744,9 @@ function GetRepositoryScriptHash( )
 
 	curl_close( $c_r );
 
-	$Data = json_decode( $Data, true );
-
-	if ( isset( $Data[ 'tree' ] ) )
+	if ( strlen($Data) > 0 )
 	{
-		foreach( $Data[ 'tree' ] as &$File )
-		{
-			if ( $File[ 'path' ] === "cheat.php" )
-			{
-				return $File[ 'sha' ];
-			}
-		}
+		return sha1( $Data );
 	}
 
 	Msg( '{lightred}-- Failed to check for script in repository' );
