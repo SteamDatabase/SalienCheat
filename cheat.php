@@ -104,6 +104,7 @@ do
 	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet );
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
+	$WaitedTimeAfterJoinZone = microtime( true );
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
@@ -152,6 +153,9 @@ do
 
 		usleep( $LagAdjustedWaitTime * 1000000 );
 	}
+
+	$WaitedTimeAfterJoinZone = microtime( true ) - $WaitedTimeAfterJoinZone;
+	Msg( '   {grey}Waited ' . number_format( $WaitedTimeAfterJoinZone, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' lag) total seconds before sending score' );
 
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
