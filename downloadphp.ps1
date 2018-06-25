@@ -1,15 +1,16 @@
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $workingdir = (Get-Location).Path
+$arch = (Get-WmiObject win32_operatingsystem | select osarchitecture).osarchitecture.Substring(0, 2).replace('32', '86')
 if($PSVersiontable.PSVersion.Major -lt 3)
 {
     Write-Warning "Please download php and place it in the same folder as this script."
-    Write-Output "Download from: https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip"
+    Write-Output "Download from: https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x$arch.zip"
     Write-Output ("Save to this directory: $workingdir `nand rename it to php.zip" -f (Get-Location).Path)
     Read-Host "Press Enter when you're done!"
 }
 else
 {
-    Invoke-WebRequest -Uri https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x64.zip -OutFile php.zip
+    Invoke-WebRequest -Uri https://windows.php.net/downloads/releases/php-7.2.7-nts-Win32-VC15-x$arch.zip -OutFile php.zip
 }
 if($PSVersiontable.PSVersion.Major -lt 5)
 {
