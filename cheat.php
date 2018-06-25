@@ -345,12 +345,12 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 				$ZoneMessages[] =
 				[
-					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}+%s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
+					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}%6s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
 					[
 						$Zone[ 'zone_position' ],
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
 						number_format( $Cutoff * 100, 2 ),
-						number_format( $PaceCutoff * 100, 2 ),
+						'+' . number_format( $PaceCutoff * 100, 2 ),
 						$Minutes,
 						$Seconds,
 					]
