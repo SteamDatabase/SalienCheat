@@ -176,7 +176,7 @@ do
 			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
 			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
-			'{normal} (' . number_format( $Data[ 'new_score' ] / $Data[ 'next_level_score' ] * 100, 2 ) . '%)'
+			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 		
 		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
@@ -191,6 +191,37 @@ do
 	}
 }
 while( true );
+
+function GetNextLevelProgress( $Data )
+{
+	$ScoreTable =
+	[
+		0,       // Level 1
+		1200,    // Level 2
+		2400,    // Level 3
+		4800,    // Level 4
+		12000,   // Level 5
+		30000,   // Level 6
+		72000,   // Level 7
+		180000,  // Level 8
+		450000,  // Level 9
+		1200000, // Level 10
+		2400000, // Level 11
+		3600000, // Level 12
+		4800000, // Level 13
+		6000000, // Level 14
+	];
+
+	$PreviousLevel = $Data[ 'new_level' ] - 1;
+
+	if( !isset( $ScoreTable[ $PreviousLevel ] ) )
+	{
+		Msg( '{lightred}!! Score for next level is unknown, you probably should update the script.' );
+		return 0;
+	}
+
+	return ( $Data[ 'new_score' ] - $PreviousLevel ) / ( $Data[ 'next_level_score' ] - $PreviousLevel );
+}
 
 function GetScoreForZone( $Zone )
 {
