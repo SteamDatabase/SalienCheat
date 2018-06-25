@@ -1,1 +1,4 @@
 * text eol=lf
+
+# keep .png files binary
+*.png binary
