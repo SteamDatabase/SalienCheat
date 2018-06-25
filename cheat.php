@@ -695,6 +695,9 @@ function GetCurlRepository( )
 		curl_setopt( $c_r, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0 );
 	}
 
+	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
+	curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
+
 	return $c_r;
 }
 
@@ -781,9 +784,6 @@ function GetLocalScriptHash( )
 function GetRepositoryScriptHash( )
 {
 	$c_r = GetCurlRepository( );
-
-	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
-	curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
 
 	do
 	{
