@@ -104,8 +104,8 @@ do
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
 	$WaitedTimeAfterJoinZone = microtime( true );
 
-	// If join fails, or we join after cutoff, then rescan it again
-	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) || $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] >= $BestPlanetAndZone[ 'best_zone' ][ 'cutoff' ] )
+	// Rescan planets if joining failed
+	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
 		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
 
@@ -121,6 +121,25 @@ do
 	}
 
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
+
+	if( empty( $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] ) )
+	{
+		$Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] = 0.0;
+	}
+
+	// Rescan planets if we join zone that will finish before we do
+	if( $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] >= $BestPlanetAndZone[ 'best_zone' ][ 'cutoff' ] )
+	{
+		Msg( '{lightred}!! This zone will finish before us, rescanning and restarting...' );
+
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+		}
+		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+
+		continue;
+	}
 
 	Msg(
 		'>> Joined Zone {yellow}' . $Zone[ 'zone_position' ] .
