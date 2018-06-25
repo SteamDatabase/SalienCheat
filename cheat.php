@@ -46,6 +46,7 @@ if( strlen( $Token ) !== 32 )
 }
 
 $LocalScriptHash = GetLocalScriptHash( );
+$RepositoryScriptHash = GetRepositoryScriptHash( );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -53,6 +54,11 @@ $SkippedPlanets = [];
 $ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+
+if ( $LocalScriptHash !== $RepositoryScriptHash)
+{
+	Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+}
 
 do
 {
@@ -150,20 +156,19 @@ do
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
-	if ( !isset( $RepositoryScriptHash ) || $LocalScriptHash === $RepositoryScriptHash )
-		$RepositoryScriptHash = GetRepositoryScriptHash( );
-
-	if ( $LocalScriptHash !== $RepositoryScriptHash )
-	{
-		Msg('-- {green}Repository script has been modified. Make sure to check it for updates.');
-	}
-
-	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
-	$SkippedLagTime += curl_getinfo( $c_r, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c_r, CURLINFO_STARTTRANSFER_TIME );
-	$SkippedLagTime = floor($SkippedLagTime);
+	$SkippedLagTime = floor( curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
+
+	if ( $LocalScriptHash === $RepositoryScriptHash )
+	{
+		$RepositoryScriptHash = GetRepositoryScriptHash( );
+	}
+	else
+	{
+		Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
 
@@ -772,18 +777,25 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 function GetLocalScriptHash( )
 {
-	list( $ScriptPath ) = get_included_files( );
-
-	$ScriptFile = fopen( $ScriptPath, "rb" );
-	$ScriptData = fread( $ScriptFile, filesize( $ScriptPath ) );
-	fclose( $ScriptFile );
-
-	return sha1( $ScriptData );
+	return sha1_file( __FILE__ );
 }
 
 function GetRepositoryScriptHash( )
 {
-	$c_r = GetCurlRepository( );
+	$c_r = curl_init( );
+
+	curl_setopt_array( $c_r, [
+		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING       => 'gzip',
+		CURLOPT_TIMEOUT        => 15,
+		CURLOPT_CONNECTTIMEOUT => 5,
+		CURLOPT_HEADER         => 1,
+		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
+	] );
+
+	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
+	curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
 
 	do
 	{
