@@ -45,8 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1_file( __FILE__ );
-$RepositoryScriptHash = GetRepositoryScriptHash( );
+$LocalScriptHash = $RepositoryScriptHash = GetRepositoryScriptHash( );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -54,11 +53,6 @@ $SkippedPlanets = [];
 $ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
-
-if ( $LocalScriptHash !== $RepositoryScriptHash)
-{
-	Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
-}
 
 do
 {
@@ -161,14 +155,14 @@ do
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	if ( $LocalScriptHash === $RepositoryScriptHash )
+	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
 		$RepositoryScriptHash = GetRepositoryScriptHash( );
 	}
 
-	if ( $LocalScriptHash !== $RepositoryScriptHash )
+	if( $LocalScriptHash !== $RepositoryScriptHash )
 	{
-		Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
 	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
