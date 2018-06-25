@@ -108,9 +108,14 @@ do
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
-		Msg( '{lightred}!! Failed to join a zone, restarting in 15 seconds...' );
-
-		sleep( 15 );
+		Msg( '{lightred}!! Failed to join a zone, looking for new zone and restarting...' );
+		
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+			$CurrentPlanet = $BestPlanetAndZone[ 'id' ];
+		}
+		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
 		continue;
 	}
