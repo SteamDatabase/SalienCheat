@@ -165,7 +165,8 @@ do
 	{
 		$RepositoryScriptHash = GetRepositoryScriptHash( );
 	}
-	else
+
+	if ( $LocalScriptHash !== $RepositoryScriptHash )
 	{
 		Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
 	}
@@ -784,44 +785,35 @@ function GetRepositoryScriptHash( )
 {
 	$c_r = curl_init( );
 
+	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
 	curl_setopt_array( $c_r, [
-		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
+		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => 15,
+		CURLOPT_TIMEOUT        => 5,
 		CURLOPT_CONNECTTIMEOUT => 5,
 		CURLOPT_HEADER         => 1,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
 	] );
 
-	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
-	curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
+	$Data = curl_exec( $c_r );
 
-	do
+	$HeaderSize = curl_getinfo( $c_r, CURLINFO_HEADER_SIZE );
+	$Data = substr( $Data, $HeaderSize );
+	$Data = json_decode( $Data, true );
+
+	if ( isset( $Data[ 'tree' ] ) )
 	{
-		$Data = curl_exec( $c_r );
-
-		$HeaderSize = curl_getinfo( $c_r, CURLINFO_HEADER_SIZE );
-		$Data = substr( $Data, $HeaderSize );
-		$Data = json_decode( $Data, true );
-
-		if ( isset( $Data[ 'tree' ] ) )
+		foreach( $Data[ 'tree' ] as &$File )
 		{
-			foreach( $Data[ 'tree' ] as &$File )
+			if ( $File[ 'path' ] === "cheat.php" )
 			{
-				if ( isset( $File[ 'path' ] ) && $File[ 'path' ] === "cheat.php" )
-				{
-					if ( isset( $File[ 'sha' ]) )
-						return $File[ 'sha' ];
-
-					break;
-				}
+				return $File[ 'sha' ];
 			}
 		}
-
-		Msg( '{lightred}-- Failed to check for script in repository... Retrying' );
 	}
-	while( true && sleep( 1 ) === 0 );
+
+	Msg( '{lightred}-- Failed to check for script in repository' );
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
