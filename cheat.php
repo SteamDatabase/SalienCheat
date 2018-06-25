@@ -47,7 +47,8 @@ if( strlen( $Token ) !== 32 )
 
 $LocalScriptHash = sha1_file( __FILE__ );
 $RepositoryScriptETag = '';
-$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+$RepositoryScriptLastCheck = -1.0;
+$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash, $RepositoryScriptLastCheck );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -152,23 +153,14 @@ do
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
-    $RepositoryScriptHash = GetRepositoryScriptHash( );
-
-    if ( $LocalScriptHash !== $RepositoryScriptHash )
-    {
-        Msg('-- {green}Repository script has been modified. Make sure to check it for updates.');
-    }
-
-	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
-	$SkippedLagTime += curl_getinfo( $c_r, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c_r, CURLINFO_STARTTRANSFER_TIME );
-    $SkippedLagTime = floor($SkippedLagTime);
+	$SkippedLagTime = floor( curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
 	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
-		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash, $RepositoryScriptLastCheck );
 	}
 
 	if( $LocalScriptHash !== $RepositoryScriptHash )
@@ -669,48 +661,6 @@ function GetCurl( )
 	return $c;
 }
 
-function GetCurlRepository( )
-{
-	global $c_r;
-
-	if( isset( $c_r ) )
-	{
-		return $c_r;
-	}
-
-	$c_r = curl_init( );
-
-	curl_setopt_array( $c_r, [
-		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING       => 'gzip',
-		CURLOPT_TIMEOUT        => 30,
-		CURLOPT_CONNECTTIMEOUT => 10,
-		CURLOPT_HEADER         => 1,
-		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
-		CURLOPT_HTTPHEADER     =>
-		[
-			'Accept: */*',
-			'Origin: https://github.com',
-			'Referer: https://github.com/SteamDatabase/SalienCheat',
-			'Connection: Keep-Alive',
-			'Keep-Alive: 300'
-		],
-	] );
-
-	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
-	{
-		curl_setopt( $c_r, CURLOPT_INTERFACE, $_SERVER[ 'LOCAL_ADDRESS' ] );
-	}
-
-	if( defined( 'CURL_HTTP_VERSION_2_0' ) )
-	{
-		curl_setopt( $c_r, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0 );
-	}
-
-	return $c_r;
-}
-
 function ExecuteRequest( $Method, $URL, $Data = [] )
 {
 	$c = GetCurl( );
@@ -780,8 +730,14 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 	return $Data;
 }
 
-function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
+function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash, &$RepositoryScriptLastCheck )
 {
+	// check only once per half-hour
+	if( microtime( true ) - $RepositoryScriptLastCheck < 1800 )
+	{
+		return $LocalScriptHash;
+	}
+	
 	$c_r = curl_init( );
 
 	$Time = time();
