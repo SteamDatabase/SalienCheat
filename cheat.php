@@ -742,14 +742,13 @@ function GetRepositoryScriptHash( )
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 5,
 		CURLOPT_CONNECTTIMEOUT => 5,
-		CURLOPT_HEADER         => 1,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
 	] );
 
 	$Data = curl_exec( $c_r );
 
-	$HeaderSize = curl_getinfo( $c_r, CURLINFO_HEADER_SIZE );
-	$Data = substr( $Data, $HeaderSize );
+	curl_close( $c_r );
+
 	$Data = json_decode( $Data, true );
 
 	if ( isset( $Data[ 'tree' ] ) )
