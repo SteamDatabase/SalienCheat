@@ -80,7 +80,6 @@ while( !isset( $Data[ 'response' ][ 'score' ] ) );
 do
 {
 	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
-	$CurrentPlanet = $BestPlanetAndZone[ 'id' ];
 }
 while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -93,24 +92,30 @@ do
 	do
 	{
 		// Leave current game before trying to switch planets (it will report InvalidState otherwise)
-		$SteamThinksPlanet = LeaveCurrentGame( $Token, $CurrentPlanet );
+		$SteamThinksPlanet = LeaveCurrentGame( $Token, $BestPlanetAndZone[ 'id' ] );
 	
-		if( $CurrentPlanet !== $SteamThinksPlanet )
+		if( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet )
 		{
-			SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $CurrentPlanet . '&access_token=' . $Token );
+			SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $BestPlanetAndZone[ 'id' ] . '&access_token=' . $Token );
 	
 			$SteamThinksPlanet = LeaveCurrentGame( $Token );
 		}
 	}
-	while( $CurrentPlanet !== $SteamThinksPlanet );
+	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet );
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
 
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
-		Msg( '{lightred}!! Failed to join a zone, restarting in 15 seconds...' );
+		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
 
-		sleep( 15 );
+		sleep( 1 );
+
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+		}
+		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
 		continue;
 	}
@@ -135,7 +140,6 @@ do
 	do
 	{
 		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
-		$CurrentPlanet = $BestPlanetAndZone[ 'id' ];
 	}
 	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
