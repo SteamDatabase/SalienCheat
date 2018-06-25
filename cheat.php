@@ -150,16 +150,17 @@ do
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
-    $RepositoryScriptHash = GetRepositoryScriptHash( );
+	if ( !isset( $RepositoryScriptHash ) || $LocalScriptHash === $RepositoryScriptHash )
+		$RepositoryScriptHash = GetRepositoryScriptHash( );
 
-    if ( $LocalScriptHash !== $RepositoryScriptHash )
-    {
-        Msg('-- {green}Repository script has been modified. Make sure to check it for updates.');
-    }
+	if ( $LocalScriptHash !== $RepositoryScriptHash )
+	{
+		Msg('-- {green}Repository script has been modified. Make sure to check it for updates.');
+	}
 
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
 	$SkippedLagTime += curl_getinfo( $c_r, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c_r, CURLINFO_STARTTRANSFER_TIME );
-    $SkippedLagTime = floor($SkippedLagTime);
+	$SkippedLagTime = floor($SkippedLagTime);
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
@@ -768,21 +769,21 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 function GetLocalScriptHash( )
 {
-    list( $ScriptPath ) = get_included_files( );
+	list( $ScriptPath ) = get_included_files( );
 
-    $ScriptFile = fopen( $ScriptPath, "rb" );
-    $ScriptData = fread( $ScriptFile, filesize( $ScriptPath ) );
-    fclose( $ScriptFile );
+	$ScriptFile = fopen( $ScriptPath, "rb" );
+	$ScriptData = fread( $ScriptFile, filesize( $ScriptPath ) );
+	fclose( $ScriptFile );
 
-    return sha1( $ScriptData );
+	return sha1( $ScriptData );
 }
 
 function GetRepositoryScriptHash( )
 {
-    $c_r = GetCurlRepository( );
+	$c_r = GetCurlRepository( );
 
-    curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
-    curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
+	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
+	curl_setopt( $c_r, CURLOPT_HTTPGET, 1 );
 
 	do
 	{
@@ -792,21 +793,21 @@ function GetRepositoryScriptHash( )
 		$Data = substr( $Data, $HeaderSize );
 		$Data = json_decode( $Data, true );
 
-        if ( isset( $Data[ 'tree' ] ) )
-        {
-            foreach( $Data[ 'tree' ] as &$File )
-            {
-                if ( isset( $File[ 'path' ] ) && $File[ 'path' ] === "cheat.php" )
-                {
-                    if ( isset( $File[ 'sha' ]) )
-                        return $File[ 'sha' ];
+		if ( isset( $Data[ 'tree' ] ) )
+		{
+			foreach( $Data[ 'tree' ] as &$File )
+			{
+				if ( isset( $File[ 'path' ] ) && $File[ 'path' ] === "cheat.php" )
+				{
+					if ( isset( $File[ 'sha' ]) )
+						return $File[ 'sha' ];
 
-                    break;
-                }
-            }
-        }
+					break;
+				}
+			}
+		}
 
-        Msg( '{lightred}-- Failed to check for script in repository... Retrying' );
+		Msg( '{lightred}-- Failed to check for script in repository... Retrying' );
 	}
 	while( true && sleep( 1 ) === 0 );
 }
