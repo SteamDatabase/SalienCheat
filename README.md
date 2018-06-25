@@ -1,3 +1,4 @@
+
 # How to use this
 
 ## First steps
@@ -32,6 +33,21 @@ php cheat.php token2
 
 1. Install `php-curl` and enable it in `php.ini`
 2. You know what you are doing. 🐧
+
+Bash script use `screen` to run multiple instances of PHP Script and `Git` client to perform updates. You need to clone this  repository manually first.
+
+Add your tokens to `accounts.txt` file:
+```
+name1	token1
+name2	token2
+name3	token3
+```
+
+Options:
+- `-update` `[--update]` - Update! (+restart)
+- `-start` `[--start]` - Start the Fight!
+- `-stop` `[--stop]` - Stop!
+- `-restart` `[--restart]` - Restart!
 
 ## Python
 
