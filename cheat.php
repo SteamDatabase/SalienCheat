@@ -358,6 +358,8 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 	unset( $Zone );
 
+	$ShouldTruncate = count( $ZonePaces[ $Planet ][ 'times' ] ) > 3;
+
 	foreach( $Zones as $Zone )
 	{
 		if( !isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
@@ -366,7 +368,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		}
 		else
 		{
-			if( count( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) > 3 )
+			if( $ShouldTruncate )
 			{
 				array_shift( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] );
 			}
@@ -375,7 +377,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		}
 	}
 
-	if( count( $ZonePaces[ $Planet ][ 'times' ] ) > 4 )
+	if( $ShouldTruncate )
 	{
 		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
 	}
