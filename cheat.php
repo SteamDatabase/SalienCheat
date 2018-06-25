@@ -269,7 +269,10 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$ZoneMessages = [];
-	
+
+	$ZonePaces[ $Planet ][ 'times' ][] = microtime( true );
+	$CurrentTimes = $ZonePaces[ $Planet ][ 'times' ];
+
 	foreach( $Zones as &$Zone )
 	{
 		if( empty( $Zone[ 'capture_progress' ] ) )
@@ -297,14 +300,18 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			$Paces = $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ];
 			$Paces[] = $Zone[ 'capture_progress' ];
 			$Differences = [];
+			$DifferenceTimes = [];
 
 			for( $i = count( $Paces ) - 1; $i > 0; $i-- )
 			{
-				$Differences[] = $Paces[ $i ] - $Paces[ $i - 1 ];
+				$TimeDelta = $CurrentTimes[ $i ] - $CurrentTimes[ $i - 1 ];
+				$DifferenceTimes[] = $TimeDelta;
+				$Differences[] = ( $Paces[ $i ] - $Paces[ $i - 1 ] ) / $TimeDelta;
 			}
 
-			$PaceCutoff = array_sum( $Differences ) / count( $Differences );
-			$Cutoff = 0.97 - $PaceCutoff * 1.7;
+			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
+			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
+			$Cutoff = 1.0 - min( 0.1, $PaceCutoff );
 
 			if( $PaceCutoff > 0.02 )
 			{
@@ -359,13 +366,18 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		}
 		else
 		{
-			if( count( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) > 4 )
+			if( count( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) > 3 )
 			{
 				array_shift( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] );
 			}
 
 			$ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ][] = $Zone[ 'capture_progress' ];
 		}
+	}
+
+	if( count( $ZonePaces[ $Planet ][ 'times' ] ) > 4 )
+	{
+		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
 	}
 
 	if( empty( $CleanZones ) )
@@ -419,7 +431,10 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !isset( $ZonePaces[ $Planet[ 'id' ] ] ) )
 		{
-			$ZonePaces[ $Planet[ 'id' ] ] = [];
+			$ZonePaces[ $Planet[ 'id' ] ] =
+			[
+				'times' => []
+			];
 		}
 
 		do
