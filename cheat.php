@@ -744,6 +744,7 @@ function GetRepositoryScriptHash( )
 
 	curl_close( $c_r );
 
+	if ( strlen( $Data ) > 0 )
 	{
 		return sha1( $Data );
 	}
