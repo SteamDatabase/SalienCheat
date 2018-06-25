@@ -586,7 +586,7 @@ try:
             # choose highest priority zone
             zone_id = zones[0]['zone_position']
             difficulty = zones[0]['difficulty']
-            game.zone_capture_rate = 0
+            game.zone_capture_rate *= 0.5
 
             deadline = time() + 60 * 10  # rescan planets every 10min
 
