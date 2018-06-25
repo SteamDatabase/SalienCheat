@@ -45,7 +45,15 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1_file( __FILE__ );
+$LocalScriptHash = trim( file_get_contents( __FILE__ . '.sha1' ) );
+if( strlen( $LocalScriptHash ) > 40 )  // allows to generate the file with sha1sum
+{
+	$LocalScriptHash = strstr( $LocalScriptHash, ' ', true );
+}
+if( strlen( $LocalScriptHash ) < 40 )
+{
+	$LocalScriptHash = sha1_file( __FILE__ );
+}
 $RepositoryScriptETag = '';
 $RepositoryScriptLastCheck = 0.0;
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
