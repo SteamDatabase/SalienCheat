@@ -364,7 +364,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 	unset( $Zone );
 
-	$ShouldTruncate = count( $ZonePaces[ $Planet ][ 'times' ] ) > 3;
+	$ShouldTruncate = count( $ZonePaces[ $Planet ][ 'times' ] ) > 1;
 
 	foreach( $Zones as $Zone )
 	{
