@@ -47,8 +47,8 @@ if( strlen( $Token ) !== 32 )
 
 $LocalScriptHash = sha1_file( __FILE__ );
 $RepositoryScriptETag = '';
-$RepositoryScriptLastCheck = -1.0;
-$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash, $RepositoryScriptLastCheck );
+$RepositoryScriptLastCheck = 0.0;
+$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -158,14 +158,16 @@ do
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	if( $LocalScriptHash === $RepositoryScriptHash )
+	// check only once per half-hour
+	if( $LocalScriptHash === $RepositoryScriptHash && microtime( true ) - $RepositoryScriptLastCheck > 1800 )
 	{
-		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash, $RepositoryScriptLastCheck );
+		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+		$RepositoryScriptLastCheck = microtime( true );
 	}
-
+	
 	if( $LocalScriptHash !== $RepositoryScriptHash )
 	{
-		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
+		Msg( '-- {green}Script has been updated on GitHub since you started this script, please make sure to update.' );
 	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
@@ -730,14 +732,8 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 	return $Data;
 }
 
-function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash, &$RepositoryScriptLastCheck )
+function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 {
-	// check only once per half-hour
-	if( microtime( true ) - $RepositoryScriptLastCheck < 1800 )
-	{
-		return $LocalScriptHash;
-	}
-	
 	$c_r = curl_init( );
 
 	$Time = time();
