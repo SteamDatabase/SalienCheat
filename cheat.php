@@ -188,7 +188,7 @@ do
 		$Minutes = $Time % 60;
 		$Date = date_create();
 		
-		date_add( $Date,date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
+		date_add( $Date , date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
 		
 		Msg(
 			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
