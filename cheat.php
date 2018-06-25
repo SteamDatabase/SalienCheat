@@ -45,8 +45,19 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
+$LocalScriptHash = trim( file_get_contents( __FILE__ . '.sha1' ) );
+if( strlen( $LocalScriptHash ) > 40 )  // allows to generate the file with sha1sum
+{
+	$LocalScriptHash = strstr( $LocalScriptHash, ' ', true );
+}
+if( strlen( $LocalScriptHash ) < 40 )
+{
+	// seems it's better to stay with sha1_file( )
+	// https://stackoverflow.com/questions/19988785/which-is-preferable-sha1-filef-or-sha1file-get-contentsf
+	$LocalScriptHash = sha1_file( __FILE__ );
+}
 $RepositoryScriptETag = '';
+$RepositoryScriptLastCheck = 0.0;
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
 $WaitTime = 110;
@@ -157,14 +168,16 @@ do
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	if( $LocalScriptHash === $RepositoryScriptHash )
+	// check only once per half-hour
+	if( $LocalScriptHash === $RepositoryScriptHash && microtime( true ) - $RepositoryScriptLastCheck > 1800 )
 	{
 		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+		$RepositoryScriptLastCheck = microtime( true );
 	}
-
+	
 	if( $LocalScriptHash !== $RepositoryScriptHash )
 	{
-		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
+		Msg( '-- {green}Script has been updated on GitHub since you started this script, please make sure to update.' );
 	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
@@ -458,6 +471,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 	}
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
+	$TotalPlayers = 0;
 
 	foreach( $Planets as &$Planet )
 	{
@@ -470,6 +484,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		{
 			$Planet[ 'state' ][ 'current_players' ] = 0;
 		}
+		$TotalPlayers += $Planet[ 'state' ][ 'current_players' ];
 
 		$KnownPlanets[ $Planet[ 'id' ] ] = true;
 
@@ -570,7 +585,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !$Planet[ 'state' ][ 'captured' ] )
 		{
-			Msg( '>> Best Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+			Msg( '>> Best zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . '){normal} - Global Players: {yellow}' . number_format( $TotalPlayers ) . '{normal}' );
 
 			return $Planet;
 		}
@@ -765,7 +780,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? sha1( $Data ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
