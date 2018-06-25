@@ -224,7 +224,7 @@ function GetNextLevelProgress( $Data )
 		return 0;
 	}
 
-	return ( $Data[ 'new_score' ] - $PreviousLevel ) / ( $Data[ 'next_level_score' ] - $PreviousLevel );
+	return ( $Data[ 'new_score' ] - $ScoreTable[ $PreviousLevel ] ) / ( $Data[ 'next_level_score' ] - $ScoreTable[ $PreviousLevel ] );
 }
 
 function GetScoreForZone( $Zone )
