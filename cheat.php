@@ -87,8 +87,6 @@ do
 {
 	echo PHP_EOL;
 
-	$Zone = $BestPlanetAndZone[ 'best_zone' ];
-
 	do
 	{
 		// Leave current game before trying to switch planets (it will report InvalidState otherwise)
@@ -103,10 +101,11 @@ do
 	}
 	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet );
 
-	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $Zone[ 'zone_position' ] . '&access_token=' . $Token );
+	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
 	$WaitedTimeAfterJoinZone = microtime( true );
 
-	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
+	// If join fails, or we join after cutoff, then rescan it again
+	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) || $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] >= $BestPlanetAndZone[ 'best_zone' ][ 'cutoff' ] )
 	{
 		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
 
@@ -311,11 +310,17 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
 			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
-			$Cutoff = 1.0 - max( 0.1, $PaceCutoff );
+			$Cutoff = 1.0 - max( 0.1, $PaceCutoff ) / 1.05;
+			$PaceTime = $PaceCutoff > 0 ? ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime ) : 1000;
+
+			if( $WaitTime + 30 >= $PaceTime )
+			{
+				// If zone will finish soon, skip it
+				$Cutoff = 0.10;
+			}
 
 			if( $PaceCutoff > 0.02 )
 			{
-				$PaceTime = ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime );
 				$Minutes = floor( $PaceTime / 60 );
 				$Seconds = $PaceTime % 60;
 
@@ -353,6 +358,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			case 1: $LowZones++; break;
 		}
 
+		$Zone[ 'cutoff' ] = $Cutoff;
 		$CleanZones[] = $Zone;
 	}
 
