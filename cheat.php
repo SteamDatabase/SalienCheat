@@ -125,7 +125,7 @@ do
 
 	Msg(
 		'>> Joined Zone {green}' . $Zone[ 'zone_position' ] .
-		'{normal} on planet {green}' . $BestPlanetAndZone[ 'id' ] .
+		'{normal} on Planet {green}' . $BestPlanetAndZone[ 'id' ] .
 		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
@@ -179,7 +179,7 @@ do
 		Msg(
 			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
-			'{normal} - Current level: {green}' . $Data[ 'new_level' ] .
+			'{normal} - Current Level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 		
@@ -188,7 +188,7 @@ do
 		$Minutes = $Time % 60;
 		
 		Msg(
-			'>> Next level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
+			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
 			'{normal} XP - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
 			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm'
 		);
@@ -511,7 +511,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !$Planet[ 'state' ][ 'captured' ] )
 		{
-			Msg( '>> Next zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+			Msg( '>> Next Zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
 			return $Planet;
 		}
