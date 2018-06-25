@@ -45,12 +45,20 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$LocalScriptHash = sha1_file( __FILE__ );
+$RepositoryScriptHash = GetRepositoryScriptHash( );
+
 $WaitTime = 110;
 $KnownPlanets = [];
 $SkippedPlanets = [];
 $ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+
+if ( $LocalScriptHash !== $RepositoryScriptHash)
+{
+	Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+}
 
 do
 {
@@ -152,6 +160,16 @@ do
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
+
+	if ( $LocalScriptHash === $RepositoryScriptHash )
+	{
+		$RepositoryScriptHash = GetRepositoryScriptHash( );
+	}
+
+	if ( $LocalScriptHash !== $RepositoryScriptHash )
+	{
+		Msg('-- {lightred}Repository script has been modified. Make sure to check it for updates.');
+	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
 
@@ -711,6 +729,40 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
 
 	return $Data;
+}
+
+function GetRepositoryScriptHash( )
+{
+	$c_r = curl_init( );
+
+	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
+	curl_setopt_array( $c_r, [
+		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING       => 'gzip',
+		CURLOPT_TIMEOUT        => 5,
+		CURLOPT_CONNECTTIMEOUT => 5,
+		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
+	] );
+
+	$Data = curl_exec( $c_r );
+
+	curl_close( $c_r );
+
+	$Data = json_decode( $Data, true );
+
+	if ( isset( $Data[ 'tree' ] ) )
+	{
+		foreach( $Data[ 'tree' ] as &$File )
+		{
+			if ( $File[ 'path' ] === "cheat.php" )
+			{
+				return $File[ 'sha' ];
+			}
+		}
+	}
+
+	Msg( '{lightred}-- Failed to check for script in repository' );
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
