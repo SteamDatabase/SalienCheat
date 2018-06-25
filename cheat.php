@@ -131,11 +131,12 @@ do
 
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME ) + 0.1;
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
+	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	Msg( '   {grey}Waiting 60 seconds before rescanning planets...' );
+	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
 
-	sleep( 60 );
+	usleep( $WaitTimeBeforeFirstScan * 1000000 );
 
 	do
 	{
