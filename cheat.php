@@ -167,7 +167,7 @@ do
 		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
 	}
 
-	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
+	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 0 ) . ' seconds before rescanning planets...' );
 
 	usleep( $WaitTimeBeforeFirstScan * 1000000 );
 
