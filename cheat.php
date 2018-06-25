@@ -45,7 +45,8 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = $RepositoryScriptHash = GetRepositoryScriptHash( );
+$LocalScriptHash = sha1_file( __FILE__ );
+$RepositoryScriptHash = GetRepositoryScriptHash( );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -730,7 +731,7 @@ function GetRepositoryScriptHash( )
 	$c_r = curl_init( );
 
 	curl_setopt_array( $c_r, [
-		CURLOPT_URL            => 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master',
+		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php',
 		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
@@ -743,20 +744,13 @@ function GetRepositoryScriptHash( )
 
 	curl_close( $c_r );
 
-	$Data = json_decode( $Data, true );
-
-	if ( isset( $Data[ 'tree' ] ) )
 	{
-		foreach( $Data[ 'tree' ] as &$File )
-		{
-			if ( $File[ 'path' ] === "cheat.php" )
-			{
-				return $File[ 'sha' ];
-			}
-		}
+		return sha1( $Data );
 	}
 
 	Msg( '{lightred}-- Failed to check for script in repository' );
+
+	return $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
