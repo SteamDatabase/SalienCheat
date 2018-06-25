@@ -45,7 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1_file( __FILE__ );
+$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
 $RepositoryScriptETag = '';
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
@@ -735,7 +735,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	$c_r = curl_init( );
 
 	$Time = time();
-	$Time = $Time - ( $Time % 100 );
+	$Time = $Time - ( $Time % 10 );
 
 	curl_setopt_array( $c_r, [
 		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . $Time,
@@ -765,7 +765,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? sha1( $Data ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
