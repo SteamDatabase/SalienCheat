@@ -311,7 +311,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
 			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
-			$Cutoff = 1.0 - min( 0.1, $PaceCutoff );
+			$Cutoff = 1.0 - max( 0.1, $PaceCutoff );
 
 			if( $PaceCutoff > 0.02 )
 			{
