@@ -313,7 +313,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			$Cutoff = 1.0 - max( 0.1, $PaceCutoff ) / 1.05;
 			$PaceTime = $PaceCutoff > 0 ? ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime ) : 1000;
 
-			if( $WaitTime + 30 >= $PaceTime )
+			if( 60 * 3 >= $PaceTime )
 			{
 				// If zone will finish soon, skip it
 				$Cutoff = 0.10;
