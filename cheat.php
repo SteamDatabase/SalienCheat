@@ -52,6 +52,8 @@ if( strlen( $LocalScriptHash ) > 40 )  // allows to generate the file with sha1s
 }
 if( strlen( $LocalScriptHash ) < 40 )
 {
+	// seems it's better to stay with sha1_file( )
+	// https://stackoverflow.com/questions/19988785/which-is-preferable-sha1-filef-or-sha1file-get-contentsf
 	$LocalScriptHash = sha1_file( __FILE__ );
 }
 $RepositoryScriptETag = '';
@@ -748,7 +750,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	$c_r = curl_init( );
 
 	$Time = time();
-	$Time = $Time - ( $Time % 100 );
+	$Time = $Time - ( $Time % 10 );
 
 	curl_setopt_array( $c_r, [
 		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . $Time,
@@ -778,7 +780,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? sha1( $Data ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
