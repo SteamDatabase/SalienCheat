@@ -735,8 +735,8 @@ function GetRepositoryScriptHash( )
 {
 	$c_r = curl_init( );
 
-	curl_setopt( $c_r, CURLOPT_URL, 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master' );
 	curl_setopt_array( $c_r, [
+		CURLOPT_URL            => 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master',
 		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
