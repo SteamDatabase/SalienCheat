@@ -46,7 +46,8 @@ if( strlen( $Token ) !== 32 )
 }
 
 $LocalScriptHash = sha1_file( __FILE__ );
-$RepositoryScriptHash = GetRepositoryScriptHash( );
+$RepositoryScriptETag = '';
+$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -158,7 +159,7 @@ do
 
 	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
-		$RepositoryScriptHash = GetRepositoryScriptHash( );
+		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 	}
 
 	if( $LocalScriptHash !== $RepositoryScriptHash )
@@ -726,31 +727,42 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 	return $Data;
 }
 
-function GetRepositoryScriptHash( )
+function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 {
 	$c_r = curl_init( );
 
+	$Time = time();
+	$Time = $Time - ( $Time % 100 );
+
 	curl_setopt_array( $c_r, [
-		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . time(),
+		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . $Time,
 		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 5,
 		CURLOPT_CONNECTTIMEOUT => 5,
 		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
+		CURLOPT_HEADER         => 1,
+		CURLOPT_HTTPHEADER     =>
+		[
+			'If-None-Match: "' . $RepositoryScriptETag . '"'
+		]
 	] );
 
 	$Data = curl_exec( $c_r );
 
+	$HeaderSize = curl_getinfo( $c_r, CURLINFO_HEADER_SIZE );
+	$Header = substr( $Data, 0, $HeaderSize );
+	$Data = substr( $Data, $HeaderSize );
+
 	curl_close( $c_r );
 
-	if( strlen( $Data ) > 0 )
+	if( preg_match( '/ETag: "([a-z0-9]+)"/', $Header, $ETag ) === 1 )
 	{
-		return sha1( $Data );
+		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	global $LocalScriptHash;
-	return $LocalScriptHash;
+	return strlen( $Data ) > 0 ? sha1( $Data ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
