@@ -231,7 +231,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$CleanZones = [];
 	$HardZones = 0;
 	$MediumZones = 0;
-	$EasyZones = 0;
+	$LowZones = 0;
 	$ZoneMessages = [];
 	
 	foreach( $Zones as &$Zone )
@@ -307,7 +307,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		{
 			case 3: $HardZones++; break;
 			case 2: $MediumZones++; break;
-			case 1: $EasyZones++; break;
+			case 1: $LowZones++; break;
 		}
 
 		$CleanZones[] = $Zone;
@@ -350,7 +350,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	return [
 		'hard_zones' => $HardZones,
 		'medium_zones' => $MediumZones,
-		'easy_zones' => $EasyZones,
+		'low_zones' => $LowZones,
 		'best_zone' => $CleanZones[ 0 ],
 		'messages' => $ZoneMessages,
 	];
@@ -398,25 +398,25 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 			$SkippedPlanets[ $Planet[ 'id' ] ] = true;
 			$Planet[ 'hard_zones' ] = 0;
 			$Planet[ 'medium_zones' ] = 0;
-			$Planet[ 'easy_zones' ] = 0;
+			$Planet[ 'low_zones' ] = 0;
 		}
 		else
 		{
 			$Planet[ 'hard_zones' ] = $Zone[ 'hard_zones' ];
 			$Planet[ 'medium_zones' ] = $Zone[ 'medium_zones' ];
-			$Planet[ 'easy_zones' ] = $Zone[ 'easy_zones' ];
+			$Planet[ 'low_zones' ] = $Zone[ 'low_zones' ];
 			$Planet[ 'best_zone' ] = $Zone[ 'best_zone' ];
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Easy: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - Hard: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
 				number_format( $Planet[ 'state' ][ 'capture_progress' ] * 100, 2 ),
 				$Planet[ 'hard_zones' ],
 				$Planet[ 'medium_zones' ],
-				$Planet[ 'easy_zones' ],
+				$Planet[ 'low_zones' ],
 				number_format( $Planet[ 'state' ][ 'current_players' ] ),
 				$Planet[ 'state' ][ 'name' ],
 			]
@@ -441,7 +441,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 	// https://bugs.php.net/bug.php?id=71454
 	unset( $Planet );
 
-	$Priority = [ 'hard_zones', 'medium_zones', 'easy_zones' ];
+	$Priority = [ 'hard_zones', 'medium_zones', 'low_zones' ];
 
 	usort( $Planets, function( $a, $b ) use ( $Priority )
 	{
