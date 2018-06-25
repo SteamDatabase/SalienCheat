@@ -157,7 +157,12 @@ do
 
 	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
-		$RepositoryScriptHash = GetRepositoryScriptHash( );
+		$NewRepositoryScriptHash = GetRepositoryScriptHash( );
+
+		if( $NewRepositoryScriptHash !== null )
+		{
+			$RepositoryScriptHash = $NewRepositoryScriptHash;
+		}
 	}
 
 	if( $LocalScriptHash !== $RepositoryScriptHash )
@@ -756,7 +761,7 @@ function GetRepositoryScriptHash( )
 		}
 	}
 
-	Msg( '{lightred}-- Failed to check for script in repository' );
+	return null;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
