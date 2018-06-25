@@ -123,7 +123,7 @@ do
 	$Zone = $Zone[ 'response' ][ 'zone_info' ];
 
 	Msg(
-		'>> Joined Zone {yellow}' . $Zone[ 'zone_position' ] .
+		'>> Joined Zone {green}' . $Zone[ 'zone_position' ] .
 		'{normal} on Planet {green}' . $BestPlanetAndZone[ 'id' ] .
 		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
@@ -508,7 +508,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		if( !$Planet[ 'state' ][ 'captured' ] )
 		{
-			Msg( '>> Next Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+			Msg( '>> Next Zone is {green}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
 
 			return $Planet;
 		}
