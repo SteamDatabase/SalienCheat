@@ -150,7 +150,7 @@ do
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
-	if ( !isset( $RepositoryScriptHash ) || $LocalScriptHash === $RepositoryScriptHash )
+	if ( !isset( $RepositoryScriptHash ) || $LocalScriptHash !== $RepositoryScriptHash )
 		$RepositoryScriptHash = GetRepositoryScriptHash( );
 
 	if ( $LocalScriptHash !== $RepositoryScriptHash )
