@@ -209,7 +209,7 @@ class Saliens(requests.Session):
             planet['medium_zones'] = sorted((z for z in planet['zones']
                                              if (not z['captured']
                                                  and z['difficulty'] == 2
-                                                 and z.get('capture_progress', 0) < 0.96)),
+                                                 and z.get('capture_progress', 0) < 0.90)),
                                             reverse=True,
                                             key=lambda x: x['zone_position'])
 
@@ -560,7 +560,7 @@ try:
             while (zones
                    and zones[0]['difficulty'] > 1
                    and (zones[0].get('capture_progress', 0)
-                        + min(game.zone_capture_rate, 0.1) >= 1)):
+                        + min(game.zone_capture_rate, 0.2) >= 1)):
                 zones.pop(0)
 
             if not zones:
@@ -596,7 +596,7 @@ try:
                 # skip if zone is likely to get captured while we wait, except easy zones
                 if (game.planet['zones'][zone_id]['difficulty'] > 1
                    and (game.planet['zones'][zone_id].get('capture_progress', 0)
-                        + min(game.zone_capture_rate, 0.1) >= 1)):
+                        + min(game.zone_capture_rate, 0.2) >= 1)):
                     game.log("^GRN++^NOR Zone likely to complete early. Moving on...")
                     break
 
