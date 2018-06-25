@@ -45,7 +45,8 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = $RepositoryScriptHash = GetRepositoryScriptHash( );
+$LocalScriptHash = sha1_file( __FILE__ );
+$RepositoryScriptHash = GetRepositoryScriptHash( );
 
 $WaitTime = 110;
 $KnownPlanets = [];
@@ -157,12 +158,7 @@ do
 
 	if( $LocalScriptHash === $RepositoryScriptHash )
 	{
-		$NewRepositoryScriptHash = GetRepositoryScriptHash( );
-
-		if( $NewRepositoryScriptHash !== null )
-		{
-			$RepositoryScriptHash = $NewRepositoryScriptHash;
-		}
+		$RepositoryScriptHash = GetRepositoryScriptHash( );
 	}
 
 	if( $LocalScriptHash !== $RepositoryScriptHash )
@@ -735,7 +731,7 @@ function GetRepositoryScriptHash( )
 	$c_r = curl_init( );
 
 	curl_setopt_array( $c_r, [
-		CURLOPT_URL            => 'https://api.github.com/repos/SteamDatabase/SalienCheat/git/trees/master',
+		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . time(),
 		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
@@ -748,20 +744,13 @@ function GetRepositoryScriptHash( )
 
 	curl_close( $c_r );
 
-	$Data = json_decode( $Data, true );
-
-	if ( isset( $Data[ 'tree' ] ) )
+	if( strlen( $Data ) > 0 )
 	{
-		foreach( $Data[ 'tree' ] as &$File )
-		{
-			if ( $File[ 'path' ] === "cheat.php" )
-			{
-				return $File[ 'sha' ];
-			}
-		}
+		return sha1( $Data );
 	}
 
-	return null;
+	global $LocalScriptHash;
+	return $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
