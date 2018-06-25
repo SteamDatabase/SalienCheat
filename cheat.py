@@ -12,6 +12,7 @@ from io import open
 from time import sleep, time
 from itertools import count
 from datetime import datetime
+from random import randint
 
 import requests
 from tqdm import tqdm
@@ -568,9 +569,15 @@ try:
                 game.player_info.pop('active_planet')
                 break
 
-            # choose highest priority zone
-            zone_id = zones[0]['zone_position']
-            difficulty = zones[0]['difficulty']
+            # count the number of zones of highest difficulty in zones list
+            highdiff_count = [x['difficulty'] for x in zones].count(zones[0]['difficulty'])
+
+            # chose a random high difficulty zone to distrubute users
+            zone_index = randint(0, highdiff_count - 1)
+
+            # set zone
+            zone_id = zones[zone_index]['zone_position']
+            difficulty = zones[zone_index]['difficulty']
             game.zone_capture_rate = 0
 
             deadline = time() + 60 * 10  # rescan planets every 10min
