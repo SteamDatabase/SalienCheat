@@ -249,6 +249,12 @@ function GetNextLevelProgress( $Data )
 		3600000, // Level 12
 		4800000, // Level 13
 		6000000, // Level 14
+		7200000, // Level 15
+		8400000, // Level 16
+		9600000, // Level 17
+		10800000, // Level 18
+		12000000, // Level 19
+		13200000, // Level 20
 	];
 
 	$PreviousLevel = $Data[ 'new_level' ] - 1;
