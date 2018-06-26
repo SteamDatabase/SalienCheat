@@ -297,7 +297,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$HighZones = 0;
 	$MediumZones = 0;
 	$LowZones = 0;
-	$BossZones = false;
+	$BossZones = [];
 	$ZoneMessages = [];
 
 	$ZonePaces[ $Planet ][ 'times' ][] = microtime( true );
