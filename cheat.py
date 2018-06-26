@@ -402,7 +402,6 @@ class Saliens(requests.Session):
             self.zone_pbar.desc = "Zone"
             self.zone_pbar.n = 0
             self.zone_pbar.total = 0
-            self.zone_pbar.rate_psec = 0
             self.zone_pbar.last_print_t = time()
             self.zone_pbar.bar_format = self.zone_pbar.bar_format_tmpl % ''
 
@@ -570,7 +569,6 @@ try:
             # choose highest priority zone
             zone_id = zones[0]['zone_position']
             difficulty = zones[0]['difficulty']
-            game.zone_capture_rate *= 0.5
 
             deadline = time() + 60 * 10  # rescan planets every 10min
 
