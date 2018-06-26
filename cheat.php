@@ -340,7 +340,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
 			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
-			$Cutoff = 1.0 - max( 0.01, $PaceCutoff / 15 );
+			$Cutoff = 1.0 - max( 0.01, $PaceCutoff / 7 );
 			$PaceTime = $PaceCutoff > 0 ? ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime ) : 1000;
 
 			if( $PaceCutoff > 0.015 )
