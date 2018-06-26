@@ -25,7 +25,39 @@ You can also provide token directly in CLI, to ease running multiple accounts:
 php cheat.php token1
 php cheat.php token2
 ```
+### Android
 
+To use SalienCheat on **Android** follow the following steps;
+
+1. Install Termux from Play Store
+
+2. Give Storage Permissions to Termux (Long press the app icon> app info> permissions> Storage)
+
+3. Open Termux
+
+4. Type "apt update" enter
+
+5. Type "apt upgrade" enter
+
+6. Type "apt install termux-api php" enter
+
+7. Type "pkg install git php"
+
+8. Type "git clone https://github.com/SteamDatabase/SalienCheat.git"
+
+9. Type "cd SalienCheat"
+
+10. Type "php cheat.php YOURTOKEN"
+
+**To Update Script as @xPaw is working very hard to make stable Script**
+
+1. hit ctrl-c (Volume down + C) to stop the script
+
+2. Type "git pull"
+
+3. Type "php cheat.php YOURTOKEN"
+
+I hope this help, this is the best way to use this script power efficiently on android device.
 ### Linux
 
 1. Install `php-curl` and enable it in `php.ini`
