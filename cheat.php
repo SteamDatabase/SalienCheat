@@ -50,8 +50,6 @@ $RepositoryScriptETag = '';
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
 $WaitTime = 110;
-$KnownPlanets = [];
-$SkippedPlanets = [];
 $ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
@@ -83,7 +81,7 @@ while( !isset( $Data[ 'response' ][ 'score' ] ) );
 
 do
 {
-	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+	$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 }
 while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -117,7 +115,7 @@ do
 
 		do
 		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 		}
 		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -159,7 +157,7 @@ do
 
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 	}
 	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -439,7 +437,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	];
 }
 
-function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $WaitTime )
+function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -452,6 +450,8 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 	foreach( $Planets as &$Planet )
 	{
+		$Planet[ 'sort_key' ] = 0;
+
 		if( empty( $Planet[ 'state' ][ 'capture_progress' ] ) )
 		{
 			$Planet[ 'state' ][ 'capture_progress' ] = 0.0;
@@ -461,8 +461,6 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		{
 			$Planet[ 'state' ][ 'current_players' ] = 0;
 		}
-
-		$KnownPlanets[ $Planet[ 'id' ] ] = true;
 
 		if( !isset( $ZonePaces[ $Planet[ 'id' ] ] ) )
 		{
@@ -481,7 +479,6 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		if( $Zone === false )
 		{
 			$ZonePaces[ $Planet[ 'id' ] ] = [];
-			$SkippedPlanets[ $Planet[ 'id' ] ] = true;
 			$Planet[ 'high_zones' ] = 0;
 			$Planet[ 'medium_zones' ] = 0;
 			$Planet[ 'low_zones' ] = 0;
@@ -521,59 +518,40 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 				return $Planet;
 			}
-		}
-	}
 
-	// https://bugs.php.net/bug.php?id=71454
-	unset( $Planet );
-
-	$Priority = [ 'high_zones', 'medium_zones', 'low_zones' ];
-
-	usort( $Planets, function( $a, $b ) use ( $Priority )
-	{
-		// Sort planets by least amount of zones
-		for( $i = 0; $i < 3; $i++ )
-		{
-			$Key = $Priority[ $i ];
-
-			if( $a[ $Key ] !== $b[ $Key ] )
+			if( $Planet[ 'low_zones' ] > 0 )
 			{
-				return $a[ $Key ] - $b[ $Key ];
+				$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
+			}
+
+			if( $Planet[ 'medium_zones' ] > 0 )
+			{
+				$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
+			}
+
+			if( $Planet[ 'high_zones' ] > 0 )
+			{
+				$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
 			}
 		}
-
-		return $a[ 'id' ] - $b[ 'id' ];
-	} );
-
-	// Loop three times - first loop tries to find planet with hard zones, second loop - medium zones, and then easies
-	for( $i = 0; $i < 3; $i++ )
-	foreach( $Planets as &$Planet )
-	{
-		if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
-		{
-			continue;
-		}
-
-		if( !$Planet[ $Priority[ $i ] ] )
-		{
-			continue;
-		}
-
-		if( !$Planet[ 'state' ][ 'captured' ] )
-		{
-			Msg(
-				'>> Best Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
-				'{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%' .
-				'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] ) .
-				'{normal}) on Planet {green}' . $Planet[ 'id' ] .
-				' (' . $Planet[ 'state' ][ 'name' ] . ')'
-			);
-
-			return $Planet;
-		}
 	}
 
-	return $Planets[ 0 ];
+	usort( $Planets, function( $a, $b )
+	{
+		return $b[ 'sort_key' ] - $a[ 'sort_key' ];
+	} );
+
+	$Planet = $Planets[ 0 ];
+
+	Msg(
+		'>> Best Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
+		'{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%' .
+		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] ) .
+		'{normal}) on Planet {green}' . $Planet[ 'id' ] .
+		' (' . $Planet[ 'state' ][ 'name' ] . ')'
+	);
+
+	return $Planet;
 }
 
 function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
