@@ -56,6 +56,7 @@ else
 
 $WaitTime = 110;
 $ZonePaces = [];
+$OldScore = 0;
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
 
@@ -200,13 +201,20 @@ do
 
 		echo PHP_EOL;
 
+		// Store our own old score because the API may increment score while giving an error (e.g. a timeout)
+		if( !$OldScore )
+		{
+			$OldScore = $Data[ 'old_score' ];
+		}
+
 		Msg(
 			'>> Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
-			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $Data[ 'old_score' ] ) . ')' .
+			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $OldScore ) . ')' .
 			'{normal} - Current Level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 		
+		$OldScore = $Data[ 'new_score' ];
 		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
 		$Hours = floor( $Time / 60 );
 		$Minutes = $Time % 60;
@@ -592,6 +600,8 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 	{
 		Msg( '   Leaving planet {green}' . $ActivePlanet . '{normal} because we want to be on {green}' . $LeaveCurrentPlanet );
 		Msg( '   Time accumulated on planet {green}' . $ActivePlanet . '{normal}: {yellow}' . gmdate( 'H\h m\m s\s', $Data[ 'response' ][ 'time_on_planet' ] ) );
+
+		echo PHP_EOL;
 
 		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $ActivePlanet );
 	}
