@@ -42,8 +42,6 @@ def get_access_token(force_input=False):
 
                 if not token_re.match(token):
                     token = ''
-                else:
-                    game.log("^GRN++^NOR Loaded token from token.txt")
 
     if not token:
         token = _input("Login to steamcommunity.com\n"
