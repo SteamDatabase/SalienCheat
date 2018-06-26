@@ -565,7 +565,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 				'>> Best Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
 				'{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%' .
 				'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] ) .
-				') on Planet {green}' . $Planet[ 'id' ] .
+				'{normal}) on Planet {green}' . $Planet[ 'id' ] .
 				' (' . $Planet[ 'state' ][ 'name' ] . ')'
 			);
 
