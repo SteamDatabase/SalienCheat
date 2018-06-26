@@ -9,16 +9,14 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 	exit( 1 );
 }
 
-$EnvToken = getenv('TOKEN');
-
 if( $argc === 2 )
 {
 	$Token = $argv[ 1 ];
 }
-else if( is_string( $EnvToken ) )
+else if( isset( $_SERVER[ 'TOKEN' ] ) )
 {
 	// if the token was provided as an env var, use it
-	$Token = $EnvToken;
+	$Token = $_SERVER[ 'TOKEN' ];
 }
 else
 {
@@ -37,8 +35,6 @@ else
 	
 	unset( $ParsedToken );
 }
-
-unset( $EnvToken );
 
 if( strlen( $Token ) !== 32 )
 {
