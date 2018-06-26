@@ -8,8 +8,6 @@ import os
 import re
 import sys
 import json
-import ctypes
-import platform
 from io import open
 from time import sleep, time
 from itertools import count
@@ -17,24 +15,6 @@ from datetime import datetime
 
 import requests
 from tqdm import tqdm
-
-# color support
-colors = (
-    ('^NOR', '\033[0m'),
-    ('^GRN', '\033[0;32m'),
-    ('^YEL', '\033[0;33m'),
-    ('^RED', '\033[0;31m'),
-    ('^GRY', '\033[0;36m'),
-    )
-
-if sys.platform == "win32":
-    if platform.win32_ver()[0] == '10':
-        # enable color support on windows 10
-        kernel32 = ctypes.windll.kernel32
-        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-    else:
-        # disable other windows versions
-        colors = [(k, '') for k, v in colors]
 
 # determine input func
 try:
@@ -90,7 +70,13 @@ class Saliens(requests.Session):
     planet = None
     zone_id = None
     zone_capture_rate = 0
-    colors = colors
+    colors = (
+        ('^NOR', '\033[0m'),
+        ('^GRN', '\033[0;32m'),
+        ('^YEL', '\033[0;33m'),
+        ('^RED', '\033[0;31m'),
+        ('^GRY', '\033[0;36m'),
+        )
 
     def __init__(self, access_token):
         super(Saliens, self).__init__()
@@ -478,8 +464,8 @@ class Saliens(requests.Session):
 # ----- MAIN -------
 
 
-game = Saliens(None)
-game.access_token = get_access_token()
+access_token = get_access_token()
+game = Saliens(access_token)
 
 # display current stats
 game.log("^GRN++^NOR Getting player info...")

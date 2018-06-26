@@ -33,6 +33,12 @@ php cheat.php token2
 
 ## Python
 
+### Windows
+
+1. [Download this script](https://github.com/SteamDatabase/SalienCheat/archive/master.zip)
+2. Extract it into a new folder
+3. Click `python-cheat.bat` and follow instructions
+
 ### Linux/Cygwin
 
 0. (optional) Setup virtual env: `virtualenv env && source env/bin/activate`
