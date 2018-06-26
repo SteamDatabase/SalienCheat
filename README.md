@@ -71,11 +71,11 @@ php cheat.php token2
 ## Heroku
 1. Fork this repository on your GitHub account.
 2. Create new app with Heroku
-3. Connect app to GitHub: your_forked_repo/SalienCheat
+3. Connect app to GitHub (your fork): your_github_user/SalienCheat
 4. (optional) Enable automatic deploys (each time you merge changes with upstream repo the app redeploys)
 5. Deploy branch
-6. In Settings and set SALIENS_TOKEN as a Config Var
-7. In Resources and disable web dyno and enable worker
+6. In Settings: set SALIENS_TOKEN as a Config Var
+7. In Resources: disable web dyno and enable worker
 
 To view script output with colors:
   * Install heroku-cli and login
