@@ -28,8 +28,15 @@ php cheat.php token2
 
 ### Linux
 
-1. Install `php-curl` and enable it in `php.ini`
-2. You know what you are doing. 🐧
+0. Install `php-curl` and enable it in `php.ini`
+0. Install `screen`
+0. `git clone https://github.com/SteamDatabase/SalienCheat.git`
+0. Create `tokens.txt` with one token per line (making sure to use LF line endings)
+0. Change `CHEAT_DIR` and `TOKENS_FILE` at the top of `cheat.sh`
+0. Set `cheat.sh` executable and run it
+0. Use a cron to auto update, you know what you are doing. 🐧
+
+`cheat.sh` will check for updates and any new or not running tokens in `tokens.txt` each run.
 
 ## Python
 
