@@ -52,7 +52,6 @@ $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalSc
 $WaitTime = 110;
 $KnownPlanets = [];
 $SkippedPlanets = [];
-$ZonePaces = [];
 
 Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
 
@@ -83,7 +82,7 @@ while( !isset( $Data[ 'response' ][ 'score' ] ) );
 
 do
 {
-	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
 }
 while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -117,7 +116,7 @@ do
 
 		do
 		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
 		}
 		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -138,7 +137,7 @@ do
 
 		do
 		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
 		}
 		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -173,7 +172,7 @@ do
 
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $ZonePaces, $WaitTime );
+		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
 	}
 	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -290,7 +289,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
+function GetPlanetState( $Planet, $WaitTime )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -305,9 +304,6 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$ZoneMessages = [];
-
-	$ZonePaces[ $Planet ][ 'times' ][] = microtime( true );
-	$CurrentTimes = $ZonePaces[ $Planet ][ 'times' ];
 
 	foreach( $Zones as &$Zone )
 	{
@@ -352,30 +348,6 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 	unset( $Zone );
 
-	$ShouldTruncate = count( $ZonePaces[ $Planet ][ 'times' ] ) > 1;
-
-	foreach( $Zones as $Zone )
-	{
-		if( !isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
-		{
-			$ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] = [ $Zone[ 'capture_progress' ] ];
-		}
-		else
-		{
-			if( $ShouldTruncate )
-			{
-				array_shift( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] );
-			}
-
-			$ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ][] = $Zone[ 'capture_progress' ];
-		}
-	}
-
-	if( $ShouldTruncate )
-	{
-		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
-	}
-
 	if( empty( $CleanZones ) )
 	{
 		return false;
@@ -400,7 +372,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	];
 }
 
-function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $WaitTime )
+function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, $WaitTime )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -425,23 +397,14 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 
 		$KnownPlanets[ $Planet[ 'id' ] ] = true;
 
-		if( !isset( $ZonePaces[ $Planet[ 'id' ] ] ) )
-		{
-			$ZonePaces[ $Planet[ 'id' ] ] =
-			[
-				'times' => []
-			];
-		}
-
 		do
 		{
-			$Zone = GetPlanetState( $Planet[ 'id' ], $ZonePaces, $WaitTime );
+			$Zone = GetPlanetState( $Planet[ 'id' ], $WaitTime );
 		}
 		while( $Zone === null && sleep( 5 ) === 0 );
 
 		if( $Zone === false )
 		{
-			$ZonePaces[ $Planet[ 'id' ] ] = [];
 			$SkippedPlanets[ $Planet[ 'id' ] ] = true;
 			$Planet[ 'high_zones' ] = 0;
 			$Planet[ 'medium_zones' ] = 0;
