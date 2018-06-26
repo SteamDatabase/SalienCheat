@@ -634,7 +634,7 @@ function GetCurl( )
 			'Origin: https://steamcommunity.com',
 			'Referer: https://steamcommunity.com/saliengame/play',
 			'Connection: Keep-Alive',
-			'Keep-Alive: 300'
+			'Keep-Alive: timeout=300'
 		],
 	] );
 
