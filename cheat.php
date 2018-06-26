@@ -45,7 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = md5( trim( file_get_contents( __FILE__ ) ) );
+$LocalScriptHash = md5( TrimScript( file_get_contents( __FILE__ ) ) );
 $RepositoryScriptETag = '';
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
@@ -730,6 +730,13 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 	return $Data;
 }
 
+function TrimScript( $ScriptData )
+{
+    $chars = array( '\r\n', '\r', '\n', '\t', ' ' );
+
+    return str_replace( $chars, '', $ScriptData );
+}
+
 function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 {
 	$c_r = curl_init( );
@@ -765,7 +772,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? md5( trim( $Data ) ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? md5( TrimScript( $Data ) ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
