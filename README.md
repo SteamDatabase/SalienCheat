@@ -77,6 +77,6 @@ php cheat.php token2
 6. In Settings and set SALIENS_TOKEN as a Config Var
 7. In Resources and disable web dyno and enable worker
 
-To view script with colors:
-  * Install heroku-cli
-  * Run `heroku logs -a your_app_name --tail`
+To view script output with colors:
+  * Install heroku-cli and login
+  * Run from Terminal/Powershell/CMD: `heroku logs -a your_app_name --tail`
