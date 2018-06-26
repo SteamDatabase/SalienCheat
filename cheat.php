@@ -255,8 +255,12 @@ function GetScoreForZone( $Zone )
 		case 1: $Score = 5; break;
 		case 2: $Score = 10; break;
 		case 3: $Score = 20; break;
+
+		// Set fallback score equal to high zone score to avoid uninitialized
+		// variable if new zone difficulty is introduced (e.g., for boss zones)
+		default: $Score = 20;
 	}
-	
+
 	return $Score * 120;
 }
 
