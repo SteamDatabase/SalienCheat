@@ -620,6 +620,12 @@ function GetCurl( )
 
 	$c = curl_init( );
 
+	$Headers = [
+			'Accept: */*',
+			'Origin: https://steamcommunity.com',
+			'Referer: https://steamcommunity.com/saliengame/play'
+	];
+
 	curl_setopt_array( $c, [
 		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
@@ -627,15 +633,7 @@ function GetCurl( )
 		CURLOPT_TIMEOUT        => 30,
 		CURLOPT_CONNECTTIMEOUT => 10,
 		CURLOPT_HEADER         => 1,
-		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem',
-		CURLOPT_HTTPHEADER     =>
-		[
-			'Accept: */*',
-			'Origin: https://steamcommunity.com',
-			'Referer: https://steamcommunity.com/saliengame/play',
-			'Connection: Keep-Alive',
-			'Keep-Alive: 300'
-		],
+		CURLOPT_CAINFO         => __DIR__ . '/cacert.pem'
 	] );
 
 	if ( !empty( $_SERVER[ 'LOCAL_ADDRESS' ] ) )
@@ -647,6 +645,14 @@ function GetCurl( )
 	{
 		curl_setopt( $c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0 );
 	}
+	else
+	{
+		// HTTP/2 forbids using these headers
+		$Headers[] = 'Connection: Keep-Alive';
+		$Headers[] = 'Keep-Alive: timeout=300';
+	}
+
+	curl_setopt( $c, CURLOPT_HTTPHEADER, $Headers );
 
 	return $c;
 }
