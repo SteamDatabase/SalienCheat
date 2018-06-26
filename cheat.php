@@ -289,6 +289,7 @@ function GetPlanetState( $Planet )
 	$HighZones = 0;
 	$MediumZones = 0;
 	$LowZones = 0;
+	$BossZone = false;
 	$ZoneMessages = [];
 
 	foreach( $Zones as &$Zone )
@@ -303,10 +304,10 @@ function GetPlanetState( $Planet )
 			continue;
 		}
 
-		// Always join boss zone
+		// Store boss zone separately to ensure it has priority later
 		if( $Zone[ 'type' ] == 4 )
 		{
-			return $Zone;
+			$BossZone = $Zone;
 		}
 		else if( $Zone[ 'type' ] != 3 )
 		{
@@ -338,15 +339,23 @@ function GetPlanetState( $Planet )
 		return false;
 	}
 
-	usort( $CleanZones, function( $a, $b )
+	// Always join boss zone
+	if ( $BossZone )
 	{
-		if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
+		$CleanZones = [ $BossZone ];
+	}
+	else
+	{
+		usort( $CleanZones, function( $a, $b )
 		{
-			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
-		}
-		
-		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
-	} );
+			if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
+			{
+				return $b[ 'zone_position' ] - $a[ 'zone_position' ];
+			}
+
+			return $b[ 'difficulty' ] - $a[ 'difficulty' ];
+		} );
+	}
 
 	return [
 		'high_zones' => $HighZones,
