@@ -83,7 +83,7 @@ do
 		}
 	}
 }
-while( !isset( $Data[ 'response' ][ 'score' ] ) );
+while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
 
 do
 {
@@ -107,7 +107,7 @@ do
 			$SteamThinksPlanet = LeaveCurrentGame( $Token );
 		}
 	}
-	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet );
+	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( 1 ) === 0 );
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
 	$WaitedTimeAfterJoinZone = microtime( true );
@@ -587,7 +587,7 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 		}
 	}
-	while( !isset( $Data[ 'response' ][ 'score' ] ) );
+	while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
 
 	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
 	{
