@@ -325,7 +325,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
-		$Cutoff = 0.97;
+		$Cutoff = 0.99;
 
 		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
 		{
@@ -343,7 +343,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
 			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
-			//$Cutoff = 1.0 - max( 0.03, $PaceCutoff );
+			$Cutoff = 1.0 - max( 0.01, $PaceCutoff / 15 );
 			$PaceTime = $PaceCutoff > 0 ? ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime ) : 1000;
 
 			if( $PaceCutoff > 0.015 )
@@ -353,10 +353,11 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 				$ZoneMessages[] =
 				[
-					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Pace: {yellow}%6s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
+					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}%6s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
 					[
 						$Zone[ 'zone_position' ],
 						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
+						number_format( $Cutoff * 100, 2 ),
 						'+' . number_format( $PaceCutoff * 100, 2 ),
 						$Minutes,
 						$Seconds,
