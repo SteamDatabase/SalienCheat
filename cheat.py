@@ -93,7 +93,7 @@ class Saliens(requests.Session):
 
         data = None
         resp = None
-        deadline = time() + 60
+        deadline = time() + 30
 
         while not data:
             try:
@@ -117,7 +117,7 @@ class Saliens(requests.Session):
                 self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
 
                 if eresult == 93 and time() < deadline:
-                    sleep(5)
+                    sleep(3)
                     continue
 
                 data = rdata['response']
