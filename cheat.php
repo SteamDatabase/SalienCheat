@@ -554,6 +554,38 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, &$ZonePaces, $W
 		return $a[ 'id' ] - $b[ 'id' ];
 	} );
 
+	if( file_exists( __DIR__ . '/planet_override.txt' ) )
+	{
+		$planet_override = trim( file_get_contents( __DIR__ . '/planet_override.txt' ) );
+		if( is_numeric( $planet_override ) )
+		{
+			foreach( $Planets as &$Planet )
+			{
+				if( isset( $SkippedPlanets[ $Planet[ 'id' ] ] ) )
+				{
+					continue;
+				}
+
+				if( $Planet[ 'state' ][ 'captured' ] )
+				{
+					continue;
+				}
+
+				if( $Planet[ 'id' ] != $planet_override )
+				{
+					continue;
+				}
+
+				Msg( '>> {lightred}Overridden{normal} to {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] . '{normal} on Planet {green}' . $Planet[ 'id' ] . ' (' . $Planet[ 'state' ][ 'name' ] . ')' );
+				
+				return $Planet;
+			}
+		}
+	}
+
+	// https://bugs.php.net/bug.php?id=71454
+	unset( $Planet );
+
 	// Loop three times - first loop tries to find planet with hard zones, second loop - medium zones, and then easies
 	for( $i = 0; $i < 3; $i++ )
 	foreach( $Planets as &$Planet )
