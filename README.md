@@ -67,3 +67,16 @@ php cheat.php token2
 2. To build: `docker build . -t steamdb/saliencheat`
 3. To run: `docker run -it --init --rm -e TOKEN=<32 character token from gettoken url> steamdb/saliencheat`
 4. To stop running, Ctrl+C
+
+## Heroku
+1. Fork this repository on your GitHub account.
+2. Create new app with [Heroku](https://dashboard.heroku.com)
+3. Connect app to GitHub (your fork): your_github_user/SalienCheat
+4. (optional) Enable automatic deploys (each time you merge changes from upstream repo the app redeploys)
+5. Deploy branch
+6. In Settings: set SALIENS_TOKEN as a Config Var
+7. In Resources: disable web dyno and enable worker
+
+To view script output with colors:
+  * Install heroku-cli and login
+  * Run from Terminal/Powershell/CMD: `heroku logs -a your_app_name --tail`
