@@ -45,7 +45,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
+$LocalScriptHash = md5( trim( file_get_contents( __FILE__ ) ) );
 $RepositoryScriptETag = '';
 $RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 
@@ -765,7 +765,7 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 		$RepositoryScriptETag = $ETag[ 1 ];
 	}
 
-	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+	return strlen( $Data ) > 0 ? md5( trim( $Data ) ) : $LocalScriptHash;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
