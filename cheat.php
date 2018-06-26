@@ -789,3 +789,4 @@ function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 		echo $Message;
 	}
 }
+# vim: set tabstop=8 softtabstop=8 shiftwidth=8 noexpandtab :
