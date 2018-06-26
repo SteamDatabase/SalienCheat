@@ -82,7 +82,7 @@ while( !isset( $Data[ 'response' ][ 'score' ] ) );
 
 do
 {
-	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
+	$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets );
 }
 while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -116,7 +116,7 @@ do
 
 		do
 		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
+			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets );
 		}
 		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -128,20 +128,6 @@ do
 	if( empty( $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] ) )
 	{
 		$Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] = 0.0;
-	}
-
-	// Rescan planets if we join zone that will finish before we do
-	if( $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] >= $BestPlanetAndZone[ 'best_zone' ][ 'cutoff' ] )
-	{
-		Msg( '{lightred}!! This zone will finish before us, rescanning and restarting...' );
-
-		do
-		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
-		}
-		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
-
-		continue;
 	}
 
 	Msg(
@@ -172,7 +158,7 @@ do
 
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
+		$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets );
 	}
 	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
 
@@ -289,7 +275,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetPlanetState( $Planet, $WaitTime )
+function GetPlanetState( $Planet )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -342,7 +328,6 @@ function GetPlanetState( $Planet, $WaitTime )
 			case 1: $LowZones++; break;
 		}
 
-		$Zone[ 'cutoff' ] = $Cutoff;
 		$CleanZones[] = $Zone;
 	}
 
@@ -372,7 +357,7 @@ function GetPlanetState( $Planet, $WaitTime )
 	];
 }
 
-function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, $WaitTime )
+function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -399,7 +384,7 @@ function GetBestPlanetAndZone( &$SkippedPlanets, &$KnownPlanets, $WaitTime )
 
 		do
 		{
-			$Zone = GetPlanetState( $Planet[ 'id' ], $WaitTime );
+			$Zone = GetPlanetState( $Planet[ 'id' ] );
 		}
 		while( $Zone === null && sleep( 5 ) === 0 );
 
