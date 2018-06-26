@@ -420,6 +420,11 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	{
 		if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
 		{
+			if( (int)( $a[ 'capture_progress' ] * 100 ) !== (int)( $b[ 'capture_progress' ] * 100 ) )
+			{
+				return (int)( $a[ 'capture_progress' ] * 100000 ) - (int)( $b[ 'capture_progress' ] * 100000 );
+			}
+
 			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
 		}
 		
@@ -542,7 +547,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 	$Planet = $Planets[ 0 ];
 
 	Msg(
-		'>> Best Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
+		'>> Next Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
 		'{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%' .
 		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] ) .
 		'{normal}) on Planet {green}' . $Planet[ 'id' ] .
