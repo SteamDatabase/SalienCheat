@@ -516,11 +516,14 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 	}
 
 	$ActivePlanet = $Data[ 'response' ][ 'active_planet' ];
+	$TimeOnPlanet = $Data[ 'response' ][ 'time_on_planet' ];
 
 	if( $LeaveCurrentPlanet > 0 && $LeaveCurrentPlanet !== $ActivePlanet )
 	{
 		Msg( '   Leaving planet {yellow}' . $ActivePlanet . '{normal} because we want to be on {yellow}' . $LeaveCurrentPlanet );
 	
+		Msg( '   Time spent on planet {yellow}' . $ActivePlanet . '{normal}: {yellow}' . gmdate( "H:m:s", $TimeOnPlanet ) );
+		
 		SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $ActivePlanet );
 	}
 
