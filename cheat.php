@@ -42,9 +42,17 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
-$RepositoryScriptETag = '';
-$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
+{
+	$UpdateCheck = false;
+}
+else
+{
+	$UpdateCheck = true;
+	$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
+	$RepositoryScriptETag = '';
+	$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+}
 
 $WaitTime = 110;
 $ZonePaces = [];
@@ -138,14 +146,17 @@ do
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
 	$PlanetCheckTime = microtime( true );
 
-	if( $LocalScriptHash === $RepositoryScriptHash )
+	if( $UpdateCheck )
 	{
-		$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
-	}
+		if( $LocalScriptHash === $RepositoryScriptHash )
+		{
+			$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
+		}
 
-	if( $LocalScriptHash !== $RepositoryScriptHash )
-	{
-		Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
+		if( $LocalScriptHash !== $RepositoryScriptHash )
+		{
+			Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
+		}
 	}
 
 	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 0 ) . ' seconds before rescanning planets...' );
