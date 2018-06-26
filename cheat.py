@@ -106,7 +106,7 @@ class Saliens(requests.Session):
 
                 rdata = resp.json()
                 if 'response' not in rdata:
-                    raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
+                    raise Exception("NoJSON EResult %s" % eresult)
             except Exception as exp:
                 self.log("^RED-- POST %-46s %s", endpoint, str(exp))
 
@@ -144,7 +144,7 @@ class Saliens(requests.Session):
 
                 rdata = resp.json()
                 if 'response' not in rdata:
-                    raise Exception("NoJSON EResult %s" % (resp.status_code, eresult))
+                    raise Exception("NoJSON EResult %s" % eresult)
             except Exception as exp:
                 self.log("^RED-- GET  %-46s %s", endpoint, str(exp))
 
