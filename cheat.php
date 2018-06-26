@@ -130,20 +130,6 @@ do
 		$Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] = 0.0;
 	}
 
-	// Rescan planets if we join zone that will finish before we do
-	if( $Zone[ 'response' ][ 'zone_info' ][ 'capture_progress' ] >= $BestPlanetAndZone[ 'best_zone' ][ 'cutoff' ] )
-	{
-		Msg( '{lightred}!! This zone will finish before us, rescanning and restarting...' );
-
-		do
-		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $SkippedPlanets, $KnownPlanets, $WaitTime );
-		}
-		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
-
-		continue;
-	}
-
 	Msg(
 		'>> Joined Zone {yellow}' . $Zone[ 'zone_position' ] .
 		'{normal} on Planet {green}' . $BestPlanetAndZone[ 'id' ] .
