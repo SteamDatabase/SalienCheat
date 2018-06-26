@@ -207,15 +207,15 @@ class Saliens(requests.Session):
 
             planet['medium_zones'] = sorted((z for z in planet['zones']
                                              if (not z['captured']
-                                                 and z['difficulty'] == 2
-                                                 and z.get('capture_progress', 0) < 0.90)),
+                                                 and z['difficulty'] == 2)),
+#                                                and z.get('capture_progress', 0) < 0.90)),
                                             reverse=True,
                                             key=lambda x: x['zone_position'])
 
             planet['hard_zones'] = sorted((z for z in planet['zones']
                                            if (not z['captured']
-                                               and z['difficulty'] == 3
-                                               and z.get('capture_progress', 0) < 0.95)),
+                                               and z['difficulty'] == 3)),
+#                                              and z.get('capture_progress', 0) < 0.95)),
                                           reverse=True,
                                           key=lambda x: x['zone_position'])
             planet['boss_zones'] = sorted((z for z in planet['zones']
@@ -554,12 +554,12 @@ try:
                      + game.planet['medium_zones']
                      + game.planet['easy_zones'])
 
-            # filter out zones that are very close to getting captured
-            while (zones
-                   and zones[0]['difficulty'] > 1
-                   and (zones[0].get('capture_progress', 0)
-                        + min(game.zone_capture_rate, 0.2) >= 1)):
-                zones.pop(0)
+#           # filter out zones that are very close to getting captured
+#           while (zones
+#                  and zones[0]['difficulty'] > 1
+#                  and (zones[0].get('capture_progress', 0)
+#                       + min(game.zone_capture_rate, 0.2) >= 1)):
+#               zones.pop(0)
 
             if not zones:
                 game.log("^GRN++^NOR No open zones left on planet")
@@ -590,12 +590,12 @@ try:
                    and not game.planet['zones'][zone_id]['captured']
                    ):
 
-                # skip if zone is likely to get captured while we wait, except easy zones
-                if (game.planet['zones'][zone_id]['difficulty'] > 1
-                   and (game.planet['zones'][zone_id].get('capture_progress', 0)
-                        + min(game.zone_capture_rate, 0.2) >= 1)):
-                    game.log("^GRN++^NOR Zone likely to complete early. Moving on...")
-                    break
+#               # skip if zone is likely to get captured while we wait, except easy zones
+#               if (game.planet['zones'][zone_id]['difficulty'] > 1
+#                  and (game.planet['zones'][zone_id].get('capture_progress', 0)
+#                       + min(game.zone_capture_rate, 0.2) >= 1)):
+#                   game.log("^GRN++^NOR Zone likely to complete early. Moving on...")
+#                   break
 
                 game.log("^GRN++^NOR Fighting in ^YEL%szone^NOR %s (^YEL%s^NOR) for ^YEL110sec",
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
@@ -609,7 +609,7 @@ try:
                 # refresh progress bars while in battle
                 for i in count(start=1):
                     # stop when battle is finished or zone was captured
-                    if time() >= stoptime or game.planet['zones'][zone_id]['captured']:
+                    if time() >= stoptime:  # or game.planet['zones'][zone_id]['captured']:
                         break
 
                     sleep(1)
@@ -619,14 +619,14 @@ try:
 
                     game.pbar_refresh()
 
-                if game.planet['zones'][zone_id]['captured']:
-                    game.log("^RED-- Zone was captured before we could submit score")
-                else:
-                    score = 120 * (5 * (2**(difficulty - 1)))
-                    game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
-                    game.report_score(score)
-                    game.refresh_player_info()
-                    game.refresh_planet_info()
+#               if game.planet['zones'][zone_id]['captured']:
+#                   game.log("^RED-- Zone was captured before we could submit score")
+#               else:
+                score = 120 * (5 * (2**(difficulty - 1)))
+                game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
+                game.report_score(score)
+                game.refresh_player_info()
+                game.refresh_planet_info()
 
                 # incase user gets stuck
                 game.leave_zone(False)
