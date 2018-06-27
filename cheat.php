@@ -236,7 +236,8 @@ do
 		);
 		
 		$OldScore = $Data[ 'new_score' ];
-		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
+		$WaitTimeSeconds = $WaitTime / 60;
+		$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
 		$Hours = floor( $Time / 60 );
 		$Minutes = $Time % 60;
 		$Date = date_create();
