@@ -12,12 +12,7 @@ $COLOR_CODES = [
 	'{background-blue}',
 ];
 
-$DisplayColors = IsColorSupported( );
-
-if( isset( $_SERVER[ 'FORCE_ENABLE_COLORS' ] ) && (bool)$_SERVER[ 'FORCE_ENABLE_COLORS' ] )
-	$DisplayColors = true;
-else if( isset( $_SERVER[ 'FORCE_DISABLE_COLORS' ] ) && (bool)$_SERVER[ 'FORCE_DISABLE_COLORS' ] )
-	$DisplayColors = false;
+$DisplayColors = isset( $_SERVER[ 'FORCE_COLORS_SETTING' ] ) ? (bool)$_SERVER[ 'FORCE_COLORS_SETTING' ] : IsColorSupported( );
 
 if( $DisplayColors )
 {
