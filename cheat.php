@@ -557,12 +557,23 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 			}
 		}
 	}
-
-	usort( $Planets, function( $a, $b )
+	
+	if( $Planet[ 'high_zones' ] == 0 && $Planet[ 'medium_zones' ] == 0 )
 	{
-		return $b[ 'sort_key' ] - $a[ 'sort_key' ];
-	} );
-
+		usort( $Planets, function( $a, $b )
+		{
+			return $a[ 'state' ][ 'capture_progress' ] < $b[ 'state' ][ 'capture_progress' ];
+		} );
+	}
+	
+	else
+	{
+		usort( $Planets, function( $a, $b )
+		{
+			return $b[ 'sort_key' ] - $a[ 'sort_key' ];
+		} );
+	}
+	
 	$Planet = $Planets[ 0 ];
 
 	Msg(
