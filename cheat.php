@@ -508,7 +508,8 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 	}
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
-
+	$OnlyEasy = True;
+	
 	foreach( $Planets as &$Planet )
 	{
 		$Planet[ 'sort_key' ] = 0;
@@ -594,14 +595,33 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 			{
 				$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
 			}
+			
+			if( !( $Planet[ 'high_zones' ] == 0 && $Planet[ 'medium_zones' ] == 0 ) )
+			{
+				$OnlyEasy = False;
+			}
+			else
+			{
+				$Planet[ 'sort_key' ] = $Planet[ 'state' ][ 'capture_progress' ];
+			}
 		}
 	}
-
-	usort( $Planets, function( $a, $b )
+	
+	if( $OnlyEasy == True )
+	{		
+		usort( $Planets, function( $a, $b )
+		{
+			return $a[ 'sort_key' ] < $b[ 'sort_key' ];
+		} );
+	}
+	else
 	{
-		return $b[ 'sort_key' ] - $a[ 'sort_key' ];
-	} );
-
+		usort( $Planets, function( $a, $b )
+		{
+			return $b[ 'sort_key' ] - $a[ 'sort_key' ];
+		} );
+	}
+	
 	$Planet = $Planets[ 0 ];
 
 	Msg(
