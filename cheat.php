@@ -207,7 +207,7 @@ do
 
 	if( $Data[ 'eresult' ] == 93 )
 	{
-		$LagAdjustedWaitTime = min( 10, ceil( $SkippedLagTime + 0.3 ) );
+		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
 
 		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
 
