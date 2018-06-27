@@ -1,1 +1,1 @@
-worker: DISABLE_COLORS=1 IGNORE_UPDATES=1 php cheat.php $SALIENS_TOKEN
+worker: php -d date.timezone=$TIMEZONE cheat.php $SALIENS_TOKEN

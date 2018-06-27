@@ -21,7 +21,7 @@
 2. Launch Terminal and run the script: `php downloads/cheat.php`
 
 You can also provide token directly in CLI, to ease running multiple accounts:
-```
+```bash
 php cheat.php token1
 php cheat.php token2
 ```
@@ -69,14 +69,24 @@ php cheat.php token2
 4. To stop running, Ctrl+C
 
 ## Heroku
-1. Fork this repository on your GitHub account.
-2. Create new app with [Heroku](https://dashboard.heroku.com)
-3. Connect app to GitHub (your fork): your_github_user/SalienCheat
-4. (optional) Enable automatic deploys (each time you merge changes from upstream repo the app redeploys)
-5. Deploy branch
-6. In Settings: set SALIENS_TOKEN as a Config Var
-7. In Resources: disable web dyno and enable worker
+### Deploying with web-console
 
-To view script output with colors:
-  * Install heroku-cli and login
-  * Run from Terminal/Powershell/CMD: `heroku logs -a your_app_name --tail`
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+1. Click the button above.
+2. Set SALIENS_TOKEN & IGNORE_UPDATES.
+3. That's all!
+
+To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_NAME]/logs
+
+### Updating
+
+If you are using Windows, open cmd by pressing <kbd>win</kbd>+<kbd>r</kbd> -> type `cmd` -> press <kbd>Enter</kbd> and then enter the following:
+```bash
+git clone https://git.heroku.com/[APP_NAME].git -o heroku
+cd [APP_NAME]
+git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
+git fetch upstream
+git merge remotes/upstream/master
+git push heroku master
+```
