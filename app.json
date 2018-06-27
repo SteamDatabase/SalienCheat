@@ -4,11 +4,11 @@
     "repository": "https://github.com/SteamDatabase/SalienCheat",
     "env": {
         "SALIENS_TOKEN": {
-            "description": "Get token from https://steamcommunity.com/saliengame/gettoken and place below",
+            "description": "Get token from https://steamcommunity.com/saliengame/gettoken and place below | https://i.imgur.com/T3gi8DG.png <- help on finding the token!",
             "value": ""
         },
         "IGNORE_UPDATES": {
-            "description": "Set to 0 or 1 | 1 = True 0 = False",
+            "description": "Set to 0 or 1 | 1 = True 0 = False | setting to true will make logs not spit out 'Script has been updated on GitHub since you started this script, please make sure to update' anymore",
             "value": ""
         },
         "DISABLE_COLORS": {

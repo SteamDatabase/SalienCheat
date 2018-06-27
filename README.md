@@ -77,13 +77,16 @@ php cheat.php token2
 2. Set SALIENS_TOKEN & IGNORE_UPDATES.
 3. That's all!
 
+To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_NAME]/logs
+
 ### Updating
 
+Open cmd by `pressing ctrl + r -> type cmd -> press enter` and then enter the following if on windows. If on linux you should know how to do this. --
 ```bash
-$ git clone https://git.heroku.com/[APP_NAME].git -o heroku
-$ cd [APP_NAME]
-$ git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
-$ git fetch upstream
-$ git merge remotes/upstream/master
-$ git push heroku master
+git clone https://git.heroku.com/[APP_NAME].git -o heroku
+cd [APP_NAME]
+git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
+git fetch upstream
+git merge remotes/upstream/master
+git push heroku master
 ```
