@@ -17,7 +17,7 @@
         },
         "TIMEZONE": {
             "description": "Get timezone from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List",
-            "value": "UTC"
+            "value": "Asia/Jakarta"
         }
     },
     "formation": {
