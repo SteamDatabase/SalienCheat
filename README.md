@@ -21,7 +21,7 @@
 2. Launch Terminal and run the script: `php downloads/cheat.php`
 
 You can also provide token directly in CLI, to ease running multiple accounts:
-```
+```bash
 php cheat.php token1
 php cheat.php token2
 ```
@@ -81,7 +81,7 @@ To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_
 
 ### Updating
 
-Open cmd by `pressing ctrl + r -> type cmd -> press enter` and then enter the following if on windows. If on linux you should know how to do this. --
+If you are using Windows, open cmd by pressing <kbd>win</kbd>+<kbd>r</kbd> -> type `cmd` -> press <kbd>Enter</kbd> and then enter the following:
 ```bash
 git clone https://git.heroku.com/[APP_NAME].git -o heroku
 cd [APP_NAME]
