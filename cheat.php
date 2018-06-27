@@ -54,11 +54,19 @@ else
 	$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 }
 
+// 10/10 code
+$TerminalSupportsColors =
+	( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) ) ||
+	( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) ) ||
+	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) );
+$DisableColors = isset( $_SERVER[ 'DISABLE_COLORS' ] ) || !$TerminalSupportsColors;
+unset( $TerminalSupportsColors );
+
 $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 
-Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
 do
 {
@@ -770,6 +778,8 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 {
+	global $DisableColors;
+
 	$Message = str_replace(
 		[
 			'{normal}',
@@ -777,17 +787,19 @@ function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 			'{yellow}',
 			'{lightred}',
 			'{grey}',
+			'{background-blue}',
 		],
-		[
+		$DisableColors ? '' : [
 			"\033[0m",
 			"\033[0;32m",
 			"\033[1;33m",
 			"\033[1;31m",
 			"\033[0;36m",
+			"\033[37;44m",
 		],
 	$Message, $Count );
 
-	if( $Count > 0 )
+	if( $Count > 0 && !$DisableColors )
 	{
 		$Message .= "\033[0m";
 	}
