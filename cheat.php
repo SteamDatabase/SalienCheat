@@ -9,6 +9,7 @@ $COLOR_CODES = [
 	'{yellow}',
 	'{lightred}',
 	'{grey}',
+	'{background-blue}',
 ];
 
 if( !isset( $_SERVER[ 'DISABLE_COLORS_SALIENS' ] ) || !(bool)$_SERVER[ 'DISABLE_COLORS_SALIENS' ] )
@@ -19,6 +20,7 @@ if( !isset( $_SERVER[ 'DISABLE_COLORS_SALIENS' ] ) || !(bool)$_SERVER[ 'DISABLE_
 		"\033[1;33m",
 		"\033[1;31m",
 		"\033[0;36m",
+		"\033[37;44m",
 	];
 	$ANSI_COLOR_SUFFIX = "\033[0m";
 }
@@ -83,7 +85,7 @@ $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 
-Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB{normal}" );
 
 do
 {
