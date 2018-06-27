@@ -24,13 +24,7 @@ if( !isset( $_SERVER[ 'DISABLE_COLORS_SALIENS' ] ) || !(bool)$_SERVER[ 'DISABLE_
 }
 else
 {
-	$ANSI_COLOR_CODES = [
-		"",
-		"",
-		"",
-		"",
-		"",
-	];
+	$ANSI_COLOR_CODES = "";
 	$ANSI_COLOR_SUFFIX = "";
 }
 
