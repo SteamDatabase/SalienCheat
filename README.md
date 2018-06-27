@@ -21,7 +21,7 @@
 2. Launch Terminal and run the script: `php downloads/cheat.php`
 
 You can also provide token directly in CLI, to ease running multiple accounts:
-```
+```bash
 php cheat.php token1
 php cheat.php token2
 ```
@@ -77,13 +77,16 @@ php cheat.php token2
 2. Set SALIENS_TOKEN & IGNORE_UPDATES.
 3. That's all!
 
+To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_NAME]/logs
+
 ### Updating
 
+If you are using Windows, open cmd by pressing <kbd>win</kbd>+<kbd>r</kbd> -> type `cmd` -> press <kbd>Enter</kbd> and then enter the following:
 ```bash
-$ git clone https://git.heroku.com/[APP_NAME].git -o heroku
-$ cd [APP_NAME]
-$ git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
-$ git fetch upstream
-$ git merge remotes/upstream/master
-$ git push heroku master
+git clone https://git.heroku.com/[APP_NAME].git -o heroku
+cd [APP_NAME]
+git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
+git fetch upstream
+git merge remotes/upstream/master
+git push heroku master
 ```
