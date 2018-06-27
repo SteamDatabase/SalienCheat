@@ -66,6 +66,7 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
 }
 
+$GameVersion = 1;
 $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
@@ -242,6 +243,18 @@ do
 	}
 }
 while( true );
+
+function CheckGameVersion( $Data )
+{
+	global $GameVersion;
+
+	if( !isset( $Data[ 'response' ][ 'game_version' ] ) || $GameVersion >= $Data[ 'response' ][ 'game_version' ] )
+	{
+		return;
+	}
+
+	Msg( '{lightred}!! Game version changed to ' . $Data[ 'response' ][ 'game_version' ] );
+}
 
 function GetNextLevelProgress( $Data )
 {
@@ -474,6 +487,8 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
+
+	CheckGameVersion( $Planets );
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
 	{
