@@ -31,7 +31,7 @@ else
 		"",
 		"",
 	];
-	$ANSI_COLOR_FIX = "";
+	$ANSI_COLOR_SUFFIX = "";
 }
 
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
