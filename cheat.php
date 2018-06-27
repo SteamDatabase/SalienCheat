@@ -751,6 +751,8 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 			}
 			else if( $EResult === 10 )
 			{
+				$Data = '{}'; // Retry this exact request
+
 				Msg( '{lightred}-- EResult 10 means Steam is busy' );
 
 				sleep( 3 );
