@@ -55,12 +55,16 @@ else
 }
 
 // 10/10 code
-$TerminalSupportsColors =
+$DisableColors = !(
 	( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) ) ||
 	( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) ) ||
-	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) );
-$DisableColors = isset( $_SERVER[ 'DISABLE_COLORS' ] ) || !$TerminalSupportsColors;
-unset( $TerminalSupportsColors );
+	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) )
+);
+
+if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
+{
+	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
+}
 
 $WaitTime = 110;
 $ZonePaces = [];
