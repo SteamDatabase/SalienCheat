@@ -29,7 +29,11 @@ php cheat.php token2
 ### Linux
 
 1. Install `php-curl` and enable it in `php.ini`
-2. You know what you are doing. 🐧
+2. git clone https://github.com/SteamDatabase/SalienCheat
+3. cd SalienCheat
+4. echo yourtoken (get token from https://steamcommunity.com/saliengame/gettoken) > token.txt example: echo 6d60d6596958ebb9847f08c6fb014729 > token.txt
+5. If you have screen installed: screen -AmdS cheat php cheat.php otherwise php cheat.php &
+🐧
 
 ## Python
 
