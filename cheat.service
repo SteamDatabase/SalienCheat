@@ -1,0 +1,10 @@
+[Unit]
+Description=SalienCheat
+
+[Service]
+User=#YOUR_USERNAME
+WorkingDirectory=#WORKING_DIRECTORY
+ExecStart=/usr/bin/php #FULL_PATH_TO_FILE
+
+[Install]
+WantedBy=multi-user.target
