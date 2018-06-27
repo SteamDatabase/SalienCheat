@@ -70,6 +70,8 @@ $GameVersion = 1;
 $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
+$LastKnownPlanet = 0;
+$LastKnownZone = 0;
 
 Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
@@ -114,22 +116,28 @@ do
 {
 	echo PHP_EOL;
 
-	do
+	// Only get player info and leave current planet if it changed
+	if( $LastKnownPlanet !== $BestPlanetAndZone[ 'id' ] )
 	{
-		// Leave current game before trying to switch planets (it will report InvalidState otherwise)
-		$SteamThinksPlanet = LeaveCurrentGame( $Token, $BestPlanetAndZone[ 'id' ] );
-	
-		if( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet )
+		do
 		{
-			SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $BestPlanetAndZone[ 'id' ] . '&access_token=' . $Token );
-	
-			$SteamThinksPlanet = LeaveCurrentGame( $Token );
+			// Leave current game before trying to switch planets (it will report InvalidState otherwise)
+			$SteamThinksPlanet = LeaveCurrentGame( $Token, $BestPlanetAndZone[ 'id' ] );
+		
+			if( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet )
+			{
+				SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $BestPlanetAndZone[ 'id' ] . '&access_token=' . $Token );
+		
+				$SteamThinksPlanet = LeaveCurrentGame( $Token );
+			}
 		}
+		while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( 1 ) === 0 );
+
+		$LastKnownPlanet = $BestPlanetAndZone[ 'id' ];
 	}
-	while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( 1 ) === 0 );
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
-	$WaitedTimeAfterJoinZone = microtime( true );
+	$PlanetCheckTime = microtime( true );
 
 	// Rescan planets if joining failed
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
@@ -158,15 +166,13 @@ do
 		'++ Joined Zone {yellow}' . $Zone[ 'zone_position' ] .
 		'{normal} on Planet {green}' . $BestPlanetAndZone[ 'id' ] .
 		'{normal} - Captured: {yellow}' . number_format( $Zone[ 'capture_progress' ] * 100, 2 ) . '%' .
-		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone ) .
-		'{grey} (' . time() . ')'
+		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Zone )
 	);
 
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
 	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
 	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
-	$PlanetCheckTime = microtime( true );
 
 	if( $UpdateCheck )
 	{
@@ -181,7 +187,7 @@ do
 		}
 	}
 
-	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' seconds before rescanning planets...' );
+	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' second lag) seconds before rescanning planets...' );
 
 	usleep( $WaitTimeBeforeFirstScan * 1000000 );
 
@@ -200,14 +206,11 @@ do
 		usleep( $LagAdjustedWaitTime * 1000000 );
 	}
 
-	$WaitedTimeAfterJoinZone = microtime( true ) - $WaitedTimeAfterJoinZone;
-	Msg( '   {grey}Waited ' . number_format( $WaitedTimeAfterJoinZone, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' second lag) total seconds before sending score {grey}(' . time() . ')' );
-
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
 	if( $Data[ 'eresult' ] == 93 )
 	{
-		$LagAdjustedWaitTime = min( 10, ceil( $SkippedLagTime + 0.3 ) );
+		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
 
 		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
 
@@ -236,7 +239,8 @@ do
 		);
 		
 		$OldScore = $Data[ 'new_score' ];
-		$Time = ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * ( $WaitTime / 60 );
+		$WaitTimeSeconds = $WaitTime / 60;
+		$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
 		$Hours = floor( $Time / 60 );
 		$Minutes = $Time % 60;
 		$Date = date_create();
@@ -731,7 +735,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 				Msg( '{lightred}!! API failed - ' . $ErrorMessage[ 0 ] );
 			}
 
-			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )
+			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )  // EResult.AccessDenied
 			{
 				echo PHP_EOL;
 
@@ -741,15 +745,16 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				sleep( 10 );
 			}
-			else if( $EResult === 42 && $Method === 'ITerritoryControlMinigameService/ReportScore' )
+			else if( $EResult === 11 ) // EResult.InvalidState
 			{
-				Msg( '{lightred}-- EResult 42 means zone has been captured while you were in it' );
+				global $LastKnownPlanet;
+				$LastKnownPlanet = 0;
 			}
-			else if( $EResult === 0 || $EResult === 11 )
+			else if( $EResult === 0 ) // timeout
 			{
 				Msg( '{lightred}-- This problem should resolve itself, wait for a couple of minutes' );
 			}
-			else if( $EResult === 10 )
+			else if( $EResult === 10 ) // EResult.Busy
 			{
 				$Data = '{}'; // Retry this exact request
 

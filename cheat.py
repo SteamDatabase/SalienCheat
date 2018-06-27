@@ -130,13 +130,13 @@ class Saliens(requests.Session):
 
         return data
 
-    def sget(self, endpoint, query_params=None, retry=False):
+    def sget(self, endpoint, query_params=None, retry=False, timeout=15):
         data = None
         resp = None
 
         while not data:
             try:
-                resp = self.get(self.api_url % endpoint, params=query_params)
+                resp = self.get(self.api_url % endpoint, params=query_params, timeout=timeout)
 
                 eresult = resp.headers.get('X-eresult', -1)
                 if resp.status_code != 200:
@@ -148,7 +148,7 @@ class Saliens(requests.Session):
             except Exception as exp:
                 self.log("^RED-- GET  %-46s %s", endpoint, str(exp))
 
-                if resp is None or resp.status_code >= 500:
+                if (resp is None and retry) or (resp and resp.status_code >= 500):
                     sleep(2)
                     continue
             else:
@@ -183,20 +183,28 @@ class Saliens(requests.Session):
         self.player_info = self.spost('ITerritoryControlMinigameService/GetPlayerInfo', retry=True)
         return self.player_info
 
-    def refresh_planet_info(self):
+    def refresh_planet_info(self, retry=True, timeout=15):
         if 'active_planet' in self.player_info:
-            self.planet = self.get_planet(self.player_info['active_planet'])
+            planet = self.get_planet(self.player_info['active_planet'], retry=retry, timeout=timeout)
+
+            if planet is not None:
+                self.planet = planet
         else:
             self.planet = {}
 
         self.pbar_refresh()
         return self.planet
 
-    def get_planet(self, pid):
-        planet = self.sget('ITerritoryControlMinigameService/GetPlanet',
-                           {'id': pid, '_': int(time())},
-                           retry=True,
-                           ).get('planets', [{}])[0]
+    def get_planet(self, pid, retry=True, timeout=15):
+        data = self.sget('ITerritoryControlMinigameService/GetPlanet',
+                         {'id': pid, '_': int(time())},
+                         retry=retry,
+                         timeout=timeout,
+                         )
+        if data is None:
+            return
+        else:
+            planet = data.get('planets', [{}])[0]
 
         if planet:
             planet['easy_zones'] = sorted((z for z in planet['zones']
@@ -615,9 +623,8 @@ try:
                     sleep(1)
 
                     if (i % 11) == 0:
-                        game.refresh_planet_info()
-
-                    game.pbar_refresh()
+                        game.refresh_planet_info(retry=False, timeout=max(0, stoptime - time()))
+                        game.pbar_refresh()
 
 #               if game.planet['zones'][zone_id]['captured']:
 #                   game.log("^RED-- Zone was captured before we could submit score")
