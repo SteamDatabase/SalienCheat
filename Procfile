@@ -1,1 +1,1 @@
-worker: php cheat.php $SALIENS_TOKEN
+worker: php -d date.timezone=$TIMEZONE cheat.php $SALIENS_TOKEN
