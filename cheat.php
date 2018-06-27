@@ -3,6 +3,35 @@
 
 set_time_limit( 0 );
 
+$COLOR_CODES = [
+	'{normal}',
+	'{green}',
+	'{yellow}',
+	'{lightred}',
+	'{grey}',
+	'{background-blue}',
+];
+
+$DisplayColors = isset( $_SERVER[ 'FORCE_COLORS_SETTING' ] ) ? (bool)$_SERVER[ 'FORCE_COLORS_SETTING' ] : IsColorSupported( );
+
+if( $DisplayColors )
+{
+	$ANSI_COLOR_CODES = [
+		"\033[0m",
+		"\033[0;32m",
+		"\033[1;33m",
+		"\033[1;31m",
+		"\033[0;36m",
+		"\033[37;44m",
+	];
+	$ANSI_COLOR_SUFFIX = "\033[0m";
+}
+else
+{
+	$ANSI_COLOR_CODES = "";
+	$ANSI_COLOR_SUFFIX = "";
+}
+
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
 	Msg( 'You forgot to download cacert.pem file' );
@@ -58,7 +87,7 @@ $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 
-Msg( "\033[37;44mWelcome to SalienCheat for SteamDB\033[0m" );
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB{normal}" );
 
 do
 {
@@ -768,28 +797,44 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
 }
 
+function IsColorSupported( )
+{
+	if( defined( 'PHP_WINDOWS_VERSION_BUILD' ) )
+	{
+		if( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) )
+			return true;
+		if( isset( $_SERVER[ 'ANSICON' ] ) && (bool)$_SERVER[ 'ANSICON' ] )
+			return true;
+		if( isset( $_SERVER[ 'ConEmuANSI' ] ) && $_SERVER[ 'ConEmuANSI' ] === 'ON' )
+			return true;
+		if( isset( $_SERVER[ 'TERM' ] ) && $_SERVER[ 'TERM' ] === 'xterm' )
+			return true;
+	}
+	else
+	{
+		if( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) )
+			return true;
+		if( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) )
+			return true;
+
+		$stat = fstat( STDOUT );
+
+		if( isset( $stat[ 'mode' ] ) && ( $stat[ 'mode' ] & 0xF000 ) === 0x2000 )
+			return true;
+	}
+
+	return false;
+}
+
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 {
-	$Message = str_replace(
-		[
-			'{normal}',
-			'{green}',
-			'{yellow}',
-			'{lightred}',
-			'{grey}',
-		],
-		[
-			"\033[0m",
-			"\033[0;32m",
-			"\033[1;33m",
-			"\033[1;31m",
-			"\033[0;36m",
-		],
-	$Message, $Count );
+	global $COLOR_CODES, $ANSI_COLOR_CODES, $ANSI_COLOR_SUFFIX;
+
+	$Message = str_replace( $COLOR_CODES, $ANSI_COLOR_CODES, $Message, $Count );
 
 	if( $Count > 0 )
 	{
-		$Message .= "\033[0m";
+		$Message .= $ANSI_COLOR_SUFFIX;
 	}
 
 	$Message = '[' . date( 'H:i:s' ) . '] ' . $Message . $EOL;
