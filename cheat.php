@@ -3,6 +3,37 @@
 
 set_time_limit( 0 );
 
+$COLOR_CODES = [
+	'{normal}',
+	'{green}',
+	'{yellow}',
+	'{lightred}',
+	'{grey}',
+];
+
+if( !isset( $_SERVER[ 'DISABLE_COLORS_SALIENS' ] ) || !(bool)$_SERVER[ 'DISABLE_COLORS_SALIENS' ] )
+{
+	$ANSI_COLOR_CODES = [
+		"\033[0m",
+		"\033[0;32m",
+		"\033[1;33m",
+		"\033[1;31m",
+		"\033[0;36m",
+	];
+	$ANSI_COLOR_SUFFIX = "\033[0m";
+}
+else
+{
+	$ANSI_COLOR_CODES = [
+		"",
+		"",
+		"",
+		"",
+		"",
+	];
+	$ANSI_COLOR_FIX = "";
+}
+
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
 	Msg( 'You forgot to download cacert.pem file' );
@@ -770,26 +801,13 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 {
-	$Message = str_replace(
-		[
-			'{normal}',
-			'{green}',
-			'{yellow}',
-			'{lightred}',
-			'{grey}',
-		],
-		[
-			"\033[0m",
-			"\033[0;32m",
-			"\033[1;33m",
-			"\033[1;31m",
-			"\033[0;36m",
-		],
-	$Message, $Count );
+	global $COLOR_CODES, $ANSI_COLOR_CODES, $ANSI_COLOR_SUFFIX;
+
+	$Message = str_replace( $COLOR_CODES, $ANSI_COLOR_CODES, $Message, $Count );
 
 	if( $Count > 0 )
 	{
-		$Message .= "\033[0m";
+		$Message .= $ANSI_COLOR_SUFFIX;
 	}
 
 	$Message = '[' . date( 'H:i:s' ) . '] ' . $Message . $EOL;
