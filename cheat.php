@@ -810,7 +810,9 @@ function IsColorSupported( )
 			return true;
 		if( isset( $_SERVER[ 'ANSICON' ] ) && (bool)$_SERVER[ 'ANSICON' ] )
 			return true;
+		if( isset( $_SERVER[ 'ConEmuANSI' ] ) && $_SERVER[ 'ConEmuANSI' ] === 'ON' )
 			return true;
+		if( isset( $_SERVER[ 'TERM' ] ) && $_SERVER[ 'TERM' ] === 'xterm' )
 			return true;
 	}
 	else
