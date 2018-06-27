@@ -12,7 +12,14 @@ $COLOR_CODES = [
 	'{background-blue}',
 ];
 
-if( !isset( $_SERVER[ 'DISABLE_COLORS_SALIENS' ] ) || !(bool)$_SERVER[ 'DISABLE_COLORS_SALIENS' ] )
+$DisplayColors = IsColorSupported( );
+
+if( isset( $_SERVER[ 'FORCE_ENABLE_COLORS' ] ) && (bool)$_SERVER[ 'FORCE_ENABLE_COLORS' ] )
+	$DisplayColors = true;
+else if( isset( $_SERVER[ 'FORCE_DISABLE_COLORS' ] ) && (bool)$_SERVER[ 'FORCE_DISABLE_COLORS' ] )
+	$DisplayColors = false;
+
+if( $DisplayColors )
 {
 	$ANSI_COLOR_CODES = [
 		"\033[0m",
@@ -793,6 +800,33 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	}
 
 	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+}
+
+function IsColorSupported( )
+{
+	if( defined( 'PHP_WINDOWS_VERSION_BUILD' ) )
+	{
+		if( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) )
+			return true;
+		if( isset( $_SERVER[ 'ANSICON' ] ) && (bool)$_SERVER[ 'ANSICON' ] )
+			return true;
+			return true;
+			return true;
+	}
+	else
+	{
+		if( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) )
+			return true;
+		if( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) )
+			return true;
+
+		$stat = fstat( STDOUT );
+
+		if( isset( $stat[ 'mode' ] ) && ( $stat[ 'mode' ] & 0xF000 ) === 0x2000 )
+			return true;
+	}
+
+	return false;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
