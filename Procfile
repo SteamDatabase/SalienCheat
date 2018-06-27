@@ -1,1 +1,1 @@
-worker: php cheat.php $SALIENS_TOKEN
+worker: DISABLE_COLORS=1 IGNORE_UPDATES=1 php cheat.php $SALIENS_TOKEN
