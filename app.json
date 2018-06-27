@@ -1,0 +1,27 @@
+{
+    "name": "SalienCheat",
+    "description": "Cheating Salien minigame, the proper way",
+    "repository": "https://github.com/SteamDatabase/SalienCheat",
+    "env": {
+        "SALIENS_TOKEN": {
+            "description": "Get token from https://steamcommunity.com/saliengame/gettoken and place below",
+            "value": ""
+        },
+        "IGNORE_UPDATES": {
+            "description": "Set to 0 or 1 | 1 = True 0 = False",
+            "value": ""
+        },
+        "DISABLE_COLORS": {
+            "description": "DO NOT CHANGE THE BELOW VALUE! unless you want color for log --tail then set to 0",
+            "value": "1"
+        }
+    },
+    "formation": {
+        "web": {
+            "quantity": 0
+        },
+        "worker": {
+            "quantity": 1
+        }
+    }
+}
