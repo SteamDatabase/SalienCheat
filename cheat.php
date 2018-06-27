@@ -566,9 +566,14 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 	
 	if( $OnlyEasy == True )
 	{
+		foreach( $Planets as &$Planet )
+		{
+			$Planet[ 'sort_key' ] = $Planet[ 'state' ][ 'capture_progress' ];
+		}
+		
 		usort( $Planets, function( $a, $b )
 		{
-			return $a[ 'state' ][ 'capture_progress' ] < $b[ 'state' ][ 'capture_progress' ];
+			return $a[ 'sort_key' ] < $b[ 'sort_key' ];
 		} );
 	}
 	
