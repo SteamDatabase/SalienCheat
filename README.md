@@ -74,7 +74,7 @@ php cheat.php token2
 3. Connect app to GitHub (your fork): your_github_user/SalienCheat
 4. (optional) Enable automatic deploys (each time you merge changes from upstream repo the app redeploys)
 5. Deploy branch
-6. In Settings: set SALIENS_TOKEN as a Config Var
+6. In Settings: Press Reveal Config Vars, set Key to SALIENS_TOKEN, paste your token in to Value field
 7. In Resources: disable web dyno and enable worker
 
 To view script output with colors:
