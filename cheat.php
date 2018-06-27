@@ -71,7 +71,6 @@ $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 $LastKnownPlanet = 0;
-$LastKnownZone = 0;
 
 Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
