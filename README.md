@@ -31,6 +31,17 @@ php cheat.php token2
 1. Install `php-curl` and enable it in `php.ini`
 2. You know what you are doing. 🐧
 
+
+## NodeJS (http proxy)
+
+### Linux
+
+0. [Download this script](https://github.com/SteamDatabase/SalienCheat/archive/master.zip)
+1. Extract it into a new folder
+2. Run the script: `node [token]`
+
+Example with proxy: `node [token] http://[ip]:[port]`
+
 ## Python
 
 ### Windows
