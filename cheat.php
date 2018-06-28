@@ -66,6 +66,13 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
 }
 
+$SaliensUserAgent = false;
+
+if( isset( $_SERVER[ 'SALIENS_USER_AGENT' ] ) )
+{
+	$SaliensUserAgent = (bool)$_SERVER[ 'SALIENS_USER_AGENT' ];
+}
+
 $GameVersion = 1;
 $WaitTime = 110;
 $ZonePaces = [];
@@ -285,8 +292,12 @@ function GetNextLevelProgress( $Data )
 		9600000, // Level 17
 		10800000, // Level 18
 		12000000, // Level 19
-		14600000, // Level 20
+		14400000, // Level 20
 		16800000, // Level 21
+		19200000, // Level 22
+		21600000, // Level 23
+		24000000, // Level 24
+		26400000, // Level 25
 	];
 
 	$PreviousLevel = $Data[ 'new_level' ] - 1;
@@ -666,7 +677,7 @@ function GetCurl( )
 	$c = curl_init( );
 
 	curl_setopt_array( $c, [
-		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
+		CURLOPT_USERAGENT      => $SaliensUserAgent ? 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 30,
