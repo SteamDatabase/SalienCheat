@@ -71,7 +71,6 @@ $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 $LastKnownPlanet = 0;
-$LastKnownZone = 0;
 
 Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
@@ -150,7 +149,7 @@ do
 		{
 			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 		}
-		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
 
 		continue;
 	}
@@ -195,7 +194,7 @@ do
 	{
 		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 	}
-	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+	while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
@@ -249,8 +248,8 @@ do
 		
 		Msg(
 			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
-			'{normal} XP - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
-			'{normal} XP - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
+			'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
+			'{normal} - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
 		);
 	}
 }
@@ -291,7 +290,8 @@ function GetNextLevelProgress( $Data )
 		9600000, // Level 17
 		10800000, // Level 18
 		12000000, // Level 19
-		13200000, // Level 20
+		14600000, // Level 20
+		16800000, // Level 21
 	];
 
 	$PreviousLevel = $Data[ 'new_level' ] - 1;
@@ -466,8 +466,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	{
 		$CleanZones = $BossZones;
 	}
-
-	if( empty( $CleanZones ) )
+	else if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
@@ -535,7 +534,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 		{
 			$Zone = GetPlanetState( $Planet[ 'id' ], $ZonePaces, $WaitTime );
 		}
-		while( $Zone === null && sleep( 5 ) === 0 );
+		while( $Zone === null && sleep( 1 ) === 0 );
 
 		if( $Zone === false )
 		{
@@ -553,7 +552,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - High: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - High: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%7s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
@@ -579,6 +578,8 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 
 				return $Planet;
 			}
+
+			$Planet[ 'sort_key' ] += (int)( $Planet[ 'state' ][ 'capture_progress' ] * 100 );
 
 			if( $Planet[ 'low_zones' ] > 0 )
 			{
