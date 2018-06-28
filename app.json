@@ -12,11 +12,11 @@
             "value": ""
         },
         "DISABLE_COLORS": {
-            "description": "DO NOT CHANGE THE BELOW VALUE! unless you want color for log --tail then set to 0",
+            "description": "Disables colors for heroku logs | If you are going to use heroku logs -a APPNAME --tail then feel free to set this to 0",
             "value": "1"
         },
         "TIMEZONE": {
-            "description": "Get timezone from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List",
+            "description": "Get timezone from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List | USE 3rd column!",
             "value": "UTC"
         }
     },

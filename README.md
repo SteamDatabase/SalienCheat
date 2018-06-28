@@ -81,11 +81,22 @@ To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_
 
 ### Updating
 
+Download and install [Heroku-CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
 If you are using Windows, open cmd by pressing <kbd>win</kbd>+<kbd>r</kbd> -> type `cmd` -> press <kbd>Enter</kbd> and then enter the following:
+```bash
+heroku login
+```
+Enter your Heroku credentials and then enter the following stuff below:
+
+(Required only for first update. Safe to ignore warning about: `You appear to have cloned an empty repository`) -
 ```bash
 git clone https://git.heroku.com/[APP_NAME].git -o heroku
 cd [APP_NAME]
 git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
+```
+Then enter the following (below stuff required for all updates):
+```bash
 git fetch upstream
 git merge remotes/upstream/master
 git push heroku master
