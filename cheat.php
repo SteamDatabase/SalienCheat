@@ -668,7 +668,8 @@ function SendGET( $Method, $Data )
 function GetCurl( )
 {
 	global $c;
-
+	global $SaliensUserAgent;
+	
 	if( isset( $c ) )
 	{
 		return $c;
