@@ -149,7 +149,7 @@ do
 		{
 			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 		}
-		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
 
 		continue;
 	}
@@ -194,7 +194,7 @@ do
 	{
 		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
 	}
-	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+	while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
@@ -534,7 +534,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 		{
 			$Zone = GetPlanetState( $Planet[ 'id' ], $ZonePaces, $WaitTime );
 		}
-		while( $Zone === null && sleep( 5 ) === 0 );
+		while( $Zone === null && sleep( 1 ) === 0 );
 
 		if( $Zone === false )
 		{
