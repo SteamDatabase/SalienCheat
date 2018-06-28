@@ -23,7 +23,7 @@ else
 	// otherwise, read it from disk
 	$Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
 	$ParsedToken = json_decode( $Token, true );
-	
+
 	if( is_string( $ParsedToken ) )
 	{
 		$Token = $ParsedToken;
@@ -32,7 +32,7 @@ else
 	{
 		$Token = $ParsedToken[ 'token' ];
 	}
-	
+
 	unset( $ParsedToken );
 }
 
@@ -90,7 +90,7 @@ do
 		{
 			Msg( '{green}-- You are currently not representing any clan, so you are now part of SteamDB' );
 			Msg( '{green}-- Make sure to join{yellow} https://steamcommunity.com/groups/steamdb {green}on Steam' );
-	
+
 			SendPOST( 'ITerritoryControlMinigameService/RepresentClan', 'clanid=4777282&access_token=' . $Token );
 		}
 		else if( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] != 4777282 )
@@ -122,11 +122,11 @@ do
 		{
 			// Leave current game before trying to switch planets (it will report InvalidState otherwise)
 			$SteamThinksPlanet = LeaveCurrentGame( $Token, $BestPlanetAndZone[ 'id' ] );
-		
+
 			if( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet )
 			{
 				SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $BestPlanetAndZone[ 'id' ] . '&access_token=' . $Token );
-		
+
 				$SteamThinksPlanet = LeaveCurrentGame( $Token );
 			}
 		}
@@ -236,16 +236,16 @@ do
 			'{normal} - Current Level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
-		
+
 		$OldScore = $Data[ 'new_score' ];
 		$WaitTimeSeconds = $WaitTime / 60;
 		$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
 		$Hours = floor( $Time / 60 );
 		$Minutes = $Time % 60;
 		$Date = date_create();
-		
+
 		date_add( $Date, date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
-		
+
 		Msg(
 			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
 			'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
@@ -482,7 +482,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
 		}
-		
+
 		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
 	} );
 
