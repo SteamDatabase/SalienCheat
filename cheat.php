@@ -553,7 +553,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 		}
 
 		Msg(
-			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - High: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%8s {green}(%s)',
+			'>> Planet {green}%3d{normal} - Captured: {green}%5s%%{normal} - High: {yellow}%2d{normal} - Medium: {yellow}%2d{normal} - Low: {yellow}%2d{normal} - Players: {yellow}%7s {green}(%s)',
 			PHP_EOL,
 			[
 				$Planet[ 'id' ],
