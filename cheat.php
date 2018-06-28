@@ -68,6 +68,7 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 
 $GameVersion = 1;
 $WaitTime = 110;
+$ScanPlanetsTime = 5; // expected duration
 $ZonePaces = [];
 $OldScore = 0;
 $LastKnownPlanet = 0;
@@ -102,14 +103,20 @@ do
 			Msg( '{green}-- Happy farming!' );
 		}
 	}
+	
+	$Loopings = (bool)( !isset( $Data[ 'response' ][ 'score' ] ) );
+	sleep( 1 * (int)( $Loopings ) );
 }
-while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
+while( $Loopings );
 
 do
 {
 	$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+	
+	$Loopings = (bool)( !$BestPlanetAndZone );
+	sleep( 5 * (int)( $Loopings ) );
 }
-while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+while( $Loopings );
 
 do
 {
@@ -129,8 +136,11 @@ do
 		
 				$SteamThinksPlanet = LeaveCurrentGame( $Token );
 			}
+			
+			$Loopings = (bool)( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet );
+			sleep( 1 * (int)( $Loopings ) );
 		}
-		while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( 1 ) === 0 );
+		while( $Loopings );
 
 		$LastKnownPlanet = $BestPlanetAndZone[ 'id' ];
 	}
@@ -148,8 +158,11 @@ do
 		do
 		{
 			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+			
+			$Loopings = (bool)( !$BestPlanetAndZone );
+			sleep( 5 * (int)( $Loopings ) );
 		}
-		while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+		while( $Loopings );
 
 		continue;
 	}
@@ -171,7 +184,7 @@ do
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
 	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
-	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
+	$WaitTimeBeforeFirstScan = $WaitTime - $ScanPlanetsTime - $SkippedLagTime;
 
 	if( $UpdateCheck )
 	{
@@ -193,8 +206,11 @@ do
 	do
 	{
 		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+		
+		$Loopings = (bool)( !$BestPlanetAndZone );
+		sleep( 5 * (int)( $Loopings ) );
 	}
-	while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+	while( $Loopings );
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
@@ -231,7 +247,7 @@ do
 		}
 
 		Msg(
-			'++ Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) .
+			'++ Your Score: {lightred}' . number_format( $Data[ 'new_score' ] ) . '{normal} XP' .
 			'{yellow} (+' . number_format( $Data[ 'new_score' ] - $OldScore ) . ')' .
 			'{normal} - Current Level: {green}' . $Data[ 'new_level' ] .
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
@@ -533,8 +549,11 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 		do
 		{
 			$Zone = GetPlanetState( $Planet[ 'id' ], $ZonePaces, $WaitTime );
+			
+			$Loopings = (bool)( $Zone === null );
+			sleep( 5 * (int)( $Loopings ) );
 		}
-		while( $Zone === null && sleep( 5 ) === 0 );
+		while( $Loopings );
 
 		if( $Zone === false )
 		{
@@ -626,8 +645,11 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 		{
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 		}
+		
+		$Loopings = (bool)( !isset( $Data[ 'response' ][ 'score' ] ) );
+		sleep( 1 * (int)( $Loopings ) );
 	}
-	while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
+	while( $Loopings );
 
 	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
 	{
@@ -767,8 +789,11 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 		$Data = json_decode( $Data, true );
 		$Data[ 'eresult' ] = $EResult;
+		
+		$Loopings = (bool)( !isset( $Data[ 'response' ] ) );
+		sleep( 1 * (int)( $Loopings ) );
 	}
-	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
+	while( $Loopings );
 
 	return $Data;
 }
