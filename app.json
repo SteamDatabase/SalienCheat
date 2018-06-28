@@ -1,0 +1,31 @@
+{
+    "name": "SalienCheat",
+    "description": "Cheating Salien minigame, the proper way",
+    "repository": "https://github.com/SteamDatabase/SalienCheat",
+    "env": {
+        "SALIENS_TOKEN": {
+            "description": "Get token from https://steamcommunity.com/saliengame/gettoken and place below | https://i.imgur.com/T3gi8DG.png <- help on finding the token!",
+            "value": ""
+        },
+        "IGNORE_UPDATES": {
+            "description": "Set to 0 or 1 | 1 = True 0 = False | setting to true will make logs not spit out 'Script has been updated on GitHub since you started this script, please make sure to update' anymore",
+            "value": ""
+        },
+        "DISABLE_COLORS": {
+            "description": "DO NOT CHANGE THE BELOW VALUE! unless you want color for log --tail then set to 0",
+            "value": "1"
+        },
+        "TIMEZONE": {
+            "description": "Get timezone from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List",
+            "value": "UTC"
+        }
+    },
+    "formation": {
+        "web": {
+            "quantity": 0
+        },
+        "worker": {
+            "quantity": 1
+        }
+    }
+}
