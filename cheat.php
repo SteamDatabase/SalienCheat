@@ -467,7 +467,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		$CleanZones = $BossZones;
 	}
 
-	if( empty( $CleanZones ) )
+	if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
