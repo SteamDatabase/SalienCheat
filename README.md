@@ -14,6 +14,13 @@
 2. Extract it into a new folder
 3. Click `cheat.bat` and follow instructions
 
+### Linux subsystem for Windows 10
+1. Install Ubuntu from Windows Store
+2. Run bash
+3. Run "sudo apt-get install php7.0-cli"
+4. [Download this script](https://github.com/SteamDatabase/SalienCheat/archive/master.zip), extract,  and save token.txt file.
+5. run "php cheat.php"
+
 ### Mac
 
 0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default
