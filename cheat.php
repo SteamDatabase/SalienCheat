@@ -579,6 +579,8 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 				return $Planet;
 			}
 
+			$Planet[ 'sort_key' ] += (int)( $Planet[ 'state' ][ 'capture_progress' ] * 100 );
+
 			if( $Planet[ 'low_zones' ] > 0 )
 			{
 				$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
