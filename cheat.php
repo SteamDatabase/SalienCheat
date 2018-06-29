@@ -207,8 +207,14 @@ do
 	{
 		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
 
-		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
-
+		if( $LagAdjustedWaitTime != 1 )
+		{
+			Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
+		} else 
+		{
+			Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' second...' );
+		}
+		
 		sleep( $LagAdjustedWaitTime );
 
 		$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
