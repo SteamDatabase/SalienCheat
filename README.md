@@ -75,9 +75,8 @@ php cheat.php token2
 3. Open Termux
 4. Type `apt update` and press enter
 5. Type `apt upgrade` and press enter
-6. Type `apt install termux-api php` and press enter
-7. Download SalienCheat master zip from GitHub https://github.com/SteamDatabase/SalienCheat/archive/master.zip
-8. Unzip the zip you downloaded and extract all its content to your internal storage inside php folder (create the folder if it does not exist.) all the files should be in `/sdcard/php/` folder.
-9. Open https://steamcommunity.com/saliengame/gettoken and copy all of its contents into a token.txt file and then move the token.txt file to the same folder you cloned the files to i.e "/sdcard/php"
-10. Open Termux  and Type `php /storage/emulated/0/php/cheat.php` or `php /sdcard/php/cheat.php` and press enter
-11. After the scripts starts swipe down to access android notification and click on "Acquire wake lock" on the Termux session notification. (This will allow the termux to not go into deepsleep and keep running the script when the screen is locked.)
+6. Type `apt install termux-api php git` and press enter
+7. Type `git clone https://github.com/SteamDatabase/SalienCheat.git` and press enter
+8. Type `cd SalienCheat` and press enter
+9. Type `php cheat.php YOURTOKEN` and press enter
+10. After the scripts starts swipe down to access android notification and click on "Acquire wake lock" on the Termux session notification. (This will allow the termux to not go into deepsleep and keep running the script when the screen is locked.)
