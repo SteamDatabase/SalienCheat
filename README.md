@@ -31,6 +31,20 @@ php cheat.php token2
 1. Install `php-curl` and enable it in `php.ini`
 2. You know what you are doing. 🐧
 
+## Android
+
+1. Install [Termux](https://play.google.com/store/apps/details?id=com.termux) from PlayStore
+2. Give Storage Permissions to Termux (Long press the app icon> app info> permissions> Storage)
+3. Open Termux
+4. Type `apt update` and press enter
+5. Type `apt upgrade` and press enter
+6. Type `apt install termux-api php git` and press enter
+7. Type `git clone https://github.com/SteamDatabase/SalienCheat.git` and press enter
+8. Type `cd SalienCheat` and press enter
+9. Type `php cheat.php YOURTOKEN` and press enter
+10. After the scripts starts swipe down to access android notification and click on "Acquire wake lock" on the Termux session notification. (This will allow the termux to not go into deepsleep and keep running the script when the screen is locked.)
+
+
 ## Python
 
 ### Windows
@@ -67,16 +81,3 @@ php cheat.php token2
 2. To build: `docker build . -t steamdb/saliencheat`
 3. To run: `docker run -it --init --rm -e TOKEN=<32 character token from gettoken url> steamdb/saliencheat`
 4. To stop running, Ctrl+C
-
-
-## Android
-1. Install [Termux](https://play.google.com/store/apps/details?id=com.termux) from PlayStore
-2. Give Storage Permissions to Termux (Long press the app icon> app info> permissions> Storage)
-3. Open Termux
-4. Type `apt update` and press enter
-5. Type `apt upgrade` and press enter
-6. Type `apt install termux-api php git` and press enter
-7. Type `git clone https://github.com/SteamDatabase/SalienCheat.git` and press enter
-8. Type `cd SalienCheat` and press enter
-9. Type `php cheat.php YOURTOKEN` and press enter
-10. After the scripts starts swipe down to access android notification and click on "Acquire wake lock" on the Termux session notification. (This will allow the termux to not go into deepsleep and keep running the script when the screen is locked.)
