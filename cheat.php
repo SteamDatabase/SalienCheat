@@ -166,7 +166,7 @@ do
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
 	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
-	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
+	$WaitTimeBeforeFirstScan = $WaitTime - $SkippedLagTime - 10;
 
 	if( $UpdateCheck )
 	{
