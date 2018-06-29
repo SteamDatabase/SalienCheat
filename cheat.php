@@ -71,14 +71,15 @@ $WaitTime = 110;
 $ZonePaces = [];
 $OldScore = 0;
 $LastKnownPlanet = 0;
-
-Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
+$BestPlanetAndZone = 0;
 
 if( ini_get( 'precision' ) < 18 )
 {
 	Msg( '{teal}Fixed php float precision (was ' . ini_get( 'precision' ) . ')' );
 	ini_set( 'precision', '18' );
 }
+
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
 do
 {
@@ -107,12 +108,15 @@ while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
 
 do
 {
-	$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
-}
-while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+	if( !$BestPlanetAndZone )
+	{
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+		}
+		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
+	}
 
-do
-{
 	echo PHP_EOL;
 
 	// Only get player info and leave current planet if it changed
@@ -142,15 +146,7 @@ do
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
 		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
-
-		sleep( 1 );
-
-		do
-		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
-		}
-		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
-
+		$BestPlanetAndZone = 0;
 		continue;
 	}
 
