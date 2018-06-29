@@ -76,7 +76,7 @@ Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
 if( ini_get( 'precision' ) < 18 )
 {
-	Msg( '{grey}Fixed php float precision (was ' . ini_get( 'precision' ) . ')' );
+	Msg( '{teal}Fixed php float precision (was ' . ini_get( 'precision' ) . ')' );
 	ini_set( 'precision', '18' );
 }
 
@@ -181,7 +181,7 @@ do
 		}
 	}
 
-	Msg( '   {grey}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' second lag) seconds before rescanning planets...' );
+	Msg( '   {teal}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' second lag) seconds before rescanning planets...' );
 
 	usleep( $WaitTimeBeforeFirstScan * 1000000 );
 
@@ -195,7 +195,7 @@ do
 
 	if( $LagAdjustedWaitTime > 0 )
 	{
-		Msg( '   {grey}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' remaining seconds before submitting score...' );
+		Msg( '   {teal}Waiting ' . number_format( $LagAdjustedWaitTime, 3 ) . ' remaining seconds before submitting score...' );
 
 		usleep( $LagAdjustedWaitTime * 1000000 );
 	}
@@ -817,7 +817,7 @@ function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
 			'{green}',
 			'{yellow}',
 			'{lightred}',
-			'{grey}',
+			'{teal}',
 			'{background-blue}',
 		],
 		$DisableColors ? '' : [
