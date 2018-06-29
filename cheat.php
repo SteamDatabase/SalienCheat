@@ -183,13 +183,39 @@ do
 
 	Msg( '   {teal}Waiting ' . number_format( $WaitTimeBeforeFirstScan, 3 ) . ' (+' . number_format( $SkippedLagTime, 3 ) . ' second lag) seconds before rescanning planets...' );
 
-	usleep( $WaitTimeBeforeFirstScan * 1000000 );
-
+	$LeaveZoneEarly = false;
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+		}
+		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
+
+
+		$TimeOnPlanet = microtime( true ) - $PlanetCheckTime + $SkippedLagTime;
+		if( $Zone[ 'type' ] != 4 && $Zone[ 'difficulty' ] < 3 && $BestPlanetAndZone[ 'high_zones' ] > 0 )
+		{
+			// Account for the time it takes to leave the current zone and switch to the new one
+			// FIXME: Smarter logic than hard-coding 10
+			$JoinTimeAdjustment = 10;
+			$NewZoneScoreForRemainingTime = GetScoreForZone( $BestPlanetAndZone[ 'best_zone' ] ) * ( 1 - ( $TimeOnPlanet + $JoinTimeAdjustment ) / $WaitTime );
+
+			if( GetScoreForZone( $Zone ) < $NewZoneScoreForRemainingTime ) {
+				$LeaveZoneEarly = true;
+				Msg( '{lightred}!! Planet with hard zones became available while waiting, switching planets...' );
+			}
+		}
+
+		// exit loop 10s before the final sleep before submitting
+		$EarlyLeaveCheckSleepDuration = max( min( 100 - $TimeOnPlanet, 10 ), 0);
 	}
-	while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
+	while( !$LeaveZoneEarly && $EarlyLeaveCheckSleepDuration > 0 && usleep( $EarlyLeaveCheckSleepDuration * 1000000 ) === 0 );
+
+	if( $LeaveZoneEarly )
+	{
+		continue;
+	}
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
