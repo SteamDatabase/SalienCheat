@@ -146,7 +146,11 @@ do
 	if( empty( $Zone[ 'response' ][ 'zone_info' ] ) )
 	{
 		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
+
 		$BestPlanetAndZone = 0;
+
+		sleep( 1 );
+
 		continue;
 	}
 
