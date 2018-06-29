@@ -757,7 +757,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				Msg( '{lightred}-- EResult 10 means Steam is busy' );
 
-				sleep( 3 );
+				sleep( 10 );
 			}
 		}
 
