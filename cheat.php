@@ -73,13 +73,13 @@ $OldScore = 0;
 $LastKnownPlanet = 0;
 $BestPlanetAndZone = 0;
 
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
+
 if( ini_get( 'precision' ) < 18 )
 {
 	Msg( '{teal}Fixed php float precision (was ' . ini_get( 'precision' ) . ')' );
 	ini_set( 'precision', '18' );
 }
-
-Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
 do
 {
