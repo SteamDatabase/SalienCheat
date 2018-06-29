@@ -200,12 +200,18 @@ do
 		usleep( $LagAdjustedWaitTime * 1000000 );
 	}
 
-	$i = 3;
-	do
+	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
+
+	if( empty( $Data[ 'response' ][ 'new_score' ] ) )
 	{
+		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
+
+		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
+
+		sleep( $LagAdjustedWaitTime );
+
 		$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 	}
-	while( empty( $Data[ 'response' ][ 'new_score' ] ) && $i-- > 0 && sleep( 1 ) === 0 );
 
 	if( isset( $Data[ 'response' ][ 'new_score' ] ) )
 	{
