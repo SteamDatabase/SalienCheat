@@ -31,7 +31,7 @@ php cheat.php token2
 1. Install `php-curl` and enable it in `php.ini`
 2. You know what you are doing. 🐧
 
-## Android
+### Android
 
 1. Install [Termux](https://play.google.com/store/apps/details?id=com.termux) from PlayStore
 2. Give Storage Permissions to Termux (Long press the app icon> app info> permissions> Storage)
