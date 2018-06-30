@@ -294,8 +294,7 @@ do
 		if( $LocalScriptHash !== $RepositoryScriptHash )
 		{
 			Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
-			//Close Script
-			exit( 0 );
+			exit( 0 ); //Close Script for Auto Update
 		}
 	}
 
@@ -794,7 +793,7 @@ function GetCurl( )
 	$c = curl_init( );
 
 	curl_setopt_array( $c, [
-		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/DouglasAntunes/SalienCheat)',
+		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => '', // Let curl decide best encoding on its own
 		CURLOPT_TIMEOUT        => 30,
@@ -901,8 +900,8 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	$Time = $Time - ( $Time % 10 );
 
 	curl_setopt_array( $c_r, [
-		CURLOPT_URL            => 'https://raw.githubusercontent.com/DouglasAntunes/SalienCheat/master/cheat.php?_=' . $Time,
-		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/DouglasAntunes/SalienCheat/)',
+		CURLOPT_URL            => 'https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php?_=' . $Time,
+		CURLOPT_USERAGENT      => 'SalienCheat (https://github.com/SteamDatabase/SalienCheat/)',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_TIMEOUT        => 5,

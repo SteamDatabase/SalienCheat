@@ -13,8 +13,7 @@ if not exist git\bin\git.exe (
 
 if not exist .git\index (
 	git\bin\git.exe init > nul
-	git\bin\git.exe remote add https://github.com/DouglasAntunes/SalienCheat.git > nul
-
+	git\bin\git.exe remote add https://github.com/SteamDatabase/SalienCheat.git > nul
 )
 
 cls
