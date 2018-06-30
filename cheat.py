@@ -635,9 +635,8 @@ try:
                         heal = 0
                         #submit every 5 seconds
                         if((time+5)<time()):
-                            
                             #send boss damage
-                            response = game.send_boss_request();
+                            response = game.report_boss_damage();
                             #If there is a battle complete field
                             if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
                                 print("Boss Battle Completed")
