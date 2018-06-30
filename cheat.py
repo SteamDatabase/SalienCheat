@@ -628,15 +628,16 @@ try:
                     time_last_heal = time()
                     next_heal = randint(120,180)
                     #boss_fails_allowed = 10
-                    
+                    next_loop = time()
                     #Loop until break
                     while(True):
                         #reset heal on each iteration
                         heal = 0
                         #submit every 5 seconds
-                        if((time+5)<time()):
+                        if((next_loop+5)<time()):
+                            next_loop = time()
                             #send boss damage
-                            response = game.report_boss_damage();
+                            response = game.report_boss_damage(heal);
                             #If there is a battle complete field
                             if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
                                 print("Boss Battle Completed")
@@ -655,6 +656,7 @@ try:
                                 continue
                             #You're in a boss battle at this point, send data
                             else:
+                                heal = 0
                                 #do healing after between 120 and 180 seconds
                                 if(time_last_heal + next_heal < time()):
                                     time_last_heal = time()
@@ -664,12 +666,10 @@ try:
                                     boss_max_hp = response['boss_status']['boss_max_hp']
                                 boss_hp = response['boss_status']['boss_hp']
                                 #Print out each player.
-                                
                                 for player in response['boss_status']['boss_players']:
                                     #if(player['accountid'] == game.account_id):
                                     print(boss_hp + " / " + boss_max_hp + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name'])  + " XP Gained: " + player['xp_earned'])
-                                #Report boss damage with heal use
-                                game.report_boss_damage(heal)
+                                
                         #sleep after success or fail            
                         sleep(1)
                                            
