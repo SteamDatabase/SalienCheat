@@ -4,7 +4,6 @@
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
 2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in the same folder as `cheat.php`
-3. Select PHP or Python version of the script. You don't need both
 
 ## PHP
 
@@ -32,6 +31,8 @@ php cheat.php token2
 2. You know what you are doing. 🐧
 
 ## Python
+
+⚠ **Python version currently does not support Boss battles, so you should choose the PHP version.** ⚠
 
 ### Windows
 
