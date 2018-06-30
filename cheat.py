@@ -636,7 +636,7 @@ try:
                             #send boss damage
                             response = game.send_boss_request();
                             #If there is a battle complete field
-                            if(response.get('game_over') and response.get('game_over')!=""):
+                            if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
                                 print("Boss Battle Completed")
                                 break
                             #If waiting for players, wait a couple seconds, then try again
