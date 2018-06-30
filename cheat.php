@@ -15,7 +15,11 @@ $AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0
 if( $argc > 1 )
 {
 	$Token = $argv[ 1 ];
-	$AccountID = $argc > 2 ? $argv[ 2 ] : 0;
+
+	if( $argc > 2 )
+	{
+		$AccountID = $argv[ 2 ];
+	}
 }
 else if( isset( $_SERVER[ 'TOKEN' ] ) )
 {
