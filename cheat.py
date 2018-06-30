@@ -69,6 +69,7 @@ class Saliens(requests.Session):
     player_info = None
     planet = None
     zone_id = None
+    account_id = None
     zone_capture_rate = 0
     colors = (
         ('^NOR', '\033[0m'),
@@ -471,7 +472,8 @@ class Saliens(requests.Session):
                  )
     def report_boss_damage(self,heal):
         return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': 1,'damage_taken':0,'use_heal_ability':heal})
-
+    def get_account_id(self):
+        self.account_id = (self.access_token & 0xFFFFFFFF)
 # ----- MAIN -------
 
 
@@ -487,6 +489,9 @@ game.log("^GRN-- Welcome to SalienCheat for SteamDB")
 
 game.log("^GRN++^NOR Scanning for planets...")
 game.refresh_planet_info()
+
+#Get account Id for boss logging
+game.get_account_id()
 
 # show planet info
 planets = game.get_uncaptured_planets()
@@ -609,14 +614,16 @@ try:
                     #placeholder max HP
                     boss_max_hp = 1;
                     time_last_heal = now()
+                    next_heal = randint(120,180)
                     while(true):
-                        #submit every 5 seconds
+                        #reset heal on each iteration
                         heal = 0
-                        next_heal = randint(120,180)
+                        #submit every 5 seconds
                         if((time+5)<now()):
                             #do healing after 120S
-                            if(time_last_heal+ < now()):
+                            if(time_last_heal + next_heal < now()):
                                 time_last_heal = now()
+                                next_heal = randint(120,180)
                                 heal = 1
                             #send boss damage
                             response = game.send_boss_request();
@@ -632,13 +639,14 @@ try:
                             if(boss_max_hp == 1):
                                 boss_max_hp = response['boss_status']['boss_max_hp']
                             boss_hp = response['boss_status']['boss_hp']
-                            print(boss_hp + " / " + boss_max_hp)
+                            for player in response['boss_status']['boss_players']:
+                                if(player['accountid'] == game.account_id):
+                                    print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
                             #Report boss damage with heal use
                             game.report_boss_damage(heal)
                         #sleep after success or fail            
                         sleep(1)
-                            
-                            
+                                           
                 else: 
                     game.join_zone(zone_id)
                     stoptime = time() + 109.6
@@ -662,11 +670,11 @@ try:
                     score = 120 * (5 * (2**(difficulty - 1)))
                     game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
                     game.report_score(score)
-                    game.refresh_player_info()
-                    game.refresh_planet_info()
+                game.refresh_player_info()
+                game.refresh_planet_info()
 
-                    # incase user gets stuck
-                    game.leave_zone(False)
+                # incase user gets stuck
+                game.leave_zone(False)
                 
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
