@@ -382,13 +382,13 @@ do
 		if( isset( $Data[ 'extratime' ] ) )
 		{
 			$LagAdjustedWaitTime = $Data[ 'extratime' ] - $SkippedLagTime;
-			if( $LagAdjustedWaitTime > 0 )
+			if( $LagAdjustedWaitTime >= 0 )
 			{
-				$LagAdjustedWaitTime = min( $ScanPlanetsTime, $LagAdjustedWaitTime, $Data[ 'extratime' ] );
+				$LagAdjustedWaitTime = min( 1, $LagAdjustedWaitTime, $Data[ 'extratime' ] );
 			}
 			else
 			{
-				$LagAdjustedWaitTime = min( $ScanPlanetsTime, $SkippedLagTime, $Data[ 'extratime' ] );
+				$LagAdjustedWaitTime = min( 1, $SkippedLagTime, $Data[ 'extratime' ] );
 			}
 		}
 		else
