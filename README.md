@@ -66,5 +66,6 @@ php cheat.php token2
 ## Docker
 1. Extract contents of this script somewhere.
 2. To build: `docker build . -t steamdb/saliencheat`
-3. To run: `docker run -it --init --rm -e TOKEN=<32 character token from gettoken url> steamdb/saliencheat`
-4. To stop running, Ctrl+C
+3. To run: `docker run -it --init --rm -v '<directory/to/SalienCheat>':'/app':'rw' 'steamdb/saliencheat`
+4. In your appointed directory, have the master files there and create a `token.txt` in that same root, for the PHP script to use.
+5. To stop running, Ctrl+C
