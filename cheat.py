@@ -635,12 +635,12 @@ try:
                                 heal = 1
                             #send boss damage
                             response = game.send_boss_request();
-                            #If complete, end the loop
-                            if(response.get('game_over')):
+                            #If there is a battle complete field
+                            if(response.get('game_over') and response.get('game_over')!=""):
                                 print("Boss Battle Completed")
                                 break
                             #If waiting for players, wait a couple seconds, then try again
-                            if(reponse.get('waiting_for_players')):
+                            if(reponse.get('waiting_for_players') and reponse.get('waiting_for_players') != ""):
                                 print("Waiting for Players")
                                 #sleep to avoid DDOSDB
                                 sleep(2)
