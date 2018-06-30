@@ -462,11 +462,11 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
 	}
 
-	/*if( !empty( $BossZones ) )
+	if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
 	}
-	else*/ if( count( $CleanZones ) < 2 )
+	else if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
