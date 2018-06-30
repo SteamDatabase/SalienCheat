@@ -44,6 +44,7 @@ if( strlen( $Token ) !== 32 )
 
 // Pass env ACCOUNTID, get it from salien page source code called 'gAccountID'
 $AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
+$Verbose = isset( $_SERVER[ 'VERBOSE' ] ) ? (bool)$_SERVER[ 'VERBOSE' ] : 0;
 
 if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
 {
@@ -195,7 +196,10 @@ do
 				continue;
 			}
 
-			usort( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ], function( $a, $b ) use ( $AccountID )
+			// Strip names down to basic ASCII.
+			$RegMask = '/[\x00-\x1F\x7F-\xFF]/';
+
+			usort( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ], function( $a, $b ) use ( $AccountID, $RegMask )
 			{
 				if( $a[ 'accountid' ] == $AccountID )
 				{
@@ -206,28 +210,32 @@ do
 					return -1;
 				}
 
-				if( $b[ 'xp_earned' ] == $a[ 'xp_earned' ] )
-				{
-					return $b[ 'hp' ] - $a[ 'hp' ];
-				}
 
-				return $b[ 'xp_earned' ] - $a[ 'xp_earned' ];
+				return strcmp( preg_replace( $RegMask, '', $a['name'] ), preg_replace( $RegMask, '', $b['name'] ) );
 			} );
 
 			foreach( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ] as $Player )
 			{
+				$DefaultColor = ( $Player[ 'accountid' ] == $AccountID ? '{green}' : '{normal}' );
+
 				Msg(
 					( $Player[ 'accountid' ] == $AccountID ? '{green}@@' : '  ' ) .
-					' Player %9d - HP: %6s / %6s - Score: %10s',
+					' %-20s - HP: {yellow}%6s' . $DefaultColor  . ' / %6s - Score Gained: {yellow}%10s' . $DefaultColor .
+					( $Verbose ? ' - Start: %10s (L%2d) - Current: %10s (' . ($Player[ 'level_on_join' ] != $Player[ 'new_level' ] ? '{lightred}' : '') . 'L%2d' . $DefaultColor . ')' : '' ),
 					PHP_EOL,
 					[
-						$Player[ 'accountid' ],
+						substr( preg_replace( $RegMask, '', $Player[ 'name' ] ), 0, 20 ),
 						$Player[ 'hp' ],
 						$Player[ 'max_hp' ],
-						number_format( $Player[ 'xp_earned' ] )
+						number_format( $Player[ 'xp_earned' ] ),
+						number_format( $Player[ 'score_on_join' ] ),
+						$Player[ 'level_on_join' ],
+						number_format( $Player[ 'score_on_join' ] + $Player[ 'xp_earned' ] ),
+						$Player[ 'new_level' ]
 					]
 				);
 			}
+
 
 			if( $Data[ 'response' ][ 'game_over' ] )
 			{
