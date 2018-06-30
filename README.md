@@ -3,7 +3,7 @@
 ## First steps
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in the same folder as `cheat.php`
+2. Open https://steamcommunity.com/saliengame/gettoken and save it (<kbd>Ctrl</kbd>+<kbd>S</kbd>) as `token.txt` in the same folder as `cheat.php`
 
 ## PHP
 
