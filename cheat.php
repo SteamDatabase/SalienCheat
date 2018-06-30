@@ -540,7 +540,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $PreferLowZones, $WaitTime )
 		}
 
 		// Skip zone 0 if it's not a boss and has no capture progress, since it's currently not allowing joins on new planets.
-		if ( $Zone[ 'zone_position' ] == 0 && $Zone[ 'capture_progress' ] == 0 )
+		if ( $Zone[ 'zone_position' ] == 0 && $Zone[ 'capture_progress' ] < 5 )
 		{
 			continue;
 		}
