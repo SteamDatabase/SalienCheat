@@ -576,6 +576,10 @@ try:
                 break
 
             # choose highest priority zone
+            #Boss error 17 hardcode fix for now
+            if(zones[0]['zone_position'] == 0):
+                zones.pop(0)
+            
             zone_id = zones[0]['zone_position']
             difficulty = zones[0]['difficulty']
 
@@ -586,13 +590,13 @@ try:
                 2: 'medium',
                 3: 'hard',
                 }
-
+            
             game.log("^GRN++^NOR Selecting %szone ^YEL%s^NOR (%s)....",
                      '^REDboss^NOR ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                      zone_id,
                      dmap.get(difficulty, difficulty),
                      )
-
+            
             # fight in the zone
             while (game.planet
                    and time() < deadline
