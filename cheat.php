@@ -70,7 +70,9 @@ $DisableColors = !(
 	( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) ) ||
 	( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) ) ||
 	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) ) ||
-	( getenv( 'TERM' ) === 'xterm-256color' )
+	( false !== getenv( 'ANSICON' ) ) ||
+	( 'ON' === getenv( 'ConEmuANSI' ) ) ||
+	( substr( getenv( 'TERM' ), 0, 5 ) === 'xterm' )
 );
 
 if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
