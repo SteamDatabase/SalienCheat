@@ -637,7 +637,11 @@ try:
                             if(reponse.get('waiting_for_players')):
                                 print("Waiting for Players")
                                 sleep(2)
-                                pass
+                                continue
+                            if(response.get('boss_status') && response[ 'boss_status' ] == ""):
+                                print("Waiting...")
+                                sleep(1)
+                                continue
                             if(boss_max_hp == 1):
                                 boss_max_hp = response['boss_status']['boss_max_hp']
                             boss_hp = response['boss_status']['boss_hp']
