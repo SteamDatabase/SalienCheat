@@ -675,6 +675,14 @@ function GetBestPlanetAndZone( &$ZonePaces, $PreferLowZones, $WaitTime, $FailSle
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
 
+	usort( $Planets, function( $a, $b )
+	{
+		$a = isset( $a[ 'state' ][ 'boss_zone_position' ] ) ? 1000 : $a[ 'id' ];
+		$b = isset( $b[ 'state' ][ 'boss_zone_position' ] ) ? 1000 : $b[ 'id' ];
+
+		return $b - $a;
+	} );
+
 	foreach( $Planets as &$Planet )
 	{
 		$Planet[ 'sort_key' ] = 0;
