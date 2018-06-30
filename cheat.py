@@ -613,16 +613,18 @@ try:
                     game.join_zone_boss(zone_id)
                     #placeholder max HP
                     boss_max_hp = 1;
-                    time_last_heal = now()
+                    time_last_heal = time()
                     next_heal = randint(120,180)
-                    while(true):
+                    #boss_fails_allowed = 10
+                    
+                    while(True):
                         #reset heal on each iteration
                         heal = 0
                         #submit every 5 seconds
-                        if((time+5)<now()):
-                            #do healing after 120S
-                            if(time_last_heal + next_heal < now()):
-                                time_last_heal = now()
+                        if((time+5)<time()):
+                            #do healing after between 120 and 180 seconds
+                            if(time_last_heal + next_heal < time()):
+                                time_last_heal = time()
                                 next_heal = randint(120,180)
                                 heal = 1
                             #send boss damage
