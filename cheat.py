@@ -657,7 +657,7 @@ try:
                                 #do healing after between 120 and 180 seconds
                                 if(time_last_heal + next_heal < time()):
                                     time_last_heal = time()
-                                    next_heal = randint(120,180)
+                                    next_heal = 120
                                     heal = 1
                                 if(boss_max_hp == 1):
                                     boss_max_hp = response['boss_status']['boss_max_hp']
