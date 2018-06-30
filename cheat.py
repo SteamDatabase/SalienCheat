@@ -470,8 +470,10 @@ class Saliens(requests.Session):
                            planet_name,
                            )
                  )
+    #Send boss damage with heal ability, damage 0, damage to boss 1
     def report_boss_damage(self,heal):
         return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': 1,'damage_taken':0,'use_heal_ability':heal})
+    #For converting id to 
     def get_account_id(self):
         self.account_id = (self.access_token & 0xFFFFFFFF)
 # ----- MAIN -------
@@ -491,7 +493,7 @@ game.log("^GRN++^NOR Scanning for planets...")
 game.refresh_planet_info()
 
 #Get account Id for boss logging
-game.get_account_id()
+#game.get_account_id()
 
 # show planet info
 planets = game.get_uncaptured_planets()
@@ -649,8 +651,8 @@ try:
                                     boss_max_hp = response['boss_status']['boss_max_hp']
                                 boss_hp = response['boss_status']['boss_hp']
                                 for player in response['boss_status']['boss_players']:
-                                    if(player['accountid'] == game.account_id):
-                                        print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
+                                    #if(player['accountid'] == game.account_id):
+                                    print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
                                 #Report boss damage with heal use
                                 game.report_boss_damage(heal)
                         #sleep after success or fail            
