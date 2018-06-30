@@ -638,10 +638,12 @@ try:
                                 print("Waiting for Players")
                                 sleep(2)
                                 continue
+                            #If boss_status is none or it's empty (Not sure which, reading from XPaw's)
                             if(response.get('boss_status') or response[ 'boss_status' ] == ""):
                                 print("Waiting...")
                                 sleep(1)
                                 continue
+                            #You're in a boss battle at this point, send data
                             else:
                                 if(boss_max_hp == 1):
                                     boss_max_hp = response['boss_status']['boss_max_hp']
