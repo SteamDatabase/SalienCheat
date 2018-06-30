@@ -338,6 +338,15 @@ do
 	}
 	while( !$BestPlanetAndZone && sleep( $FailSleep ) === 0 );
 
+	if( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
+	{
+		Msg( '{green}Boss detected, abandoning current zone and joining boss...' );
+
+		$LastKnownPlanet = 0;
+
+		continue;
+	}
+
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
 	if( $LagAdjustedWaitTime > 0 )
