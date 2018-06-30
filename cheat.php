@@ -191,6 +191,9 @@ do
 			continue;
 		}
 
+		// Avoid first time not sync error
+		sleep( 4 );
+
 		$BossFailsAllowed = 10;
 		$NextHeal = microtime( true ) + mt_rand( 120, 180 );
 
