@@ -1,7 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
+
 set_time_limit( 0 );
+error_reporting( -1 );
+ini_set( 'display_errors', '1' );
 
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
@@ -41,7 +45,12 @@ else
 		$Token = $ParsedToken[ 'token' ];
 		$AccountID = GetAccountID( $ParsedToken[ 'steamid' ] );
 
-		Msg( 'Your SteamID is ' . $ParsedToken[ 'steamid' ] . ' - AccountID is ' . $AccountID );
+		Msg( 'Your SteamID is {teal}' . $ParsedToken[ 'steamid' ] . '{normal} - AccountID is {teal}' . $AccountID );
+
+		if( $AccountID == 0 && $ParsedToken[ 'steamid' ] > 0 )
+		{
+			Msg( '{lightred}Looks like you are using 32bit PHP. Try enabling "gmp" module for correct accountid calculation.' );
+		}
 	}
 
 	unset( $ParsedToken );
@@ -53,6 +62,9 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
+Msg( '{teal}File hash is ' . substr( $LocalScriptHash, 0, 8 ) );
+
 if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
 {
 	$UpdateCheck = false;
@@ -60,7 +72,6 @@ if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] 
 else
 {
 	$UpdateCheck = true;
-	$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
 	$RepositoryScriptETag = '';
 	$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 }
@@ -85,8 +96,6 @@ $OldScore = 0;
 $LastKnownPlanet = 0;
 $BestPlanetAndZone = 0;
 $PreferLowZones = 0;
-
-Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
 
 if( ini_get( 'precision' ) < 18 )
 {
@@ -539,8 +548,8 @@ function GetPlanetState( $Planet, &$ZonePaces, $PreferLowZones, $WaitTime )
 			$BossZones[] = $Zone;
 		}
 
-		// Skip zone 0 if it's not a boss and has no capture progress, since it's currently not allowing joins on new planets.
-		if ( $Zone[ 'zone_position' ] == 0 && $Zone[ 'capture_progress' ] < 5 )
+		// Skip zone 0 if it's not a boss, since it's currently not allowing joins on new planets.
+		if ( $Zone[ 'zone_position' ] == 0 )
 		{
 			continue;
 		}
