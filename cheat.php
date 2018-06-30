@@ -540,7 +540,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $PreferLowZones, $WaitTime )
 			continue;
 		}
 
-		$Cutoff = $Zone[ 'difficulty' ] < 2 ? 0.90 : 0.99;
+		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$PreferLowZones ) ? 0.90 : 0.99;
 
 		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
 		{
