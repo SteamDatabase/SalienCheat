@@ -79,11 +79,7 @@ class Saliens(requests.Session):
     def __init__(self, access_token):
         super(Saliens, self).__init__()
         self.access_token = access_token
-        self.headers['User-Agent'] = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                                      ' (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36')
-        self.headers['Accept'] = '*/*'
-        self.headers['Origin'] = 'https://steamcommunity.com'
-        self.headers['Referer'] = 'https://steamcommunity.com/saliengame/play'
+        self.headers['User-Agent'] = ('SalienCheat (https://github.com/SteamDatabase/SalienCheat/')
         self.pbar_init()
 
     def spost(self, endpoint, form_fields=None, retry=False):
