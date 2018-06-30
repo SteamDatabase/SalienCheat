@@ -322,6 +322,14 @@ do
 			$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 		}
 
+		if( isset( $_SERVER[ 'AUTO_UPDATE' ] ) )
+		{
+			if( (bool)$_SERVER[ 'AUTO_UPDATE' ] )
+			{
+				exit(0);
+			}
+		}
+
 		if( $LocalScriptHash !== $RepositoryScriptHash )
 		{
 			Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
