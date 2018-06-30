@@ -159,28 +159,33 @@ do
 		do
 		{
 			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=0&damage_to_boss=1000&damage_taken=0' );
-			$Data = $Data[ 'response' ];
 
-			if( $Data[ 'eresult' ] == 11 || $Data[ 'game_over' ] )
+			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
+			{
+				Msg( '{green}@@ Boss battle errored too much, restarting.' );
+				break;
+			}
+
+			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
+			{
+				Msg( '{green}@@ Waiting...' );
+				continue;
+			}
+
+			if( $Data[ 'response' ][ 'game_over' ] )
 			{
 				Msg( '{green}@@ Boss battle is over.' );
 				break;
 			}
 
-			if( $Data[ 'waiting_for_players' ] )
+			if( $Data[ 'response' ][ 'waiting_for_players' ] )
 			{
 				Msg( '{green}@@ Waiting for players...' );
 				continue;
 			}
 			else
 			{
-				Msg( '{green}@@ Boss HP: ' . number_format( $Data[ 'boss_status' ][ 'boss_hp' ] ) . ' / ' .  number_format( $Data[ 'boss_status' ][ 'boss_max_hp' ] ) );
-			}
-
-			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
-			{
-				Msg( '{green}@@ Boss battle errored too much, restarting.' );
-				break;
+				Msg( '{green}@@ Boss HP: ' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . ' / ' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) );
 			}
 		}
 		while( sleep( 5 ) === 0 );
@@ -673,6 +678,11 @@ function LeaveCurrentGame( $Token, $FailSleep, $LeaveCurrentPlanet = 0 )
 		if( isset( $Data[ 'response' ][ 'active_zone_game' ] ) )
 		{
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
+		}
+
+		if( isset( $Data[ 'response' ][ 'active_boss_game' ] ) )
+		{
+			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_boss_game' ] );
 		}
 	}
 	while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( $FailSleep ) === 0 );
