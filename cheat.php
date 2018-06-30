@@ -393,7 +393,7 @@ do
 		}
 		else
 		{
-			$LagAdjustedWaitTime = max( 1, min( 10, round( $SkippedLagTime ) ) );
+			$LagAdjustedWaitTime = max( 1, min( 10, $SkippedLagTime ) );
 		}
 
 		Msg( '{lightred}-- Report score failed, trying again in ' . number_format( $LagAdjustedWaitTime, 3 ) . ' seconds...' );
