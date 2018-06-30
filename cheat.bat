@@ -1,4 +1,5 @@
 @echo off
+cd %~dp0
 setlocal enabledelayedexpansion
 
 if not exist php\php.exe (
