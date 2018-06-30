@@ -877,6 +877,10 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				sleep( 5 );
 			}
+			else if( $EResult === 17 ) //Boss
+			{
+				Msg( '{lightred}-- EResult 17 means a boss is live' );
+			}
 		}
 
 		$Data = json_decode( $Data, true );
