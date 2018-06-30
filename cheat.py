@@ -114,7 +114,7 @@ class Saliens(requests.Session):
             else:
                 self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
 
-                if eresult == 93 and time() < deadline:
+                if (eresult == 93 or eresult == -1) and time() < deadline:
                     sleep(3)
                     continue
 
@@ -621,7 +621,7 @@ try:
                          zone_id,
                          dmap.get(difficulty, difficulty))
                 
-                if(game.planet['zones'][zone_id]['type'] == 4):
+                if game.planet['zones'][zone_id]['type'] == 4:
                     game.join_zone_boss(zone_id)
                     #placeholder max HP
                     boss_max_hp = 1;
@@ -629,6 +629,7 @@ try:
                     next_heal = randint(120,180)
                     #boss_fails_allowed = 10
                     next_loop = time()
+                    boss_hp = 10000000
                     #Loop until break
                     while(True):
                         #reset heal on each iteration
@@ -638,21 +639,16 @@ try:
                             next_loop = time()
                             #send boss damage
                             response = game.report_boss_damage(heal);
+                            
                             #If there is a battle complete field
                             if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
-                                print("Boss Battle Completed")
+                                game.log("Boss Battle Completed")
                                 break
                             #If waiting for players, wait a couple seconds, then try again
-                            if(reponse.get('waiting_for_players') and reponse.get('waiting_for_players') != ""):
-                                print("Waiting for Players")
+                            if(response.get('waiting_for_players') and response.get('waiting_for_players') != ""):
+                                game.log("Waiting for Players")
                                 #sleep to avoid DDOSDB
                                 sleep(2)
-                                continue
-                            #If boss_status is none or it's empty (Not sure which, reading from XPaw's)
-                            if(not response.get('boss_status') or response[ 'boss_status' ] == ""):
-                                print("Waiting...")
-                                #sleep to avoid DDOSDB
-                                sleep(1)
                                 continue
                             #You're in a boss battle at this point, send data
                             else:
@@ -668,7 +664,7 @@ try:
                                 #Print out each player.
                                 for player in response['boss_status']['boss_players']:
                                     #if(player['accountid'] == game.account_id):
-                                    print(boss_hp + " / " + boss_max_hp + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name'])  + " XP Gained: " + player['xp_earned'])
+                                    game.log(str(boss_hp) + " / " + str(boss_max_hp) + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name']) + ' Player HP ' + str(player['hp']) + '/' + str(player['max_hp']) + " XP Gained: " + str(player['xp_earned']) )
                                 
                         #sleep after success or fail            
                         sleep(1)
