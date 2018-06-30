@@ -81,11 +81,7 @@ class Saliens(requests.Session):
     def __init__(self, access_token):
         super(Saliens, self).__init__()
         self.access_token = access_token
-        self.headers['User-Agent'] = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                                      ' (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36')
-        self.headers['Accept'] = '*/*'
-        self.headers['Origin'] = 'https://steamcommunity.com'
-        self.headers['Referer'] = 'https://steamcommunity.com/saliengame/play'
+        self.headers['User-Agent'] = ('SalienCheat (https://github.com/SteamDatabase/SalienCheat/')
         self.pbar_init()
 
     def spost(self, endpoint, form_fields=None, retry=False):
@@ -486,6 +482,18 @@ game.refresh_player_info()
 
 # fair play
 game.log("^GRN-- Welcome to SalienCheat for SteamDB")
+
+if 'clan_info' not in game.player_info:	
+    game.log("^GRN-- You are currently not representing any clan, so you are now part of SteamDB")	
+    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^GRN on Steam")	
+    game.represent_clan(4777282)	
+	
+elif game.player_info['clan_info']['accountid'] != 4777282:	
+    game.log("^GRN-- If you want to support us, join our group")	
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/groups/steamdb")	
+    game.log("^GRN-- and set us as your clan on")	
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/saliengame/play/")	
+    game.log("^GRN-- Happy farming!")	
 
 game.log("^GRN++^NOR Scanning for planets...")
 game.refresh_planet_info()
