@@ -161,6 +161,8 @@ do {
             usort($Data['response']['boss_status']['boss_players'], function ($a, $b) use ($AccountID) {
                 if ($a['accountid'] == $AccountID) {
                     return 1;
+                } else if ($b['accountid'] == $AccountID) {
+                    return -1;
                 }
 
                 if ($b['xp_earned'] == $a['xp_earned']) {
