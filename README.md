@@ -13,6 +13,14 @@
 2. Extract it into a new folder
 3. Click `cheat.bat` and follow instructions
 
+If you are using Windows 7 and you don't have colors :
+
+1. [Download ANSICON](https://github.com/adoxa/ansicon/archive/master.zip)
+2. Extract it into a new folder ("C:\AINSICON" for example)
+3. Use `cd DIRECTORY` into cmd to go to `x64` or `x86` directory as if you are using Window 64bits or 32bits ("C:\AINSICON\ansi184\x64\ for example")
+4. Then just use `ansicon.exe -i` and close cmd
+5. Click `cheat.bat` and it should works with colors !
+
 ### Mac
 
 0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default
