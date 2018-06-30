@@ -582,9 +582,6 @@ try:
                 break
 
             # choose highest priority zone
-            #Boss error 17 hardcode fix for now
-            if(zones[0]['zone_position'] == 0):
-                zones.pop(0)
             
             zone_id = zones[0]['zone_position']
             difficulty = zones[0]['difficulty']
