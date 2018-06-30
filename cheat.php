@@ -91,6 +91,8 @@ do
 
 	if( isset( $Data[ 'response' ][ 'score' ] ) )
 	{
+		$OldScore = $Data[ 'response' ][ 'score' ];
+
 		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) )
 		{
 			Msg( '{green}-- You are currently not representing any clan, so you are now part of SteamDB' );
