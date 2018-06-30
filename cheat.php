@@ -502,6 +502,12 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			$BossZones[] = $Zone;
 		}
 
+		// Skip zone 0 if it's not a boss and has no capture progress, since it's currently not allowing joins on new planets.
+		if ( $Zone[ 'zone_position' ] == 0 && $Zone[ 'capture_progress' ] == 0 )
+		{
+			continue;
+		}
+
 		$Cutoff = $Zone[ 'difficulty' ] < 2 ? 0.90 : 0.99;
 
 		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
