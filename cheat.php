@@ -49,8 +49,6 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-$Verbose = isset( $_SERVER[ 'VERBOSE' ] ) ? (bool)$_SERVER[ 'VERBOSE' ] : 0;
-
 if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
 {
 	$UpdateCheck = false;
@@ -215,32 +213,33 @@ do
 					return -1;
 				}
 
-
 				return strcmp( preg_replace( $RegMask, '', $a['name'] ), preg_replace( $RegMask, '', $b['name'] ) );
 			} );
 
+			$MyPlayer = null;
+
 			foreach( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ] as $Player )
 			{
-				$DefaultColor = ( $Player[ 'accountid' ] == $AccountID ? '{green}' : '{normal}' );
+				$IsThisMe = $Player[ 'accountid' ] == $AccountID;
+				$DefaultColor = $IsThisMe ? '{green}' : '{normal}';
+
+				if( $IsThisMe )
+				{
+					$MyPlayer = $Player;
+				}
 
 				Msg(
-					( $Player[ 'accountid' ] == $AccountID ? '{green}@@' : '  ' ) .
-					' %-20s - HP: {yellow}%6s' . $DefaultColor  . ' / %6s - Score Gained: {yellow}%10s' . $DefaultColor .
-					( $Verbose ? ' - Start: %10s (L%2d) - Current: %10s (' . ($Player[ 'level_on_join' ] != $Player[ 'new_level' ] ? '{lightred}' : '') . 'L%2d' . $DefaultColor . ')' : '' ),
+					( $IsThisMe ? '{green}@@' : '  ' ) .
+					' %-20s - HP: {yellow}%6s' . $DefaultColor  . ' / %6s - Score Gained: {yellow}%10s' . $DefaultColor,
 					PHP_EOL,
 					[
 						substr( preg_replace( $RegMask, '', $Player[ 'name' ] ), 0, 20 ),
 						$Player[ 'hp' ],
 						$Player[ 'max_hp' ],
-						number_format( $Player[ 'xp_earned' ] ),
-						number_format( $Player[ 'score_on_join' ] ),
-						$Player[ 'level_on_join' ],
-						number_format( $Player[ 'score_on_join' ] + $Player[ 'xp_earned' ] ),
-						$Player[ 'new_level' ]
+						number_format( $Player[ 'xp_earned' ] )
 					]
 				);
 			}
-
 
 			if( $Data[ 'response' ][ 'game_over' ] )
 			{
@@ -257,11 +256,15 @@ do
 				Msg( '{green}@@ Waiting for players...' );
 				continue;
 			}
-			else
+
+			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
+
+			if( $MyPlayer !== null )
 			{
-				Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
-				echo PHP_EOL;
+				Msg( '@@ Start: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' (L' . $Player[ 'level_on_join' ] . ') - Current: ' . number_format( $Player[ 'score_on_join' ] + $Player[ 'xp_earned' ] ) . ' (' . ( $Player[ 'level_on_join' ] != $Player[ 'new_level' ] ? '{lightred}' : '' ) . 'L' . $Player[ 'new_level' ] );
 			}
+
+			echo PHP_EOL;
 		}
 		while( sleep( 5 ) === 0 );
 
