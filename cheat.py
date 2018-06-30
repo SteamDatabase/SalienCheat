@@ -635,11 +635,7 @@ try:
                         heal = 0
                         #submit every 5 seconds
                         if((time+5)<time()):
-                            #do healing after between 120 and 180 seconds
-                            if(time_last_heal + next_heal < time()):
-                                time_last_heal = time()
-                                next_heal = randint(120,180)
-                                heal = 1
+                            
                             #send boss damage
                             response = game.send_boss_request();
                             #If there is a battle complete field
@@ -660,6 +656,11 @@ try:
                                 continue
                             #You're in a boss battle at this point, send data
                             else:
+                                #do healing after between 120 and 180 seconds
+                                if(time_last_heal + next_heal < time()):
+                                    time_last_heal = time()
+                                    next_heal = randint(120,180)
+                                    heal = 1
                                 if(boss_max_hp == 1):
                                     boss_max_hp = response['boss_status']['boss_max_hp']
                                 boss_hp = response['boss_status']['boss_hp']
