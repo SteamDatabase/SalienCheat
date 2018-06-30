@@ -140,7 +140,7 @@ do
 		$LastKnownPlanet = $BestPlanetAndZone[ 'id' ];
 	}
 
-	if( isset( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] ) && $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
+	if( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
 	{
 		$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinBossZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
 
@@ -158,11 +158,15 @@ do
 		$BossFailsAllowed = 10;
 		do
 		{
-			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=0&damage_to_boss=1000&damage_taken=0' );
+			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=0&damage_to_boss=100&damage_taken=0' );
 
 			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
 			{
-				Msg( '{green}@@ Boss battle errored too much, restarting.' );
+				Msg( '{green}@@ Boss battle errored too much, restarting...' );
+
+				$BestPlanetAndZone = 0;
+				$LastKnownPlanet = 0;
+
 				break;
 			}
 
@@ -175,6 +179,12 @@ do
 			if( $Data[ 'response' ][ 'game_over' ] )
 			{
 				Msg( '{green}@@ Boss battle is over.' );
+
+				$BestPlanetAndZone = 0;
+				$LastKnownPlanet = 0;
+
+				print_r( $Data );
+
 				break;
 			}
 
@@ -416,19 +426,20 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			$Zone[ 'capture_progress' ] = 0.0;
 		}
 
+		if( !isset( $Zone[ 'boss_active' ] ) )
+		{
+			$Zone[ 'boss_active' ] = false;
+		}
+
 		if( $Zone[ 'captured' ] )
 		{
 			continue;
 		}
 
 		// Store boss zone separately to ensure it has priority later
-		if( $Zone[ 'type' ] == 4 )
+		if( $Zone[ 'type' ] == 4 && $Zone[ 'boss_active' ] )
 		{
 			$BossZones[] = $Zone;
-		}
-		else if( $Zone[ 'type' ] != 3 )
-		{
-			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
 		}
 
 		$Cutoff = $Zone[ 'difficulty' ] < 2 ? 0.90 : 0.99;
