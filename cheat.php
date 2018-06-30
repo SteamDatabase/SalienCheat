@@ -66,7 +66,7 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
 }
 
-$GameVersion = 1;
+$GameVersion = 2;
 $WaitTime = 110;
 $FailSleep = 3;
 $ZonePaces = [];
@@ -138,6 +138,54 @@ do
 		while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( $FailSleep ) === 0 );
 
 		$LastKnownPlanet = $BestPlanetAndZone[ 'id' ];
+	}
+
+	if( isset( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] ) && $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
+	{
+		$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinBossZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
+
+		if( $Zone[ 'eresult' ] != 1 )
+		{
+			Msg( '{lightred}!! Failed to join boss zone, rescanning and restarting...' );
+
+			$BestPlanetAndZone = 0;
+
+			sleep( $FailSleep );
+
+			continue;
+		}
+
+		$BossFailsAllowed = 10;
+		do
+		{
+			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=0&damage_to_boss=1000&damage_taken=0' );
+			$Data = $Data[ 'response' ];
+
+			if( $Data[ 'eresult' ] == 11 || $Data[ 'game_over' ] )
+			{
+				Msg( '{green}@@ Boss battle is over.' );
+				break;
+			}
+
+			if( $Data[ 'waiting_for_players' ] )
+			{
+				Msg( '{green}@@ Waiting for players...' );
+				continue;
+			}
+			else
+			{
+				Msg( '{green}@@ Boss HP: ' . number_format( $Data[ 'boss_status' ][ 'boss_hp' ] ) . ' / ' .  number_format( $Data[ 'boss_status' ][ 'boss_max_hp' ] ) );
+			}
+
+			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
+			{
+				Msg( '{green}@@ Boss battle errored too much, restarting.' );
+				break;
+			}
+		}
+		while( sleep( 5 ) === 0 );
+
+		continue;
 	}
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
