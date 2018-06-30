@@ -236,8 +236,6 @@ do
 				$BestPlanetAndZone = 0;
 				$LastKnownPlanet = 0;
 
-				print_r( $Data );
-
 				break;
 			}
 
