@@ -638,18 +638,19 @@ try:
                                 print("Waiting for Players")
                                 sleep(2)
                                 continue
-                            if(response.get('boss_status') && response[ 'boss_status' ] == ""):
+                            if(response.get('boss_status') or response[ 'boss_status' ] == ""):
                                 print("Waiting...")
                                 sleep(1)
                                 continue
-                            if(boss_max_hp == 1):
-                                boss_max_hp = response['boss_status']['boss_max_hp']
-                            boss_hp = response['boss_status']['boss_hp']
-                            for player in response['boss_status']['boss_players']:
-                                if(player['accountid'] == game.account_id):
-                                    print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
-                            #Report boss damage with heal use
-                            game.report_boss_damage(heal)
+                            else:
+                                if(boss_max_hp == 1):
+                                    boss_max_hp = response['boss_status']['boss_max_hp']
+                                boss_hp = response['boss_status']['boss_hp']
+                                for player in response['boss_status']['boss_players']:
+                                    if(player['accountid'] == game.account_id):
+                                        print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
+                                #Report boss damage with heal use
+                                game.report_boss_damage(heal)
                         #sleep after success or fail            
                         sleep(1)
                                            
