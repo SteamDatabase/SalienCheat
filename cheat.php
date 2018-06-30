@@ -9,9 +9,13 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 	exit( 1 );
 }
 
-if( $argc === 2 )
+// Pass env ACCOUNTID, get it from salien page source code called 'gAccountID'
+$AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
+
+if( $argc > 1 )
 {
 	$Token = $argv[ 1 ];
+	$AccountID = $argv[ 2 ];
 }
 else if( isset( $_SERVER[ 'TOKEN' ] ) )
 {
@@ -31,6 +35,9 @@ else
 	else if( isset( $ParsedToken[ 'token' ] ) )
 	{
 		$Token = $ParsedToken[ 'token' ];
+		$AccountID = GetAccountID( $ParsedToken[ 'steamid' ] );
+
+		Msg( 'Your SteamID is ' . $ParsedToken[ 'steamid' ] . ' - AccountID is ' . $AccountID );
 	}
 
 	unset( $ParsedToken );
@@ -42,8 +49,6 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-// Pass env ACCOUNTID, get it from salien page source code called 'gAccountID'
-$AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
 $Verbose = isset( $_SERVER[ 'VERBOSE' ] ) ? (bool)$_SERVER[ 'VERBOSE' ] : 0;
 
 if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
@@ -941,6 +946,20 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	}
 
 	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+}
+
+function GetAccountID( $SteamID )
+{
+	if( PHP_INT_SIZE === 8 )
+	{
+		return $SteamID & 0xFFFFFFFF;
+	}
+	else if( function_exists( 'gmp_and' ) )
+	{
+		return gmp_and( $SteamID, '0xFFFFFFFF' );
+	}
+
+	return 0;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )
