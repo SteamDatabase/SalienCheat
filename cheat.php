@@ -193,9 +193,34 @@ do
 				continue;
 			}
 
+			usort( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ], function( $a, $b ) use ( $AccountID )
+			{
+				if( $a[ 'accountid' ] == $AccountID )
+				{
+					return 1;
+				}
+
+				if( $b[ 'xp_earned' ] == $a[ 'xp_earned' ] )
+				{
+					return $b[ 'hp' ] - $a[ 'hp' ];
+				}
+
+				return $b[ 'xp_earned' ] - $a[ 'xp_earned' ];
+			} );
+
 			foreach( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ] as $Player )
 			{
-				Msg( ( $Player[ 'accountid' ] == $AccountID ? '{green}' : '' ) . '@@ Player ' . $Player[ 'accountid' ] . ' - HP: ' . $Player[ 'hp' ] . ' / ' . $Player[ 'max_hp' ] . ' - Score: ' . number_format( $Player[ 'xp_earned' ] ) );
+				Msg(
+					( $Player[ 'accountid' ] == $AccountID ? '{green}@@' : '  ' ) .
+					' Player %9d - HP: %6s / %6s - Score: %10s',
+					PHP_EOL,
+					[
+						$Player[ 'accountid' ],
+						$Player[ 'hp' ],
+						$Player[ 'max_hp' ],
+						number_format( $Player[ 'xp_earned' ] )
+					]
+				);
 			}
 
 			if( $Data[ 'response' ][ 'game_over' ] )
