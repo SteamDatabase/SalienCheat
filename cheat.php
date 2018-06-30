@@ -118,11 +118,11 @@ do
 			Msg( '{green}-- Happy farming!' );
 		}
 
-		if( isset( $Data[ 'response' ][ 'level' ] ) > 20 )
+		if( $Data[ 'response' ][ 'level' ] > 20 )
 		{
 			$PreferLowZones = 1;
 		}
-		else if( isset( $Data[ 'response' ][ 'level' ] ) > 15 )
+		else if( $Data[ 'response' ][ 'level' ] > 15 )
 		{
 			$PreferLowZones = rand( 0, 1 );
 		}
