@@ -636,7 +636,7 @@ try:
                             #send boss damage
                             response = game.send_boss_request();
                             #If complete, end the loop
-                            if(response.get('game_over') ):
+                            if(response.get('game_over')):
                                 print("Boss Battle Completed")
                                 break
                             #If waiting for players, wait a couple seconds, then try again
@@ -656,9 +656,11 @@ try:
                                 if(boss_max_hp == 1):
                                     boss_max_hp = response['boss_status']['boss_max_hp']
                                 boss_hp = response['boss_status']['boss_hp']
+                                #Print out each player.
+                                
                                 for player in response['boss_status']['boss_players']:
                                     #if(player['accountid'] == game.account_id):
-                                    print(boss_hp + " / " + boss_max_hp + " Player: " + game.account_id + " XP Gained: " + player['xp_earned'])
+                                    print(boss_hp + " / " + boss_max_hp + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name'])  + " XP Gained: " + player['xp_earned'])
                                 #Report boss damage with heal use
                                 game.report_boss_damage(heal)
                         #sleep after success or fail            
