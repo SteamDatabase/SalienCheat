@@ -922,6 +922,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		if( $ExtraTime >= 0 )
 		{
 			$Data[ 'extratime' ] = $ExtraTime;
+		}
 	}
 	while( !isset( $Data[ 'response' ] ) && sleep( 2 ) === 0 );
 
