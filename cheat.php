@@ -160,17 +160,22 @@ do
 
 		$BossFailsAllowed = 10;
 		$NextHeal = microtime( true ) + 120;
+
 		do
 		{
 			$UseHeal = 0;
+			$DamageToBoss = rand( 40, 90 );
+			$DamageTaken = rand( 0, 20 );
 
 			if( microtime( true ) >= $NextHeal )
 			{
 				$UseHeal = 1;
 				$NextHeal = microtime( true ) + 120;
+
+				Msg( '{teal}@@ Using heal ability' );
 			}
 
-			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=' . $UseHeal . '&damage_to_boss=' . rand( 40, 100 ) . '&damage_taken=' . rand( 20, 80 ) );
+			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=' . $UseHeal . '&damage_to_boss=' . $DamageToBoss . '&damage_taken=' . $DamageTaken );
 
 			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
 			{
@@ -190,12 +195,7 @@ do
 
 			foreach( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ] as $Player )
 			{
-				if( $AccountID > 0 && $Player[ 'accountid' ] != $AccountID )
-				{
-					continue;
-				}
-
-				Msg( '{green}@@ Player ' . $Player[ 'accountid' ] . ' - HP: ' . $Player[ 'hp' ] . ' / ' . $Player[ 'max_hp' ] . ' - XP Earned: ' . $Player[ 'xp_earned' ] );
+				Msg( ( $Player[ 'accountid' ] == $AccountID ? '{green}' : '' ) . '@@ Player ' . $Player[ 'accountid' ] . ' - HP: ' . $Player[ 'hp' ] . ' / ' . $Player[ 'max_hp' ] . ' - Score: ' . number_format( $Player[ 'xp_earned' ] ) );
 			}
 
 			if( $Data[ 'response' ][ 'game_over' ] )
