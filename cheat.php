@@ -379,9 +379,9 @@ do
 
 	if( empty( $Data[ 'response' ][ 'new_score' ] ) )
 	{
-		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
+		$LagAdjustedWaitTime = max( 1, min( 10, round( $SkippedLagTime ) ) );
 
-		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
+		Msg( '{lightred}-- Report score failed, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
 
 		sleep( $LagAdjustedWaitTime );
 
