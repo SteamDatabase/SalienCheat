@@ -379,11 +379,26 @@ do
 
 	if( empty( $Data[ 'response' ][ 'new_score' ] ) )
 	{
-		$LagAdjustedWaitTime = max( 1, min( 10, round( $SkippedLagTime ) ) );
+		if( isset( $Data[ 'extratime' ] ) )
+		{
+			$LagAdjustedWaitTime = $Data[ 'extratime' ] - $SkippedLagTime;
+			if( $LagAdjustedWaitTime > 0 )
+			{
+				$LagAdjustedWaitTime = min( $ScanPlanetsTime, $LagAdjustedWaitTime, $Data[ 'extratime' ] );
+			}
+			else
+			{
+				$LagAdjustedWaitTime = min( $ScanPlanetsTime, $SkippedLagTime, $Data[ 'extratime' ] );
+			}
+		}
+		else
+		{
+			$LagAdjustedWaitTime = max( 1, min( 10, round( $SkippedLagTime ) ) );
+		}
 
-		Msg( '{lightred}-- Report score failed, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
+		Msg( '{lightred}-- Report score failed, trying again in ' . number_format( $LagAdjustedWaitTime, 3 ) . ' seconds...' );
 
-		sleep( $LagAdjustedWaitTime );
+		usleep( $LagAdjustedWaitTime * 1000000 );
 
 		$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 	}
@@ -846,6 +861,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 		curl_setopt( $c, CURLOPT_HTTPGET, 1 );
 	}
 
+	$ExtraTime = -1;
 	do
 	{
 		$Data = curl_exec( $c );
@@ -863,6 +879,13 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 			if( preg_match( '/^[Xx]-error_message: (?:.+)$/m', $Header, $ErrorMessage ) === 1 )
 			{
 				Msg( '{lightred}!! API failed - ' . $ErrorMessage[ 0 ] );
+
+				if( substr( $Method, 33) === 'ReportScore' &&
+					preg_match( "/User joined zone [0-9]+ at ([0-9]+), and now it's ([0-9]+), which is too soon/", $ErrorMessage[ 0 ], $ErrorTimes ) === 1 )
+				{
+					global $WaitTime;
+					$ExtraTime = $WaitTime - ( intval( $ErrorTimes[2] ) - intval( $ErrorTimes[1] ) );
+				}
 			}
 
 			if( $EResult === 15 && $Method === 'ITerritoryControlMinigameService/RepresentClan' )  // EResult.AccessDenied
@@ -896,6 +919,9 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 		$Data = json_decode( $Data, true );
 		$Data[ 'eresult' ] = $EResult;
+		if( $ExtraTime >= 0 )
+		{
+			$Data[ 'extratime' ] = $ExtraTime;
 	}
 	while( !isset( $Data[ 'response' ] ) && sleep( 2 ) === 0 );
 
