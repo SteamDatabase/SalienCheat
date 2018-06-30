@@ -243,8 +243,8 @@ class Saliens(requests.Session):
                 sort_key += 10**2 * (99 - len(planet['medium_zones']))
             if len(planet['hard_zones']):
                 sort_key += 10**4 * (99 - len(planet['hard_zones']))
-            if len(planet['boss_zones']):
-                sort_key += 10**6 * (99 - len(planet['boss_zones']))
+#           if len(planet['boss_zones']):
+#               sort_key += 10**6 * (99 - len(planet['boss_zones']))
 
             planet['sort_key'] = sort_key
 
@@ -557,8 +557,7 @@ try:
             if 'clan_info' not in game.player_info:
                 game.represent_clan(4777282)
 
-            zones = (game.planet['boss_zones']
-                     + game.planet['hard_zones']
+            zones = (game.planet['hard_zones']
                      + game.planet['medium_zones']
                      + game.planet['easy_zones'])
 
