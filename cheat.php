@@ -945,7 +945,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				sleep( 10 );
 			}
-			else if( $EResult === 11 ) // EResult.InvalidState
+			else if( $EResult === 11 || $EResult === 27 ) // EResult.InvalidState || EResult.Expired
 			{
 				global $LastKnownPlanet;
 				$LastKnownPlanet = 0;
