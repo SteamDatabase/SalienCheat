@@ -213,6 +213,16 @@ do
 
 			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=' . $UseHeal . '&damage_to_boss=' . $DamageToBoss . '&damage_taken=' . $DamageTaken );
 
+			if( $Data[ 'eresult' ] == 11 )
+			{
+				Msg( '{green}@@ Got invalid state, restarting...' );
+
+				$BestPlanetAndZone = 0;
+				$LastKnownPlanet = 0;
+
+				break;
+			}
+
 			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
 			{
 				Msg( '{green}@@ Boss battle errored too much, restarting...' );
