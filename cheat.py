@@ -583,7 +583,7 @@ try:
 
             # choose highest priority zone
             zone_array_index = 0
-            if game.player_info.get('level') > 20:
+            if game.player_info.get('level') > 20 and game.planet['zones'][0]['type'] != 4:
                 game.log("Player Level is over 20, joining random zone.")
                 zone_array_index = randint(1,len(zones)-1) 
                 
