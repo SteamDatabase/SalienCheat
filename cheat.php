@@ -462,11 +462,11 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
 	}
 
-	if( !empty( $BossZones ) )
+	/*if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
 	}
-	else if( count( $CleanZones ) < 2 )
+	else*/ if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
@@ -759,6 +759,10 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 				Msg( '{lightred}-- EResult 10 means Steam is busy' );
 
 				sleep( 5 );
+			}
+			else if( $EResult === 17 ) //Boss
+			{
+				Msg( '{lightred}-- EResult 17 means a boss is live' );
 			}
 		}
 
