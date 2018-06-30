@@ -15,7 +15,6 @@ from datetime import datetime
 from random import randint
 
 import requests
-import concurrent.futures
 from tqdm import tqdm
 
 # determine input func
@@ -473,6 +472,7 @@ class Saliens(requests.Session):
     #Send boss damage with heal ability, damage 0, damage to boss 1
     def report_boss_damage(self,heal):
         return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': 1,'damage_taken':0,'use_heal_ability':heal})
+        
     #For converting id to 
     def get_account_id(self):
         self.account_id = (self.access_token & 0xFFFFFFFF)
