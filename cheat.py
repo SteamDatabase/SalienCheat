@@ -582,9 +582,13 @@ try:
                 break
 
             # choose highest priority zone
-            
-            zone_id = zones[0]['zone_position']
-            difficulty = zones[0]['difficulty']
+            zone_array_index = 0
+            if game.player_info.get('level') > 20:
+                game.log("Player Level is over 20, joining random zone.")
+                zone_array_index = randint(1,len(zones)-1) 
+                
+            zone_id = zones[zone_array_index]['zone_position']
+            difficulty = zones[zone_array_index]['difficulty']
 
             deadline = time() + 60 * 10  # rescan planets every 10min
 
