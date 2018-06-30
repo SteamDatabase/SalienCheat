@@ -642,11 +642,13 @@ try:
                             #If waiting for players, wait a couple seconds, then try again
                             if(reponse.get('waiting_for_players')):
                                 print("Waiting for Players")
+                                #sleep to avoid DDOSDB
                                 sleep(2)
                                 continue
                             #If boss_status is none or it's empty (Not sure which, reading from XPaw's)
-                            if(response.get('boss_status') or response[ 'boss_status' ] == ""):
+                            if(not response.get('boss_status') or response[ 'boss_status' ] == ""):
                                 print("Waiting...")
+                                #sleep to avoid DDOSDB
                                 sleep(1)
                                 continue
                             #You're in a boss battle at this point, send data
