@@ -823,13 +823,16 @@ function GetBestPlanetAndZone( &$ZonePaces, $PreferLowZones, $WaitTime, $FailSle
 
 	$Planet = $Planets[ 0 ];
 
-	Msg(
-		'>> Next Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ] .
-		'{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%' .
-		'{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] ) .
-		'{normal}) on Planet {green}' . $Planet[ 'id' ] .
-		' (' . $Planet[ 'state' ][ 'name' ] . ')'
-	);
+	$Message = '';
+	$Message .= '>> Next Zone is {yellow}' . $Planet[ 'best_zone' ][ 'zone_position' ];
+	if ( isset( $Planet[ 'best_zone' ] ) )
+	{
+		$Message .= '{normal} (Captured: {yellow}' . number_format( $Planet[ 'best_zone' ][ 'capture_progress' ] * 100, 2 ) . '%';
+		$Message .= '{normal} - Difficulty: {yellow}' . GetNameForDifficulty( $Planet[ 'best_zone' ] );
+	}
+	$Message .= ' (' . $Planet[ 'state' ][ 'name' ] . ')';
+
+	Msg($Message);
 
 	return $Planet;
 }
