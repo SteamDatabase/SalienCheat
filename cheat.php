@@ -261,7 +261,7 @@ do
 
 			if( $MyPlayer !== null )
 			{
-				Msg( '@@ Start: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' (L' . $Player[ 'level_on_join' ] . ') - Current: ' . number_format( $Player[ 'score_on_join' ] + $Player[ 'xp_earned' ] ) . ' (' . ( $Player[ 'level_on_join' ] != $Player[ 'new_level' ] ? '{lightred}' : '' ) . 'L' . $Player[ 'new_level' ] );
+				Msg( '@@ Start: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' (L' . $MyPlayer[ 'level_on_join' ] . ') - Current: ' . number_format( $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ] ) . ' (' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{lightred}' : '' ) . 'L' . $MyPlayer[ 'new_level' ] );
 			}
 
 			echo PHP_EOL;
