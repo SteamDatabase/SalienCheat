@@ -293,7 +293,7 @@ do
 
 			echo PHP_EOL;
 		}
-		while( sleep( 5 ) === 0 );
+		while( BossSleep( $c ) );
 
 		continue;
 	}
@@ -422,6 +422,20 @@ do
 	}
 }
 while( true );
+
+function BossSleep( $c )
+{
+	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
+	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
+	$LagAdjustedWaitTime = 5 - $SkippedLagTime;
+
+	if( $LagAdjustedWaitTime > 0 )
+	{
+		usleep( $LagAdjustedWaitTime * 1000000 );
+	}
+
+	return true;
+}
 
 function CheckGameVersion( $Data )
 {
