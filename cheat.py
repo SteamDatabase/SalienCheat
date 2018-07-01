@@ -193,11 +193,14 @@ class Saliens(requests.Session):
         return self.planet
 
     def get_planet(self, pid, retry=True, timeout=15):
-        data = self.sget('ITerritoryControlMinigameService/GetPlanet',
-                         {'id': pid, '_': int(time())},
-                         retry=retry,
-                         timeout=timeout,
-                         )['response']
+        try:
+            data = self.sget('ITerritoryControlMinigameService/GetPlanet',
+                             {'id': pid, '_': int(time())},
+                             retry=retry,
+                             timeout=timeout,
+                             )['response']
+        except:
+            self.log("No Data Returned")
         if data is None:
             return
         else:
