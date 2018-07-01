@@ -132,9 +132,9 @@ do
 		// Randomizer is here to help reduce load on Steam servers
 		// Zones are sharded, and if everyone targets the same zone, it ends up worse for everyone
 		// By giving errors like time not synced or failed to join.
-		// Everyone at level 16 or above should be able to easily reach their Rank 6 badge without a problem with bosses
+		// Everyone at level 21 or above should be able to easily reach their Rank 6 badge without a problem with bosses
 		// So please don't change this and let's get this mini game over with
-		if( $Data[ 'response' ][ 'level' ] >= 0b10000 )
+		if( $Data[ 'response' ][ 'level' ] >= 21 )
 		{
 			$RandomizeZone = 1;
 
@@ -429,7 +429,7 @@ do
 			'{normal} - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
 		);
 
-		if( $Data[ 'new_level' ] >= 0b10000 )
+		if( $Data[ 'new_level' ] >= 21 )
 		{
 			$RandomizeZone = 1;
 		}
