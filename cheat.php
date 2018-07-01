@@ -14,26 +14,34 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 }
 
 // Pass env ACCOUNTID, get it from salien page source code called 'gAccountID'
-$AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
+// Setting up the $AccountId and the Token
+$Token     = isset( $_SERVER[ 'TOKEN' ] ) ? $_SERVER[ 'TOKEN' ] : null;
+$AccountId = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
+$TokenFile = __DIR__ . DIRECTORY_SEPARATOR . 'token.txt';
 
-if( $argc > 1 )
+// Trying to fetch the token and account ID from the CLI arguments
+if ($Token === null && $AccountId === 0 && $argc > 1 )
 {
-	$Token = $argv[ 1 ];
+	if (file_exists($argv[1])) {
+		$TokenFile = $argv[1];
+	}
+	else {
+		$Token = $argv[1];
+		$TokenFile = null;
 
-	if( $argc > 2 )
-	{
-		$AccountID = $argv[ 2 ];
+		if ($argc > 2)
+		{
+			$AccountID = $argv[2];
+		}
+		unset($TokenFile);
 	}
 }
-else if( isset( $_SERVER[ 'TOKEN' ] ) )
+
+// If token is still missing, fetch it from file
+if (isset($TokenFile))
 {
-	// if the token was provided as an env var, use it
-	$Token = $_SERVER[ 'TOKEN' ];
-}
-else
-{
-	// otherwise, read it from disk
-	$Token = trim( file_get_contents( __DIR__ . '/token.txt' ) );
+	Msg('Reading token from "{teal}' . $TokenFile . '{normal}"');
+	$Token = trim(file_get_contents($TokenFile));
 	$ParsedToken = json_decode( $Token, true );
 
 	if( is_string( $ParsedToken ) )
@@ -58,8 +66,12 @@ else
 
 if( strlen( $Token ) !== 32 )
 {
-	Msg( 'Failed to find your token. Verify token.txt' );
+	Msg( 'Failed to find your token. Verify ' . $TokenFile );
 	exit( 1 );
+}
+
+if (isset($TokenFile)) {
+	unset( $TokenFile );
 }
 
 $LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
