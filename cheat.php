@@ -204,7 +204,8 @@ do
 		{
 			$Time = microtime( true );
 			$UseHeal = 0;
-			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
+			// Do more damage in hopes of getting a harder boss next time
+			$DamageToBoss = $WaitingForPlayers ? 0 : mt_rand( 1, 40 );
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -316,14 +317,7 @@ do
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
 
-			if( $UseHeal )
-			{
-				Msg( '{green}@@ Used heal ability!' );
-			}
-			else
-			{
-				Msg( '{yellow}@@ Next heal in {green}' . round( $NextHeal - $Time ) . '{yellow} seconds' );
-			}
+			Msg( '{yellow}@@ Damage sent: {green}' . $DamageToBoss . '{yellow} - ' . ( $UseHeal ? '{green}Used heal ability!' : 'Next heal in {green}' . round( $NextHeal - $Time ) . '{yellow} seconds' ) );
 
 			echo PHP_EOL;
 		}
