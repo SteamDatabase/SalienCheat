@@ -244,7 +244,7 @@ do
 			else if( $WaitingForPlayers )
 			{
 				$WaitingForPlayers = false;
-				$NextHeal = microtime( true ) + mt_rand( 120, 180 );
+				$NextHeal = microtime( true ) + mt_rand( 0, 120 );
 			}
 
 			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
