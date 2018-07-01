@@ -21,10 +21,12 @@ If that fails for any reason, or you still have questions, [check out this Googl
 1. Extract the contents of this script to the Downloads folder
 2. Launch Terminal and run the script: `php downloads/cheat.php`
 
-You can also provide token directly in CLI, to ease running multiple accounts:
+You can also provide token or token file directly in CLI, to ease running multiple accounts:
 ```bash
 php cheat.php token1 accountid1
 php cheat.php token2 accountid2
+php cheat.php tokenFile3.json
+php cheat.php tokenFile4.txt
 ```
 
 ### Linux
