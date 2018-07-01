@@ -199,7 +199,7 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
-		$BossInitialHP = 0;
+		$BossPreviousHP = 0;
 		$BossHPDelta = array();
 		$BossRewards =
 		[
@@ -327,9 +327,9 @@ do
 
 			if ( array_key_exists( (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ], $BossRewards ) )
 			{
-				if ( count( $BossHPDelta ) )
+				if ( $BossPreviousHP )
 				{
-					array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+					array_push( $BossHPDelta, abs( $BossPreviousHP - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
 
 					$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
 					$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0 );
@@ -337,14 +337,8 @@ do
 
 					Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstBossXP ) . "{normal} - Damage per Second: {lightred}" . number_format( $EstBossDPS ) );
 				}
-				elseif ( !$BossInitialHP )
-				{
-					$BossInitialHP = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
-				}
-				else
-				{
-					array_push( $BossHPDelta, abs( $BossInitialHP - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
-				}
+
+				$BossPreviousHP = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
 			}
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
