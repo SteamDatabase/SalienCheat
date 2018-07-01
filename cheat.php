@@ -62,6 +62,14 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$_ = $_SERVER['_'];
+
+register_shutdown_function(function () {
+  global $_, $argv; // note we need to reference globals inside a function
+  // restart myself
+  pcntl_exec($_, $argv);
+});
+
 $LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
 Msg( '{teal}File hash is ' . substr( $LocalScriptHash, 0, 8 ) );
 
@@ -376,6 +384,8 @@ do
 		if( $LocalScriptHash !== $RepositoryScriptHash )
 		{
 			Msg( '-- {lightred}Script has been updated on GitHub since you started this script, please make sure to update.' );
+			file_put_contents(__FILE__,file_get_contents('https://raw.githubusercontent.com/SteamDatabase/SalienCheat/master/cheat.php'));
+			exit;
 		}
 	}
 
