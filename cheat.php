@@ -7,6 +7,14 @@ set_time_limit( 0 );
 error_reporting( -1 );
 ini_set( 'display_errors', '1' );
 
+if( !function_exists( 'random_int' ) )
+{
+	function random_int( $min, $max )
+	{
+		return mt_rand( $min, $max );
+	}
+}
+
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
 	Msg( 'You forgot to download cacert.pem file' );
@@ -205,7 +213,7 @@ do
 			$Time = microtime( true );
 			$UseHeal = 0;
 			// Do more damage in hopes of getting a harder boss next time
-			$DamageToBoss = $WaitingForPlayers ? 0 : mt_rand( 1, 40 );
+			$DamageToBoss = $WaitingForPlayers ? 0 : random_int( 1, 40 );
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -245,7 +253,7 @@ do
 			else if( $WaitingForPlayers )
 			{
 				$WaitingForPlayers = false;
-				$NextHeal = $Time + mt_rand( 0, 120 );
+				$NextHeal = $Time + random_int( 0, 120 );
 			}
 
 			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
