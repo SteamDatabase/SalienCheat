@@ -150,7 +150,7 @@ class Saliens(requests.Session):
                     continue
             else:
                 self.log("^GRY   GET  %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
-                data = rdata
+                data = rdata['response']
 
             if not retry:
                 break
@@ -158,7 +158,7 @@ class Saliens(requests.Session):
             if not data:
                 sleep(1)
 
-        return data['response']
+        return data
 
     def is_access_token_valid(self):
         if not self.access_token:
