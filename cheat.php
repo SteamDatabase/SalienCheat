@@ -140,9 +140,9 @@ do
 		// Randomizer is here to help reduce load on Steam servers
 		// Zones are sharded, and if everyone targets the same zone, it ends up worse for everyone
 		// By giving errors like time not synced or failed to join.
-		// Everyone at level 21 or above already has their Rank 6 badge
+		// Everyone at level 25 is already at the max level
 		// So please don't change this and let's get this mini game over with
-		if( $Data[ 'response' ][ 'level' ] >= 21 )
+		if( $Data[ 'response' ][ 'level' ] >= 25 )
 		{
 			$RandomizeZone = 1;
 
@@ -451,7 +451,7 @@ do
 			);
 		}
 
-		if( $Data[ 'new_level' ] >= 21 )
+		if( $Data[ 'new_level' ] >= 25 )
 		{
 			$RandomizeZone = 1;
 		}
