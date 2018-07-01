@@ -331,11 +331,11 @@ do
 				$EstBossDPT = ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) );
 				$EstXPTotal = ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT ) * $EstXPRate;
 
-				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . " {yellow}(+" . $EstXPRate . "/tick Excl. Bonuses){normal} - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
+				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . " {yellow}(+" . number_format ( $EstXPRate ) . "/tick Excl. Bonuses){normal} - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
 			}
 
-			$BossEstimate[ 'PrevHP' ][] = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
-			$BossEstimate[ 'PrevXP' ][] = ( $MyPlayer !== null ? $MyScoreInBoss : 1 );
+			$BossEstimate[ 'PrevHP' ]= $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
+			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyScoreInBoss : 1 );
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
 
