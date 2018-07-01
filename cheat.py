@@ -587,7 +587,7 @@ try:
             # choose highest priority zone
             zone_array_index = 0
             
-            if game.player_info.get('level') >= 0b10000 and game.planet['zones'][zone_id]['type'] != 4:
+            if game.player_info.get('level') >= 21 and game.planet['zones'][zone_id]['type'] != 4:
                 game.log("You will be joining randomized zones to reduce Steam server load and help capture planets faster.")
                 zone_array_index = randint(0,len(zones)-1) 
             zone_id = zones[zone_array_index]['zone_position']
