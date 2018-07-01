@@ -196,15 +196,18 @@ do
 		sleep( 4 );
 
 		$BossFailsAllowed = 10;
-		$NextHeal = microtime( true ) + mt_rand( 120, 180 );
+
+		 // Initialized below when the round starts
+		$NextHeal = 0;
+		$WaitingForPlayers = true;
 
 		do
 		{
 			$UseHeal = 0;
-			$DamageToBoss = 1;
+			$DamageToBoss = ( $WaitingForPlayers ) ? 0 : 1;
 			$DamageTaken = 0;
 
-			if( microtime( true ) >= $NextHeal )
+			if( !$WaitingForPlayers && microtime( true ) >= $NextHeal )
 			{
 				$UseHeal = 1;
 				$NextHeal = microtime( true ) + 120;
@@ -296,6 +299,12 @@ do
 			{
 				Msg( '{green}@@ Waiting for players...' );
 				continue;
+			}
+			else if( $WaitingForPlayers )
+			{
+				$WaitingForPlayers = false;
+				// Initial healing delay to spread out ability usage
+				$NextHeal = microtime( true ) + mt_rand( 15, 75 );
 			}
 
 			if( $MyPlayer !== null )
