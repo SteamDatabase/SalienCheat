@@ -16,7 +16,7 @@ else
 }
 if($PSVersiontable.PSVersion.Major -lt 5)
 {
-    if((Test-Path "$workdingdir\python") -eq $False)
+    if((Test-Path "$workingdir\python") -eq $False)
     {
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [IO.Compression.ZipFile]::ExtractToDirectory('python.zip', 'python\')
