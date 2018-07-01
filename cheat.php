@@ -202,16 +202,15 @@ do
 
 		do
 		{
+			$Time = microtime( true );
 			$UseHeal = 0;
 			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
 			$DamageTaken = 0;
 
-			if( microtime( true ) >= $NextHeal )
+			if( $Time >= $NextHeal )
 			{
 				$UseHeal = 1;
-				$NextHeal = microtime( true ) + 120;
-
-				Msg( '{teal}@@ Using heal ability' );
+				$NextHeal = $Time + 120;
 			}
 
 			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=' . $UseHeal . '&damage_to_boss=' . $DamageToBoss . '&damage_taken=' . $DamageTaken );
@@ -245,7 +244,7 @@ do
 			else if( $WaitingForPlayers )
 			{
 				$WaitingForPlayers = false;
-				$NextHeal = microtime( true ) + mt_rand( 0, 120 );
+				$NextHeal = $Time + mt_rand( 0, 120 );
 			}
 
 			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
@@ -316,6 +315,15 @@ do
 			}
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
+
+			if( $UseHeal )
+			{
+				Msg( '{green}@@ Used heal ability!' );
+			}
+			else
+			{
+				Msg( '{yellow}@@ Next heal in {green}' . round( $NextHeal - $Time ) . '{yellow} seconds' );
+			}
 
 			echo PHP_EOL;
 		}
