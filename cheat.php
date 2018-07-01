@@ -244,6 +244,12 @@ do
 				break;
 			}
 
+			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
+			{
+				Msg( '{green}@@ Waiting...' );
+				continue;
+			}
+
 			if( $Data[ 'response' ][ 'waiting_for_players' ] )
 			{
 				$WaitingForPlayers = true;
@@ -254,12 +260,6 @@ do
 			{
 				$WaitingForPlayers = false;
 				$NextHeal = $Time + random_int( 0, 120 );
-			}
-
-			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
-			{
-				Msg( '{green}@@ Waiting...' );
-				continue;
 			}
 
 			// Strip names down to basic ASCII.
