@@ -329,22 +329,22 @@ do
 			{
 				if ( count( $BossHPDelta ) )
 				{
-					array_push( $BossHPDelta, abs( $BossInitialHP - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
-				}
-				elseif ( count( $BossHPDelta ) > 1 )
-				{
 					array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+
+					$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
+					$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0 );
+					$EstBossXP = $Reward[ 0 ] + round( ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0 );
+
+					Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstBossXP ) . "{normal} - Damage per Second: {lightred}" . number_format( $EstBossDPS ) );
 				}
-				else
+				elseif ( !$BossInitialHP )
 				{
 					$BossInitialHP = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
 				}
-
-				$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
-				$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0 );
-				$EstBossXP = $Reward[ 0 ] + round( ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0 );
-
-				Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstBossXP ) . "{normal} - Damage per Second: {lightred}" . number_format( $EstBossDPS ) );
+				else
+				{
+					array_push( $BossHPDelta, abs( $BossInitialHP - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+				}
 			}
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
