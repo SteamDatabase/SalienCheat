@@ -638,8 +638,6 @@ try:
                     heal = 0
                     #Loop until break
                     while(True):
-                        #reset heal on each iteration
-                        heal = 0
                         #submit every 5 seconds
                         if (next_loop+5) < time():
                             next_loop = time()
