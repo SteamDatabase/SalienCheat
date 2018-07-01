@@ -117,7 +117,7 @@ class Saliens(requests.Session):
                 if (eresult == 93 or eresult == -1) and time() < deadline:
                     sleep(3)
                     continue
-                data = rdata
+                data = rdata['response']
 
             if not retry:
                 break
@@ -177,7 +177,7 @@ class Saliens(requests.Session):
             sleep(2)
 
     def refresh_player_info(self):
-        self.player_info = self.spost('ITerritoryControlMinigameService/GetPlayerInfo', retry=True)['response']
+        self.player_info = self.spost('ITerritoryControlMinigameService/GetPlayerInfo', retry=True)
         return self.player_info
 
     def refresh_planet_info(self, retry=True, timeout=15):
@@ -641,13 +641,13 @@ try:
                         if((next_loop+5)<time()):
                             next_loop = time()
                             #send boss damage
-                            full_response = game.report_boss_damage(heal);
+                            response = game.report_boss_damage(heal);
                             #on E11, restart, bugged for now, fix it later
                             #if 'headers' in full_response and int(full_response.headers.get('X-eresult', -1)) == 11:
                             #    game.log("Got invalid state. Restarting")
                             #    deadline = 0
                             #    break;
-                            response = full_response['response']
+                            #response = full_response['response']
                             #If there is a battle complete field
                             if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
                                 game.log("Boss Battle Completed")
