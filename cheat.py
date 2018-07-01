@@ -158,7 +158,7 @@ class Saliens(requests.Session):
             if not data:
                 sleep(1)
 
-        return data
+        return data['response']
 
     def is_access_token_valid(self):
         if not self.access_token:
@@ -193,15 +193,12 @@ class Saliens(requests.Session):
         return self.planet
 
     def get_planet(self, pid, retry=True, timeout=15):
-        data = None
-        try:
-            data = self.sget('ITerritoryControlMinigameService/GetPlanet',
-                             {'id': pid, '_': int(time())},
-                             retry=retry,
-                             timeout=timeout,
-                             )['response']
-        except:
-            self.log("No Data Returned")
+
+        data = self.sget('ITerritoryControlMinigameService/GetPlanet',
+                         {'id': pid, '_': int(time())},
+                         retry=retry,
+                         timeout=timeout,
+                         )
         if data is None:
             return
         else:
@@ -255,7 +252,7 @@ class Saliens(requests.Session):
         return self.sget('ITerritoryControlMinigameService/GetPlanets',
                          {'active_only': 1},
                          retry=True,
-                         )['response'].get('planets', [])
+                         ).get('planets', [])
 
     def get_uncaptured_planets(self):
         planets = self.get_planets()
