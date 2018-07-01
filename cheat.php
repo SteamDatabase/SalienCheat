@@ -316,6 +316,24 @@ do
 		}
 		while( BossSleep( $c ) );
 
+		$Data = SendPOST( 'ITerritoryControlMinigameService/GetPlayerInfo', 'access_token=' . $Token );
+
+		if( isset( $Data[ 'response' ][ 'score' ] ) )
+		{
+			Msg(
+				'++ Your Score after Boss battle: {lightred}' . number_format( $Data[ 'score' ] ) .
+				'{yellow} (+' . number_format( $Data[ 'score' ] - $OldScore ) . ')' .
+				'{normal} - Level: {green}' . $Data[ 'level' ]
+			);
+
+			$OldScore = $Data[ 'response' ][ 'score' ];
+		}
+
+		if( isset( $Data[ 'response' ][ 'active_boss_game' ] ) )
+		{
+			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_boss_game' ] );
+		}
+
 		continue;
 	}
 
@@ -421,9 +439,10 @@ do
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 
+		$OldScore = $Data[ 'new_score' ];
+
 		if( isset( $Data[ 'next_level_score' ] ) )
 		{
-			$OldScore = $Data[ 'new_score' ];
 			$WaitTimeSeconds = $WaitTime / 60;
 			$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
 			$Hours = floor( $Time / 60 );
