@@ -12,6 +12,7 @@ from io import open
 from time import sleep, time
 from itertools import count
 from datetime import datetime
+from random import randint
 
 import requests
 from tqdm import tqdm
@@ -67,6 +68,7 @@ class Saliens(requests.Session):
     player_info = None
     planet = None
     zone_id = None
+    account_id = None
     zone_capture_rate = 0
     colors = (
         ('^NOR', '\033[0m'),
@@ -112,11 +114,12 @@ class Saliens(requests.Session):
             else:
                 self.log("^GRY   POST %-46s HTTP %s EResult %s", endpoint, resp.status_code, eresult)
 
-                if eresult == 93 and time() < deadline:
+                if (eresult == 93 or eresult == -1) and time() < deadline:
                     sleep(3)
                     continue
-
                 data = rdata['response']
+                #this should return full data only when response is set
+                full_response = rdata
 
             if not retry:
                 break
@@ -124,7 +127,7 @@ class Saliens(requests.Session):
             if not data:
                 sleep(1)
 
-        return data
+        return rdata
 
     def sget(self, endpoint, query_params=None, retry=False, timeout=15):
         data = None
@@ -176,7 +179,7 @@ class Saliens(requests.Session):
             sleep(2)
 
     def refresh_player_info(self):
-        self.player_info = self.spost('ITerritoryControlMinigameService/GetPlayerInfo', retry=True)
+        self.player_info = self.spost('ITerritoryControlMinigameService/GetPlayerInfo', retry=True)['response']
         return self.player_info
 
     def refresh_planet_info(self, retry=True, timeout=15):
@@ -192,6 +195,7 @@ class Saliens(requests.Session):
         return self.planet
 
     def get_planet(self, pid, retry=True, timeout=15):
+
         data = self.sget('ITerritoryControlMinigameService/GetPlanet',
                          {'id': pid, '_': int(time())},
                          retry=retry,
@@ -239,13 +243,13 @@ class Saliens(requests.Session):
                 sort_key += 10**2 * (99 - len(planet['medium_zones']))
             if len(planet['hard_zones']):
                 sort_key += 10**4 * (99 - len(planet['hard_zones']))
-#           if len(planet['boss_zones']):
-#               sort_key += 10**6 * (99 - len(planet['boss_zones']))
+            if len(planet['boss_zones']):
+                sort_key += 10**6 * (99 - len(planet['boss_zones']))
 
             planet['sort_key'] = sort_key
 
-        return planet
-
+        return planet     
+        
     def get_planets(self):
         return self.sget('ITerritoryControlMinigameService/GetPlanets',
                          {'active_only': 1},
@@ -260,23 +264,26 @@ class Saliens(requests.Session):
                       )
 
     def represent_clan(self, clan_id):
-        return self.spost('ITerritoryControlMinigameService/RepresentClan', {'clanid': clan_id})
+        return self.spost('ITerritoryControlMinigameService/RepresentClan', {'clanid': clan_id})['response']
 
     def report_score(self, score):
-        return self.spost('ITerritoryControlMinigameService/ReportScore', {'score': score})
+        return self.spost('ITerritoryControlMinigameService/ReportScore', {'score': score})['response']
 
     def join_planet(self, pid):
-        return self.spost('ITerritoryControlMinigameService/JoinPlanet', {'id': pid})
+        return self.spost('ITerritoryControlMinigameService/JoinPlanet', {'id': pid})['response']
 
     def join_zone(self, pos):
         self.zone_id = pos
-        return self.spost('ITerritoryControlMinigameService/JoinZone', {'zone_position': pos})
-
+        return self.spost('ITerritoryControlMinigameService/JoinZone', {'zone_position': pos})['response']
+    def join_zone_boss(self, pos):
+        self.zone_id = pos
+        return self.spost('ITerritoryControlMinigameService/JoinBossZone', {'zone_position': pos})['response']
+        
     def leave_zone(self, clear_rate=True):
         if 'active_zone_game' in self.player_info:
             self.spost('IMiniGameService/LeaveGame',
                        {'gameid': self.player_info['active_zone_game']},
-                       retry=False)
+                       retry=False)['response']
         self.zone_id = None
 
         if clear_rate:
@@ -286,7 +293,7 @@ class Saliens(requests.Session):
         if 'active_planet' in self.player_info:
             self.spost('IMiniGameService/LeaveGame',
                        {'gameid': self.player_info['active_planet']},
-                       retry=False)
+                       retry=False)['response']
 
     def pbar_init(self):
         self.level_pbar = tqdm(ascii=True,
@@ -460,8 +467,11 @@ class Saliens(requests.Session):
                            planet_name,
                            )
                  )
-
-
+                 
+    #Send boss damage with heal ability, damage 0, damage to boss 1
+    def report_boss_damage(self,heal):
+        return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': 1,'damage_taken':0,'use_heal_ability':heal})
+        
 # ----- MAIN -------
 
 
@@ -475,20 +485,23 @@ game.refresh_player_info()
 # fair play
 game.log("^GRN-- Welcome to SalienCheat for SteamDB")
 
-if 'clan_info' not in game.player_info:
-    game.log("^GRN-- You are currently not representing any clan, so you are now part of SteamDB")
-    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^GRN on Steam")
-    game.represent_clan(4777282)
-
-elif game.player_info['clan_info']['accountid'] != 4777282:
-    game.log("^GRN-- If you want to support us, join our group")
-    game.log("^GRN-- ^YELhttps://steamcommunity.com/groups/steamdb")
-    game.log("^GRN-- and set us as your clan on")
-    game.log("^GRN-- ^YELhttps://steamcommunity.com/saliengame/play/")
-    game.log("^GRN-- Happy farming!")
+if 'clan_info' not in game.player_info:	
+    game.log("^GRN-- You are currently not representing any clan, so you are now part of SteamDB")	
+    game.log("^GRN-- Make sure to join ^YELhttps://steamcommunity.com/groups/steamdb^GRN on Steam")	
+    game.represent_clan(4777282)	
+	
+elif game.player_info['clan_info']['accountid'] != 4777282:	
+    game.log("^GRN-- If you want to support us, join our group")	
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/groups/steamdb")	
+    game.log("^GRN-- and set us as your clan on")	
+    game.log("^GRN-- ^YELhttps://steamcommunity.com/saliengame/play/")	
+    game.log("^GRN-- Happy farming!")	
 
 game.log("^GRN++^NOR Scanning for planets...")
 game.refresh_planet_info()
+
+#Get account Id for boss logging
+#game.get_account_id()
 
 # show planet info
 planets = game.get_uncaptured_planets()
@@ -553,7 +566,8 @@ try:
             if 'clan_info' not in game.player_info:
                 game.represent_clan(4777282)
 
-            zones = (game.planet['hard_zones']
+            zones = (game.planet['boss_zones']
+                     + game.planet['hard_zones']
                      + game.planet['medium_zones']
                      + game.planet['easy_zones'])
 
@@ -568,25 +582,32 @@ try:
                 game.log("^GRN++^NOR No open zones left on planet")
                 game.player_info.pop('active_planet')
                 break
-
-            # choose highest priority zone
+                
+            #Temp zone_id to check if first zone is boss zone                
             zone_id = zones[0]['zone_position']
-            difficulty = zones[0]['difficulty']
-
-            deadline = time() + 60 * 10  # rescan planets every 10min
+            
+            # choose highest priority zone
+            zone_array_index = 0
+            
+            if game.player_info.get('level') >= 21 and game.planet['zones'][zone_id]['type'] != 4:
+                game.log("You will be joining randomized zones to reduce Steam server load and help capture planets faster.")
+                zone_array_index = randint(0,len(zones)-1) 
+            zone_id = zones[zone_array_index]['zone_position']
+            difficulty = zones[zone_array_index]['difficulty']
+            deadline = time() + 60   # rescan planets every 10min
 
             dmap = {
                 1: 'easy',
                 2: 'medium',
                 3: 'hard',
                 }
-
+            
             game.log("^GRN++^NOR Selecting %szone ^YEL%s^NOR (%s)....",
                      '^REDboss^NOR ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                      zone_id,
                      dmap.get(difficulty, difficulty),
                      )
-
+            
             # fight in the zone
             while (game.planet
                    and time() < deadline
@@ -604,35 +625,89 @@ try:
                          'boss ' if game.planet['zones'][zone_id]['type'] == 4 else '',
                          zone_id,
                          dmap.get(difficulty, difficulty))
+                
+                if game.planet['zones'][zone_id]['type'] == 4:
+                    game.join_zone_boss(zone_id)
+                    #placeholder max HP
+                    boss_max_hp = 1;
+                    time_last_heal = time()
+                    next_heal = randint(120,180)
+                    #boss_fails_allowed = 10
+                    next_loop = time()
+                    boss_hp = 10000000
+                    heal = 0
+                    #Loop until break
+                    while(True):
+                        #submit every 5 seconds
+                        if (next_loop+5) < time():
+                            next_loop = time()
+                            #send boss damage
+                            full_response = game.report_boss_damage(heal);
+                            #on E11, restart, bugged for now, fix it later
+                            if 'headers' in full_response and int(full_response.headers.get('X-eresult', -1)) == 11:
+                                game.log("Got invalid state. Restarting")
+                                deadline = 0
+                                break;
+                            response = full_response['response']
+                            #If there is a battle complete field
+                            if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
+                                game.log("Boss Battle Completed")
+                                break
+                            #If waiting for players, wait a couple seconds, then try again
+                            if(response.get('waiting_for_players') and response.get('waiting_for_players') != ""):
+                                game.log("Waiting for Players")
+                                #sleep to avoid DDOSDB
+                                sleep(2)
+                                continue
+                            #You're in a boss battle at this point, send data
+                            else:
+                                heal = 0
+                                #do healing after between 120 and 180 seconds
+                                if(time_last_heal + next_heal < time()):
+                                    time_last_heal = time()
+                                    next_heal = 120
+                                    heal = 1
+                                if('boss_status' in response):
+                                    if(boss_max_hp == 1):
+                                        boss_max_hp = response['boss_status']['boss_max_hp']
+                                    boss_hp = response['boss_status']['boss_hp']
+                                    #Print out each player.
+                                    for player in response['boss_status']['boss_players']:
+                                        #if(player['accountid'] == game.account_id):
+                                        game.log(str(boss_hp) + " / " + str(boss_max_hp) + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name']) + ' Player HP ' + str(player['hp']) + '/' + str(player['max_hp']) + " XP Gained: " + str(player['xp_earned']) )
+                                
+                        #sleep after success or fail            
+                        sleep(1)
+                                           
+                else: 
+                    game.join_zone(zone_id)
+                    stoptime = time() + 109.6
+                    game.refresh_player_info()
 
-                game.join_zone(zone_id)
-                stoptime = time() + 109.6
-                game.refresh_player_info()
+                    # refresh progress bars while in battle
+                    for i in count(start=1):
+                        # stop when battle is finished or zone was captured
+                        if time() >= stoptime:  # or game.planet['zones'][zone_id]['captured']:
+                            break
 
-                # refresh progress bars while in battle
-                for i in count(start=1):
-                    # stop when battle is finished or zone was captured
-                    if time() >= stoptime:  # or game.planet['zones'][zone_id]['captured']:
-                        break
+                        sleep(1)
 
-                    sleep(1)
+                        if (i % 11) == 0:
+                            game.refresh_planet_info(retry=False, timeout=max(0, stoptime - time()))
+                            game.pbar_refresh()
 
-                    if (i % 11) == 0:
-                        game.refresh_planet_info(retry=False, timeout=max(0, stoptime - time()))
-                        game.pbar_refresh()
-
-#               if game.planet['zones'][zone_id]['captured']:
-#                   game.log("^RED-- Zone was captured before we could submit score")
-#               else:
-                score = 120 * (5 * (2**(difficulty - 1)))
-                game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
-                game.report_score(score)
+    #               if game.planet['zones'][zone_id]['captured']:
+    #                   game.log("^RED-- Zone was captured before we could submit score")
+    #               else:
+                    score = 120 * (5 * (2**(difficulty - 1)))
+                    game.log("^GRN++^NOR Submitting score of ^GRN%s^NOR...", score)
+                    game.report_score(score)
                 game.refresh_player_info()
                 game.refresh_planet_info()
 
                 # incase user gets stuck
                 game.leave_zone(False)
-
+                
             # Rescan planets after zone is finished
             game.log("^GRN++^NOR Rescanning planets...")
             planets = game.get_uncaptured_planets()
