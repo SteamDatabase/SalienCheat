@@ -421,20 +421,23 @@ do
 			'{normal} (' . number_format( GetNextLevelProgress( $Data ) * 100, 2 ) . '%)'
 		);
 
-		$OldScore = $Data[ 'new_score' ];
-		$WaitTimeSeconds = $WaitTime / 60;
-		$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
-		$Hours = floor( $Time / 60 );
-		$Minutes = $Time % 60;
-		$Date = date_create();
+		if( isset( $Data[ 'next_level_score' ] ) )
+		{
+			$OldScore = $Data[ 'new_score' ];
+			$WaitTimeSeconds = $WaitTime / 60;
+			$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
+			$Hours = floor( $Time / 60 );
+			$Minutes = $Time % 60;
+			$Date = date_create();
 
-		date_add( $Date, date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
+			date_add( $Date, date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
 
-		Msg(
-			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
-			'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
-			'{normal} - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
-		);
+			Msg(
+				'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
+				'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
+				'{normal} - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
+			);
+		}
 
 		if( $Data[ 'new_level' ] >= 21 )
 		{
@@ -472,6 +475,11 @@ function CheckGameVersion( $Data )
 
 function GetNextLevelProgress( $Data )
 {
+	if( !isset( $Data[ 'next_level_score' ] ) )
+	{
+		return 1;
+	}
+
 	$ScoreTable =
 	[
 		0,       // Level 1
