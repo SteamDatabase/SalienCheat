@@ -27,18 +27,16 @@ if ($Token === null && $AccountId === 0 && $argc > 1 )
 	}
 	else {
 		$Token = $argv[1];
-		$TokenFile = null;
 
 		if ($argc > 2)
 		{
 			$AccountID = $argv[2];
 		}
-		unset($TokenFile);
 	}
 }
 
 // If token is still missing, fetch it from file
-if (isset($TokenFile))
+if (isset($TokenFile) && file_exists($TokenFile))
 {
 	Msg('Reading token from "{teal}' . $TokenFile . '{normal}"');
 	$Token = trim(file_get_contents($TokenFile));
