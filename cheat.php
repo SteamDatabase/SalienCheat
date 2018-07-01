@@ -677,6 +677,12 @@ function GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep )
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
 	{
+		if( isset( $Planets[ 'response' ][ 'game_version' ] ) )
+		{
+			Msg( '{green}There are no active planets left! Good game!' );
+			exit( 0 );
+		}
+
 		return null;
 	}
 
