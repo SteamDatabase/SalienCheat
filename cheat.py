@@ -590,7 +590,7 @@ try:
             zone_id = zones[zone_array_index]['zone_position']
             difficulty = zones[zone_array_index]['difficulty']
 
-            deadline = time() + 60 * 10  # rescan planets every 10min
+            deadline = time() + 60   # rescan planets every 10min
 
             dmap = {
                 1: 'easy',
@@ -640,8 +640,8 @@ try:
                             next_loop = time()
                             #send boss damage
                             full_response = game.report_boss_damage(heal);
-                            #on E11, restart
-                            if int(full_response.headers.get('X-eresult', -1)) == 11:
+                            #on E11, restart/// bugged
+                            if 'headers' in full_response and int(full_response.headers.get('X-eresult', -1)) == 11:
                                 game.log("Got invalid state. Restarting")
                                 deadline = 0
                                 break;
@@ -664,13 +664,14 @@ try:
                                     time_last_heal = time()
                                     next_heal = 120
                                     heal = 1
-                                if(boss_max_hp == 1):
-                                    boss_max_hp = response['boss_status']['boss_max_hp']
-                                boss_hp = response['boss_status']['boss_hp']
-                                #Print out each player.
-                                for player in response['boss_status']['boss_players']:
-                                    #if(player['accountid'] == game.account_id):
-                                    game.log(str(boss_hp) + " / " + str(boss_max_hp) + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name']) + ' Player HP ' + str(player['hp']) + '/' + str(player['max_hp']) + " XP Gained: " + str(player['xp_earned']) )
+                                if('boss_status' in response):
+                                    if(boss_max_hp == 1):
+                                        boss_max_hp = response['boss_status']['boss_max_hp']
+                                    boss_hp = response['boss_status']['boss_hp']
+                                    #Print out each player.
+                                    for player in response['boss_status']['boss_players']:
+                                        #if(player['accountid'] == game.account_id):
+                                        game.log(str(boss_hp) + " / " + str(boss_max_hp) + " Player: " + re.sub(r'[^\x00-\x7f]',r'', player['name']) + ' Player HP ' + str(player['hp']) + '/' + str(player['max_hp']) + " XP Gained: " + str(player['xp_earned']) )
                                 
                         #sleep after success or fail            
                         sleep(1)
