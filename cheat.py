@@ -468,7 +468,7 @@ class Saliens(requests.Session):
                  
     #Send boss damage with heal ability, damage 0, damage to boss 1
     def report_boss_damage(self,heal):
-        return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': 1,'damage_taken':0,'use_heal_ability':heal})
+        return self.spost('ITerritoryControlMinigameService/ReportBossDamage', {'damage_to_boss': randint(1,200),'damage_taken':0,'use_heal_ability':heal})
         
 # ----- MAIN -------
 
@@ -580,16 +580,19 @@ try:
                 game.log("^GRN++^NOR No open zones left on planet")
                 game.player_info.pop('active_planet')
                 break
-
+            
+            zone_id = zones[0]['zone_position']
             # choose highest priority zone
             zone_array_index = 0
-            if game.player_info.get('level') >= 0b10000 and game.planet['zones'][0]['type'] != 4:
+            game.log(str(game.planet['zones'][zone_id]['type']))
+            
+            if game.player_info.get('level') >= 0b10000 and game.planet['zones'][zone_id]['type'] != 4:
                 game.log("You will be joining randomized zones to reduce Steam server load and help capture planets faster.")
                 zone_array_index = randint(0,len(zones)-1) 
                 
             zone_id = zones[zone_array_index]['zone_position']
             difficulty = zones[zone_array_index]['difficulty']
-
+            game.log(str(zone_id))
             deadline = time() + 60   # rescan planets every 10min
 
             dmap = {
