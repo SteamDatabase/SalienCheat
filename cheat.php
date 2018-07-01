@@ -199,6 +199,7 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
+		$BossInitialHP = 0;
 		$BossHPDelta = array();
 		$BossRewards =
 		[
@@ -326,7 +327,19 @@ do
 
 			if ( array_key_exists( (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ], $BossRewards ) )
 			{
-				array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+				if ( count( $BossHPDelta ) )
+				{
+					array_push( $BossHPDelta, abs( $BossInitialHP - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+				}
+				elseif ( count( $BossHPDelta ) > 1 )
+				{
+					array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+				}
+				else
+				{
+					$BossInitialHP = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
+				}
+
 				$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
 				$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0 );
 				$EstBossXP = $Reward[ 0 ] + round( ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0 );
