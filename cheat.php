@@ -68,9 +68,7 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
-if (isset($TokenFile)) {
-	unset( $TokenFile );
-}
+unset( $TokenFile );
 
 $LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
 Msg( '{teal}File hash is ' . substr( $LocalScriptHash, 0, 8 ) );
