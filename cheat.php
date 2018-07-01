@@ -573,6 +573,7 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$BossZones = [];
+	$HalfZones = [];
 
 	foreach( $Zones as &$Zone )
 	{
@@ -595,6 +596,12 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 		if( $Zone[ 'type' ] == 4 && $Zone[ 'boss_active' ] )
 		{
 			$BossZones[] = $Zone;
+		}
+		// It appears that bosses like to spawn when a random zone gets over 50% capture progress
+		// So we will target fresh zones to bring them up to speed
+		else if( $Zone[ 'capture_progress' ] < 0.45 )
+		{
+			$HalfZones[] = $Zone;
 		}
 
 		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$RandomizeZone ) ? 0.90 : 0.99;
@@ -629,6 +636,11 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 
 	if( $RandomizeZone )
 	{
+		if( count( $HalfZones ) > 3 )
+		{
+			$CleanZones = $HalfZones;
+		}
+
 		shuffle( $CleanZones );
 	}
 	else
