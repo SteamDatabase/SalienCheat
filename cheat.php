@@ -196,12 +196,13 @@ do
 		sleep( 4 );
 
 		$BossFailsAllowed = 10;
-		$NextHeal = microtime( true ) + mt_rand( 120, 180 );
+		$NextHeal = PHP_INT_MAX;
+		$WaitingForPlayers = true;
 
 		do
 		{
 			$UseHeal = 0;
-			$DamageToBoss = 1;
+			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
 			$DamageTaken = 0;
 
 			if( microtime( true ) >= $NextHeal )
@@ -232,6 +233,18 @@ do
 				$LastKnownPlanet = 0;
 
 				break;
+			}
+
+			if( $Data[ 'response' ][ 'waiting_for_players' ] )
+			{
+				$WaitingForPlayers = true;
+				Msg( '{green}@@ Waiting for players...' );
+				continue;
+			}
+			else if( $WaitingForPlayers )
+			{
+				$WaitingForPlayers = false;
+				$NextHeal = microtime( true ) + mt_rand( 120, 180 );
 			}
 
 			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
@@ -290,12 +303,6 @@ do
 				$LastKnownPlanet = 0;
 
 				break;
-			}
-
-			if( $Data[ 'response' ][ 'waiting_for_players' ] )
-			{
-				Msg( '{green}@@ Waiting for players...' );
-				continue;
 			}
 
 			if( $MyPlayer !== null )
