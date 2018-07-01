@@ -199,6 +199,15 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
+		$BossHPDelta = array();
+		$BossRewards =
+		[
+			"40000000"=>[ 250000, 2500 ],
+			"50000000"=>[ 275000, 5000 ],
+			"100000000"=>[ 300000, 7500 ],
+			"150000000"=>[ 325000, 10000 ],
+			"1000000000"=>[ 350000, 12500 ]
+		];
 
 		do
 		{
@@ -313,6 +322,16 @@ do
 				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
 
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
+			}
+
+			if ( array_key_exists( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ], $BossRewards ) )
+			{
+				array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
+				$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
+				$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0);
+				$EstBossXP = $Reward[ 0 ] + round(( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0);
+
+				Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstBossXP ) . "{normal} - Damage per Second: {lightred}" . number_format( $EstBossDPS ) );
 			}
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
