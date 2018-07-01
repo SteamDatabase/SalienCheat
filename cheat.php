@@ -207,6 +207,13 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
+		$BossEstimate =
+		[
+			'PrevHP' => 0,
+			'PrevXP' => 0,
+			'DeltHP' => [],
+			'DeltXP' => []
+		];
 
 		do
 		{
@@ -314,9 +321,24 @@ do
 				break;
 			}
 
+			if( $BossEstimate[ 'PrevXP' ] > 0 )
+			{
+				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
+				$BossEstimate[ 'DeltXP' ][] = ( $MyPlayer !== null ? abs( $BossEstimate[ 'PrevXP' ] - $MyPlayer[ 'xp_earned' ] ) : 1 );
+
+				$EstXPRate = ( $MyPlayer !== null ? ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) ) : 2500 );
+				$EstBossDPT = ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) );
+				$EstXPTotal = ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT ) * $EstXPRate;
+
+				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . "{normal} ({yellow}+" . number_format( $EstXPRate ) . "{normal}/tick excl. bonuses) - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
+			}
+
+			$BossEstimate[ 'PrevHP' ] = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
+			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 0 );
+
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
 
-			Msg( '{yellow}@@ Damage sent: {green}' . $DamageToBoss . '{yellow} - ' . ( $UseHeal ? '{green}Used heal ability!' : 'Next heal in {green}' . round( $NextHeal - $Time ) . '{yellow} seconds' ) );
+			Msg( '{normal}@@ Damage sent: {green}' . $DamageToBoss . '{normal} - ' . ( $UseHeal ? '{green}Used heal ability!' : 'Next heal in {green}' . round( $NextHeal - $Time ) . '{normal} seconds' ) );
 
 			echo PHP_EOL;
 		}
@@ -325,6 +347,8 @@ do
 		// Boss battle is over, reset state and scan again
 		$BestPlanetAndZone = 0;
 		$LastKnownPlanet = 0;
+
+		unset( $BossEstimate );
 
 		if( $MyScoreInBoss > 0 )
 		{
