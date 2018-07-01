@@ -13,6 +13,8 @@
 2. Extract it into a new folder
 3. Click `cheat.bat` and follow instructions
 
+If that fails for any reason, or you still have questions, [check out this Google doc for commonly asked questions](https://docs.google.com/document/d/1DQx6K-SmfkF_fsy4sS-vMkUlqGrABolOpOtvAYaU3nU/preview).
+
 ### Mac
 
 0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default
