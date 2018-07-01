@@ -639,6 +639,7 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 	if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
+		goto bossLabel;
 	}
 	else if( count( $CleanZones ) < 2 )
 	{
@@ -672,6 +673,7 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 		} );
 	}
 
+bossLabel:
 	return [
 		'high_zones' => $HighZones,
 		'medium_zones' => $MediumZones,
