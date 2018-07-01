@@ -415,19 +415,15 @@ do
 	{
 		if( isset( $Data[ 'extratime' ] ) )
 		{
-			$LagAdjustedWaitTime = $Data[ 'extratime' ] - $SkippedLagTime;
-			if( $LagAdjustedWaitTime >= 0 )
+			$LagAdjustedWaitTime = $Data[ 'extratime' ] - ( $SkippedLagTime / 2 );
+			if( $LagAdjustedWaitTime < 0 )
 			{
-				$LagAdjustedWaitTime = min( 1, $LagAdjustedWaitTime, $Data[ 'extratime' ] );
-			}
-			else
-			{
-				$LagAdjustedWaitTime = min( 1, $SkippedLagTime, $Data[ 'extratime' ] );
+				$LagAdjustedWaitTime = max( $FailSleep, $SkippedLagTime, $Data[ 'extratime' ] );
 			}
 		}
 		else
 		{
-			$LagAdjustedWaitTime = max( 1, min( 10, $SkippedLagTime ) );
+			$LagAdjustedWaitTime = max( $FailSleep, min( 10, $SkippedLagTime ) );
 		}
 
 		Msg( '{lightred}-- Report score failed, trying again in ' . number_format( $LagAdjustedWaitTime, 3 ) . ' seconds...' );
