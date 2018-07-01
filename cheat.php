@@ -327,9 +327,9 @@ do
 				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 				$BossEstimate[ 'DeltXP' ][] = abs( $BossEstimate[ 'PrevXP' ] - $MyScoreInBoss );
 
-				$EstXPRate = round( ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) ), 0 );
-				$EstBossDPT = round( ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) ), 0 );
-				$EstXPTotal = round( ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT ) * $EstXPRate, 0 );
+				$EstXPRate = ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) );
+				$EstBossDPT = ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) );
+				$EstXPTotal = ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT ) * $EstXPRate;
 
 				Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstXPTotal ) . " {teal}(Excl. Bonuses){normal} - Damage per Second: {lightred}" . number_format( $EstBossDPT / 5 ) );
 			}
