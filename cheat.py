@@ -635,10 +635,9 @@ try:
                     #boss_fails_allowed = 10
                     next_loop = time()
                     boss_hp = 10000000
+                    heal = 0
                     #Loop until break
                     while(True):
-                        #reset heal on each iteration
-                        heal = 0
                         #submit every 5 seconds
                         if (next_loop+5) < time():
                             next_loop = time()
@@ -651,7 +650,7 @@ try:
                                 break;
                             response = full_response['response']
                             #If there is a battle complete field
-                            if(response.get('game_over') and response.get('game_over')!="" or boss_hp == 0):
+                            if(response.get('game_over',True) boss_hp == 0):
                                 game.log("Boss Battle Completed")
                                 break
                             #If waiting for players, wait a couple seconds, then try again
