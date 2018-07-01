@@ -321,9 +321,9 @@ do
 		if( isset( $Data[ 'response' ][ 'score' ] ) )
 		{
 			Msg(
-				'++ Your Score after Boss battle: {lightred}' . number_format( $Data[ 'score' ] ) .
-				'{yellow} (+' . number_format( $Data[ 'score' ] - $OldScore ) . ')' .
-				'{normal} - Level: {green}' . $Data[ 'level' ]
+				'++ Your Score after Boss battle: {lightred}' . number_format( $Data[ 'response' ][ 'score' ] ) .
+				'{yellow} (+' . number_format( $Data[ 'response' ][ 'score' ] - $OldScore ) . ')' .
+				'{normal} - Level: {green}' . $Data[ 'response' ][ 'level' ]
 			);
 
 			$OldScore = $Data[ 'response' ][ 'score' ];
