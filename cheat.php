@@ -324,12 +324,12 @@ do
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
 			}
 
-			if ( array_key_exists( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ], $BossRewards ) )
+			if ( array_key_exists( (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ], $BossRewards ) )
 			{
 				array_push( $BossHPDelta, abs( end( $BossHPDelta ) - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) );
 				$Reward = $BossRewards[ (string)$Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ];
-				$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0);
-				$EstBossXP = $Reward[ 0 ] + round(( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0);
+				$EstBossDPS = round( ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) / 5, 0 );
+				$EstBossXP = $Reward[ 0 ] + round( ( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / ( array_sum( $BossHPDelta ) / count( $BossHPDelta ) ) ) * $Reward[ 1 ], 0 );
 
 				Msg( '@@ Estimated Final XP: {yellow}' . number_format( $EstBossXP ) . "{normal} - Damage per Second: {lightred}" . number_format( $EstBossDPS ) );
 			}
