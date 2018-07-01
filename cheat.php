@@ -311,7 +311,6 @@ do
 
 				$BestPlanetAndZone = 0;
 				$LastKnownPlanet = 0;
-				$BossEstimate = [];
 
 				break;
 			}
@@ -323,7 +322,7 @@ do
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
 			}
 
-			if ( $BossEstimate[ 'PrevXP' ] && $BossEstimate [ 'PrevHP' ] )
+			if ( !empty( $BossEstimate[ 'PrevXP' ] ) && !empty( $BossEstimate [ 'PrevHP' ] ) )
 			{
 				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 				$BossEstimate[ 'DeltXP' ][] = abs( $BossEstimate[ 'PrevXP' ] - $MyScoreInBoss );
@@ -345,6 +344,8 @@ do
 			echo PHP_EOL;
 		}
 		while( BossSleep( $c ) );
+
+		unset($BossEstimate);
 
 		if( $MyScoreInBoss > 0 )
 		{
