@@ -209,6 +209,7 @@ do
 		$MyScoreInBoss = 0;
 		$BossEstimate =
 		[
+			'InitHP' => 0,
 			'PrevHP' => 0,
 			'PrevXP' => 0,
 			'DeltHP' => [],
@@ -328,20 +329,39 @@ do
 				break;
 			}
 
+			// Boss XP, DPS and Time Estimation
 			if( $BossEstimate[ 'PrevXP' ] > 0 )
 			{
+				// Calculate HP and XP change per game tick
 				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 				$BossEstimate[ 'DeltXP' ][] = ( $MyPlayer !== null ? abs( $BossEstimate[ 'PrevXP' ] - $MyPlayer[ 'xp_earned' ] ) : 1 );
 
-				$EstXPRate = ( $MyPlayer !== null ? ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) ) : 2500 );
-				$EstBossDPT = ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) );
-				$EstXPTotal = ( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] / $EstBossDPT ) * $EstXPRate;
+				// Calculate XP rate, Boss damage per game tick (2500xp/tick fallback for players without $AccountID) and game ticks Remaining
+				$EstXPRate = ( $MyPlayer !== null ? array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) : 2500 );
+				$EstBossDPT = array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] );
+				$EstTickRemain = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT;
 
+				// Calculate Total XP Reward for Boss
+				$EstXPTotal = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] + ( $EstTickRemain * $EstXPRate ) : ( $BossEstimate[ 'InitHP' ] / $EstBossDPT ) * $EstXPRate );
+
+				// Display Estimated XP and DPS
 				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . "{normal} ({yellow}+" . number_format( $EstXPRate ) . "{normal}/tick excl. bonuses) - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
-			}
+				
+				// Display Estimated Time Remaining
+				Msg( '@@ Estimated Time Remaining: {teal}' . gmdate( 'H:i:s', $EstTickRemain * 5 ) );
 
+				// Only keep the last 1 minute of game time (12 ticks) in BossEstimate
+				if ( count( $BossEstimate[ 'DeltHP' ] ) == 12 )
+				{
+					array_shift( $BossEstimate[ 'DeltHP' ] );
+					array_shift( $BossEstimate[ 'DeltXP' ] );
+				}
+			}
+			
+			// Set Initial HP Once, Log HP and XP every tick
+			$BossEstimate[ 'InitHP' ] = ( $BossEstimate[ 'InitHP' ] ?: $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 			$BossEstimate[ 'PrevHP' ] = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
-			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 0 );
+			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 1 );
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
 
