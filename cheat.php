@@ -207,6 +207,7 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
+		$TotalLasers = 0;
 		$BossEstimate =
 		[
 			'PrevHP' => 0,
@@ -306,7 +307,14 @@ do
 					]
 				);
 			}
-
+			
+			if ( $TotalLasers !== $Data[ 'response' ][ 'num_laser_uses' ] )
+			{
+				Msg( '{lightred}@@ Hit by boss laser!' );
+			}
+			
+			$TotalLasers = $Data[ 'response' ][ 'num_laser_uses' ];
+			
 			if( $MyPlayer !== null )
 			{
 				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
