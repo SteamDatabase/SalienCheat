@@ -322,6 +322,13 @@ do
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
 			}
 
+			if( $MyPlayer !== null && $MyPlayer[ 'hp' ] <= 0 )
+			{
+				Msg( '{lightred}!! Health 0 or less, restarting...' );
+
+				break;
+			}
+			
 			if( $Data[ 'response' ][ 'game_over' ] )
 			{
 				Msg( '{green}@@ Boss battle is over.' );
