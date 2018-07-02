@@ -811,30 +811,33 @@ function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 				return $Planet;
 			}
 
-			if( $Planet[ 'low_zones' ] > 0 )
-			{
-				$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
-			}
-
 			if( $Planet[ 'medium_zones' ] > 0 )
 			{
 				$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
 			}
 
-			if( $Planet[ 'high_zones' ] > 0 )
-			{
-				$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
-			}
-
 			if( $HasReachedMaxLevel )
 			{
-				if( $Planet[ 'sort_key' ] > 0 )
+				if( $Planet[ 'low_zones' ] > 0 )
 				{
-					$Planet[ 'sort_key' ] *= -1;
+					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'low_zones' ] );
 				}
-				else
+
+				if( $Planet[ 'high_zones' ] > 0 )
 				{
-					$Planet[ 'sort_key' ] = -pow( 10, 6 );
+					$Planet[ 'sort_key' ] += 99 - $Planet[ 'high_zones' ];
+				}
+			}
+			else
+			{
+				if( $Planet[ 'low_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
+				}
+
+				if( $Planet[ 'high_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
 				}
 			}
 		}
