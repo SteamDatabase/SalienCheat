@@ -207,6 +207,7 @@ do
 		$NextHeal = PHP_INT_MAX;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
+		$TotalLasers = 0;
 		$BossEstimate =
 		[
 			'PrevHP' => 0,
@@ -306,7 +307,14 @@ do
 					]
 				);
 			}
-
+			
+			if ( $TotalLasers !== $Data[ 'response' ][ 'num_laser_uses' ] )
+			{
+				Msg( '{yellow}@@ Hit by boss laser!' );
+			}
+			
+			$TotalLasers = $Data[ 'response' ][ 'num_laser_uses' ];
+			
 			if( $MyPlayer !== null )
 			{
 				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
@@ -314,6 +322,13 @@ do
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
 			}
 
+			if( $MyPlayer !== null && $MyPlayer[ 'hp' ] <= 0 )
+			{
+				Msg( '{lightred}!! Health 0 or less, restarting...' );
+
+				break;
+			}
+			
 			if( $Data[ 'response' ][ 'game_over' ] )
 			{
 				Msg( '{green}@@ Boss battle is over.' );
