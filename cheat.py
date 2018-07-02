@@ -79,11 +79,7 @@ class Saliens(requests.Session):
     def __init__(self, access_token):
         super(Saliens, self).__init__()
         self.access_token = access_token
-        self.headers['User-Agent'] = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                                      ' (KHTML, like Gecko) Chrome/69.0.3464.0 Safari/537.36')
-        self.headers['Accept'] = '*/*'
-        self.headers['Origin'] = 'https://steamcommunity.com'
-        self.headers['Referer'] = 'https://steamcommunity.com/saliengame/play'
+        self.headers['User-Agent'] = ('SalienCheat (https://github.com/SteamDatabase/SalienCheat/')
         self.pbar_init()
 
     def spost(self, endpoint, form_fields=None, retry=False):
@@ -243,8 +239,8 @@ class Saliens(requests.Session):
                 sort_key += 10**2 * (99 - len(planet['medium_zones']))
             if len(planet['hard_zones']):
                 sort_key += 10**4 * (99 - len(planet['hard_zones']))
-            if len(planet['boss_zones']):
-                sort_key += 10**6 * (99 - len(planet['boss_zones']))
+#           if len(planet['boss_zones']):
+#               sort_key += 10**6 * (99 - len(planet['boss_zones']))
 
             planet['sort_key'] = sort_key
 
@@ -557,8 +553,7 @@ try:
             if 'clan_info' not in game.player_info:
                 game.represent_clan(4777282)
 
-            zones = (game.planet['boss_zones']
-                     + game.planet['hard_zones']
+            zones = (game.planet['hard_zones']
                      + game.planet['medium_zones']
                      + game.planet['easy_zones'])
 

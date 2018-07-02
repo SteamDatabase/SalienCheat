@@ -3,8 +3,7 @@
 ## First steps
 
 1. Join https://steamcommunity.com/groups/SteamDB (needed to represent captures)
-2. Open https://steamcommunity.com/saliengame/gettoken and save it as `token.txt` in the same folder as `cheat.php`
-3. Select PHP or Python version of the script. You don't need both
+2. Open https://steamcommunity.com/saliengame/gettoken and save it (<kbd>Ctrl</kbd>+<kbd>S</kbd>) as `token.txt` in the same folder as `cheat.php`
 
 ## PHP
 
@@ -14,6 +13,8 @@
 2. Extract it into a new folder
 3. Click `cheat.bat` and follow instructions
 
+If that fails for any reason, or you still have questions, [check out this Google doc for commonly asked questions](https://docs.google.com/document/d/1DQx6K-SmfkF_fsy4sS-vMkUlqGrABolOpOtvAYaU3nU/preview).
+
 ### Mac
 
 0. (optional) Launch the App Store and download any updates for macOS. Newer versions of macOS have php and curl included by default
@@ -22,8 +23,8 @@
 
 You can also provide token directly in CLI, to ease running multiple accounts:
 ```bash
-php cheat.php token1
-php cheat.php token2
+php cheat.php token1 accountid1
+php cheat.php token2 accountid2
 ```
 
 ### Linux
@@ -32,6 +33,8 @@ php cheat.php token2
 2. You know what you are doing. 🐧
 
 ## Python
+
+⚠ **Python version currently does not support Boss battles, so you should choose the PHP version.** ⚠
 
 ### Windows
 
@@ -67,37 +70,3 @@ php cheat.php token2
 2. To build: `docker build . -t steamdb/saliencheat`
 3. To run: `docker run -it --init --rm -e TOKEN=<32 character token from gettoken url> steamdb/saliencheat`
 4. To stop running, Ctrl+C
-
-## Heroku
-### Deploying with web-console
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-1. Click the button above.
-2. Set SALIENS_TOKEN & IGNORE_UPDATES.
-3. That's all!
-
-To check if it works, visit logs at https://dashboard.heroku.com/apps/[YOUR_APP_NAME]/logs
-
-### Updating
-
-Download and install [Heroku-CLI](https://devcenter.heroku.com/articles/heroku-cli)
-
-If you are using Windows, open cmd by pressing <kbd>win</kbd>+<kbd>r</kbd> -> type `cmd` -> press <kbd>Enter</kbd> and then enter the following:
-```bash
-heroku login
-```
-Enter your Heroku credentials and then enter the following stuff below:
-
-(Required only for first update. Safe to ignore warning about: `You appear to have cloned an empty repository`) -
-```bash
-git clone https://git.heroku.com/[APP_NAME].git -o heroku
-cd [APP_NAME]
-git remote add upstream https://github.com/SteamDatabase/SalienCheat.git
-```
-Then enter the following (below stuff required for all updates):
-```bash
-git fetch upstream
-git merge remotes/upstream/master
-git push heroku master
-```

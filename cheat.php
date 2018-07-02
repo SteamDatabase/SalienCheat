@@ -1,7 +1,19 @@
 #!/usr/bin/env php
 <?php
 
+Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
+
 set_time_limit( 0 );
+error_reporting( -1 );
+ini_set( 'display_errors', '1' );
+
+if( !function_exists( 'random_int' ) )
+{
+	function random_int( $min, $max )
+	{
+		return mt_rand( $min, $max );
+	}
+}
 
 if( !file_exists( __DIR__ . '/cacert.pem' ) )
 {
@@ -9,9 +21,17 @@ if( !file_exists( __DIR__ . '/cacert.pem' ) )
 	exit( 1 );
 }
 
-if( $argc === 2 )
+// Pass env ACCOUNTID, get it from salien page source code called 'gAccountID'
+$AccountID = isset( $_SERVER[ 'ACCOUNTID' ] ) ? (int)$_SERVER[ 'ACCOUNTID' ] : 0;
+
+if( $argc > 1 )
 {
 	$Token = $argv[ 1 ];
+
+	if( $argc > 2 )
+	{
+		$AccountID = $argv[ 2 ];
+	}
 }
 else if( isset( $_SERVER[ 'TOKEN' ] ) )
 {
@@ -31,6 +51,14 @@ else
 	else if( isset( $ParsedToken[ 'token' ] ) )
 	{
 		$Token = $ParsedToken[ 'token' ];
+		$AccountID = GetAccountID( $ParsedToken[ 'steamid' ] );
+
+		Msg( 'Your SteamID is {teal}' . $ParsedToken[ 'steamid' ] . '{normal} - AccountID is {teal}' . $AccountID );
+
+		if( $AccountID == 0 && $ParsedToken[ 'steamid' ] > 0 )
+		{
+			Msg( '{lightred}Looks like you are using 32bit PHP. Try enabling "gmp" module for correct accountid calculation.' );
+		}
 	}
 
 	unset( $ParsedToken );
@@ -42,6 +70,9 @@ if( strlen( $Token ) !== 32 )
 	exit( 1 );
 }
 
+$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
+Msg( '{teal}File hash is ' . substr( $LocalScriptHash, 0, 8 ) );
+
 if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] )
 {
 	$UpdateCheck = false;
@@ -49,7 +80,6 @@ if( isset( $_SERVER[ 'IGNORE_UPDATES' ] ) && (bool)$_SERVER[ 'IGNORE_UPDATES' ] 
 else
 {
 	$UpdateCheck = true;
-	$LocalScriptHash = sha1( trim( file_get_contents( __FILE__ ) ) );
 	$RepositoryScriptETag = '';
 	$RepositoryScriptHash = GetRepositoryScriptHash( $RepositoryScriptETag, $LocalScriptHash );
 }
@@ -58,7 +88,10 @@ else
 $DisableColors = !(
 	( function_exists( 'sapi_windows_vt100_support' ) && sapi_windows_vt100_support( STDOUT ) ) ||
 	( function_exists( 'stream_isatty' ) && stream_isatty( STDOUT ) ) ||
-	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) )
+	( function_exists( 'posix_isatty' ) && posix_isatty( STDOUT ) ) ||
+	( false !== getenv( 'ANSICON' ) ) ||
+	( 'ON' === getenv( 'ConEmuANSI' ) ) ||
+	( substr( getenv( 'TERM' ), 0, 5 ) === 'xterm' )
 );
 
 if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
@@ -66,13 +99,13 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
 }
 
-$GameVersion = 1;
+$GameVersion = 2;
 $WaitTime = 110;
-$ZonePaces = [];
+$FailSleep = 3;
 $OldScore = 0;
 $LastKnownPlanet = 0;
-
-Msg( "{background-blue}Welcome to SalienCheat for SteamDB" );
+$BestPlanetAndZone = 0;
+$RandomizeZone = 0;
 
 if( ini_get( 'precision' ) < 18 )
 {
@@ -86,6 +119,8 @@ do
 
 	if( isset( $Data[ 'response' ][ 'score' ] ) )
 	{
+		$OldScore = $Data[ 'response' ][ 'score' ];
+
 		if( !isset( $Data[ 'response' ][ 'clan_info' ][ 'accountid' ] ) )
 		{
 			Msg( '{green}-- You are currently not representing any clan, so you are now part of SteamDB' );
@@ -101,18 +136,33 @@ do
 			Msg( '{green}--{yellow} https://steamcommunity.com/saliengame/play' );
 			Msg( '{green}-- Happy farming!' );
 		}
+
+		// Randomizer is here to help reduce load on Steam servers
+		// Zones are sharded, and if everyone targets the same zone, it ends up worse for everyone
+		// By giving errors like time not synced or failed to join.
+		// Everyone at level 25 is already at the max level
+		// So please don't change this and let's get this mini game over with
+		if( $Data[ 'response' ][ 'level' ] >= 25 )
+		{
+			$RandomizeZone = 1;
+
+			Msg( '{yellow}-- You will be joining random zones to reduce Steam server load and help capture planets faster' );
+		}
 	}
 }
-while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
+while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( $FailSleep ) === 0 );
 
 do
 {
-	$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
-}
-while( !$BestPlanetAndZone && sleep( 5 ) === 0 );
+	if( !$BestPlanetAndZone )
+	{
+		do
+		{
+			$BestPlanetAndZone = GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep );
+		}
+		while( !$BestPlanetAndZone && sleep( $FailSleep ) === 0 );
+	}
 
-do
-{
 	echo PHP_EOL;
 
 	// Only get player info and leave current planet if it changed
@@ -121,18 +171,223 @@ do
 		do
 		{
 			// Leave current game before trying to switch planets (it will report InvalidState otherwise)
-			$SteamThinksPlanet = LeaveCurrentGame( $Token, $BestPlanetAndZone[ 'id' ] );
+			$SteamThinksPlanet = LeaveCurrentGame( $Token, $FailSleep, $BestPlanetAndZone[ 'id' ] );
 
 			if( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet )
 			{
 				SendPOST( 'ITerritoryControlMinigameService/JoinPlanet', 'id=' . $BestPlanetAndZone[ 'id' ] . '&access_token=' . $Token );
 
-				$SteamThinksPlanet = LeaveCurrentGame( $Token );
+				$SteamThinksPlanet = LeaveCurrentGame( $Token, $FailSleep );
 			}
 		}
-		while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( 1 ) === 0 );
+		while( $BestPlanetAndZone[ 'id' ] !== $SteamThinksPlanet && sleep( $FailSleep ) === 0 );
 
 		$LastKnownPlanet = $BestPlanetAndZone[ 'id' ];
+	}
+
+	if( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
+	{
+		$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinBossZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
+
+		if( $Zone[ 'eresult' ] != 1 )
+		{
+			Msg( '{lightred}!! Failed to join boss zone, rescanning and restarting...' );
+
+			$BestPlanetAndZone = 0;
+
+			sleep( $FailSleep );
+
+			continue;
+		}
+
+		// Avoid first time not sync error
+		sleep( 4 );
+
+		$BossFailsAllowed = 10;
+		$NextHeal = PHP_INT_MAX;
+		$WaitingForPlayers = true;
+		$MyScoreInBoss = 0;
+		$BossEstimate =
+		[
+			'InitHP' => 0,
+			'PrevHP' => 0,
+			'PrevXP' => 0,
+			'DeltHP' => [],
+			'DeltXP' => []
+		];
+
+		do
+		{
+			$Time = microtime( true );
+			$UseHeal = 0;
+			// Do more damage in hopes of getting a harder boss next time
+			$DamageToBoss = $WaitingForPlayers ? 0 : random_int( 30, 150 );
+			$DamageTaken = 0;
+
+			if( $Time >= $NextHeal )
+			{
+				$UseHeal = 1;
+				$NextHeal = $Time + 120;
+			}
+
+			$Data = SendPOST( 'ITerritoryControlMinigameService/ReportBossDamage', 'access_token=' . $Token . '&use_heal_ability=' . $UseHeal . '&damage_to_boss=' . $DamageToBoss . '&damage_taken=' . $DamageTaken );
+
+			if( $Data[ 'eresult' ] == 11 )
+			{
+				Msg( '{green}@@ Got invalid state, restarting...' );
+
+				break;
+			}
+
+			if( $Data[ 'eresult' ] != 1 && $BossFailsAllowed-- < 1 )
+			{
+				Msg( '{green}@@ Boss battle errored too much, restarting...' );
+
+				break;
+			}
+
+			if( empty( $Data[ 'response' ][ 'boss_status' ] ) )
+			{
+				Msg( '{green}@@ Waiting...' );
+				continue;
+			}
+
+			if( $Data[ 'response' ][ 'waiting_for_players' ] )
+			{
+				$WaitingForPlayers = true;
+				Msg( '{green}@@ Waiting for players...' );
+				continue;
+			}
+			else if( $WaitingForPlayers )
+			{
+				$WaitingForPlayers = false;
+				$NextHeal = $Time + random_int( 0, 120 );
+			}
+
+			// Strip names down to basic ASCII.
+			$RegMask = '/[\x00-\x1F\x7F-\xFF]/';
+
+			usort( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ], function( $a, $b ) use( $AccountID )
+			{
+				if( $a[ 'accountid' ] == $AccountID )
+				{
+					return 1;
+				}
+				else if( $b[ 'accountid' ] == $AccountID )
+				{
+					return -1;
+				}
+
+				return $b[ 'accountid' ] - $a[ 'accountid' ];
+			} );
+
+			$MyPlayer = null;
+
+			foreach( $Data[ 'response' ][ 'boss_status' ][ 'boss_players' ] as $Player )
+			{
+				$IsThisMe = $Player[ 'accountid' ] == $AccountID;
+				$DefaultColor = $IsThisMe ? '{green}' : '{normal}';
+
+				if( $IsThisMe )
+				{
+					$MyPlayer = $Player;
+				}
+
+				$Name = trim( preg_replace( $RegMask, '', $Player[ 'name' ] ) );
+
+				Msg(
+					( $IsThisMe ? '{green}@@' : '  ' ) .
+					' %-20s - HP: {yellow}%6s' . $DefaultColor  . ' / %6s - XP Gained: {yellow}%10s' . $DefaultColor,
+					PHP_EOL,
+					[
+						empty( $Name ) ? ( '[U:1:' . $Player[ 'accountid' ] . ']' ) : substr( $Name, 0, 20 ),
+						$Player[ 'hp' ],
+						$Player[ 'max_hp' ],
+						number_format( $Player[ 'xp_earned' ] )
+					]
+				);
+			}
+
+			if( $MyPlayer !== null )
+			{
+				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
+
+				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
+
+				if( $MyPlayer[ 'hp' ] <= 0 )
+				{
+					Msg( '{lightred}!! You died, restarting...' );
+
+					break;
+				}
+			}
+
+			if( $Data[ 'response' ][ 'game_over' ] )
+			{
+				Msg( '{green}@@ Boss battle is over.' );
+
+				break;
+			}
+
+			// Boss XP, DPS and Time Estimation
+			if( $BossEstimate[ 'PrevXP' ] > 0 )
+			{
+				// Calculate HP and XP change per game tick
+				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
+				$BossEstimate[ 'DeltXP' ][] = ( $MyPlayer !== null ? abs( $BossEstimate[ 'PrevXP' ] - $MyPlayer[ 'xp_earned' ] ) : 1 );
+
+				// Calculate XP rate, Boss damage per game tick (2500xp/tick fallback for players without $AccountID) and game ticks Remaining
+				$EstXPRate = ( $MyPlayer !== null ? array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) : 2500 );
+				$EstBossDPT = array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] );
+				$EstTickRemain = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT;
+
+				// Calculate Total XP Reward for Boss
+				$EstXPTotal = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] + ( $EstTickRemain * $EstXPRate ) : ( $BossEstimate[ 'InitHP' ] / $EstBossDPT ) * $EstXPRate );
+
+				// Display Estimated XP and DPS
+				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . "{normal} ({yellow}+" . number_format( $EstXPRate ) . "{normal}/tick excl. bonuses) - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
+				
+				// Display Estimated Time Remaining
+				Msg( '@@ Estimated Time Remaining: {teal}' . gmdate( 'H:i:s', $EstTickRemain * 5 ) );
+
+				// Only keep the last 1 minute of game time (12 ticks) in BossEstimate
+				if( count( $BossEstimate[ 'DeltHP' ] ) >= 12 )
+				{
+					array_shift( $BossEstimate[ 'DeltHP' ] );
+					array_shift( $BossEstimate[ 'DeltXP' ] );
+				}
+			}
+			
+			// Set Initial HP Once, Log HP and XP every tick
+			$BossEstimate[ 'InitHP' ] = ( $BossEstimate[ 'InitHP' ] ?: $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
+			$BossEstimate[ 'PrevHP' ] = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
+			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 1 );
+
+			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
+
+			Msg( '{normal}@@ Damage sent: {green}' . $DamageToBoss . '{normal} - ' . ( $UseHeal ? '{green}Used heal ability!' : 'Next heal in {green}' . round( $NextHeal - $Time ) . '{normal} seconds' ) );
+
+			echo PHP_EOL;
+		}
+		while( BossSleep( $c ) );
+
+		// Boss battle is over, reset state and scan again
+		$BestPlanetAndZone = 0;
+		$LastKnownPlanet = 0;
+
+		unset( $BossEstimate );
+
+		if( $MyScoreInBoss > 0 )
+		{
+			Msg(
+				'++ Your Score after Boss battle: {lightred}' . number_format( $MyScoreInBoss ) .
+				'{yellow} (+' . number_format( $MyScoreInBoss - $OldScore ) . ')'
+			);
+
+			$OldScore = $MyScoreInBoss;
+		}
+
+		continue;
 	}
 
 	$Zone = SendPOST( 'ITerritoryControlMinigameService/JoinZone', 'zone_position=' . $BestPlanetAndZone[ 'best_zone' ][ 'zone_position' ] . '&access_token=' . $Token );
@@ -143,13 +398,9 @@ do
 	{
 		Msg( '{lightred}!! Failed to join a zone, rescanning and restarting...' );
 
-		sleep( 1 );
+		$BestPlanetAndZone = 0;
 
-		do
-		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
-		}
-		while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
+		sleep( $FailSleep );
 
 		continue;
 	}
@@ -166,7 +417,7 @@ do
 	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
 	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
 	$LagAdjustedWaitTime = $WaitTime - $SkippedLagTime;
-	$WaitTimeBeforeFirstScan = 50 + ( 50 - $SkippedLagTime );
+	$WaitTimeBeforeFirstScan = $WaitTime - $SkippedLagTime - 10;
 
 	if( $UpdateCheck )
 	{
@@ -187,9 +438,18 @@ do
 
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $ZonePaces, $WaitTime );
+		$BestPlanetAndZone = GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep );
 	}
-	while( !$BestPlanetAndZone && sleep( 1 ) === 0 );
+	while( !$BestPlanetAndZone && sleep( $FailSleep ) === 0 );
+
+	if( $BestPlanetAndZone[ 'best_zone' ][ 'boss_active' ] )
+	{
+		Msg( '{green}Boss detected, abandoning current zone and joining boss...' );
+
+		$LastKnownPlanet = 0;
+
+		continue;
+	}
 
 	$LagAdjustedWaitTime -= microtime( true ) - $PlanetCheckTime;
 
@@ -202,11 +462,11 @@ do
 
 	$Data = SendPOST( 'ITerritoryControlMinigameService/ReportScore', 'access_token=' . $Token . '&score=' . GetScoreForZone( $Zone ) . '&language=english' );
 
-	if( $Data[ 'eresult' ] == 93 )
+	if( empty( $Data[ 'response' ][ 'new_score' ] ) )
 	{
-		$LagAdjustedWaitTime = min( 10, round( $SkippedLagTime ) );
+		$LagAdjustedWaitTime = max( 1, min( 10, round( $SkippedLagTime ) ) );
 
-		Msg( '{lightred}-- Time is out of sync, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
+		Msg( '{lightred}-- Report score failed, trying again in ' . $LagAdjustedWaitTime . ' seconds...' );
 
 		sleep( $LagAdjustedWaitTime );
 
@@ -233,22 +493,36 @@ do
 		);
 
 		$OldScore = $Data[ 'new_score' ];
-		$WaitTimeSeconds = $WaitTime / 60;
-		$Time = ( ( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) / GetScoreForZone( [ 'difficulty' => $Zone[ 'difficulty' ] ] ) * $WaitTimeSeconds ) + $WaitTimeSeconds;
-		$Hours = floor( $Time / 60 );
-		$Minutes = $Time % 60;
-		$Date = date_create();
 
-		date_add( $Date, date_interval_create_from_date_string( $Hours . " hours + " . $Minutes . " minutes" ) );
+		if( isset( $Data[ 'next_level_score' ] ) )
+		{
+			Msg(
+				'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
+				'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] )
+			);
+		}
 
-		Msg(
-			'>> Next Level: {yellow}' . number_format( $Data[ 'next_level_score' ] ) .
-			'{normal} - Remaining: {yellow}' . number_format( $Data[ 'next_level_score' ] - $Data[ 'new_score' ] ) .
-			'{normal} - ETA: {green}' . $Hours . 'h ' . $Minutes . 'm (' . date_format( $Date , "jS H:i T" ) . ')'
-		);
+		if( $Data[ 'new_level' ] >= 25 )
+		{
+			$RandomizeZone = 1;
+		}
 	}
 }
 while( true );
+
+function BossSleep( $c )
+{
+	$SkippedLagTime = curl_getinfo( $c, CURLINFO_TOTAL_TIME ) - curl_getinfo( $c, CURLINFO_STARTTRANSFER_TIME );
+	$SkippedLagTime -= fmod( $SkippedLagTime, 0.1 );
+	$LagAdjustedWaitTime = 5 - $SkippedLagTime;
+
+	if( $LagAdjustedWaitTime > 0 )
+	{
+		usleep( $LagAdjustedWaitTime * 1000000 );
+	}
+
+	return true;
+}
 
 function CheckGameVersion( $Data )
 {
@@ -264,6 +538,11 @@ function CheckGameVersion( $Data )
 
 function GetNextLevelProgress( $Data )
 {
+	if( !isset( $Data[ 'next_level_score' ] ) )
+	{
+		return 1;
+	}
+
 	$ScoreTable =
 	[
 		0,       // Level 1
@@ -335,7 +614,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
+function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -350,10 +629,7 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$BossZones = [];
-	$ZoneMessages = [];
-
-	$ZonePaces[ $Planet ][ 'times' ][] = microtime( true );
-	$CurrentTimes = $ZonePaces[ $Planet ][ 'times' ];
+	$HalfZones = [];
 
 	foreach( $Zones as &$Zone )
 	{
@@ -362,61 +638,29 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 			$Zone[ 'capture_progress' ] = 0.0;
 		}
 
+		if( !isset( $Zone[ 'boss_active' ] ) )
+		{
+			$Zone[ 'boss_active' ] = false;
+		}
+
 		if( $Zone[ 'captured' ] )
 		{
 			continue;
 		}
 
 		// Store boss zone separately to ensure it has priority later
-		if( $Zone[ 'type' ] == 4 )
+		if( $Zone[ 'type' ] == 4 && $Zone[ 'boss_active' ] )
 		{
 			$BossZones[] = $Zone;
 		}
-		else if( $Zone[ 'type' ] != 3 )
+		// It appears that bosses like to spawn when a random zone gets over 50% capture progress
+		// So we will target fresh zones to bring them up to speed
+		else if( $Zone[ 'capture_progress' ] < 0.45 )
 		{
-			Msg( '{lightred}!! Unknown zone type: ' . $Zone[ 'type' ] );
+			$HalfZones[] = $Zone;
 		}
 
-		$Cutoff = 0.99;
-
-		if( isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
-		{
-			$Paces = $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ];
-			$Paces[] = $Zone[ 'capture_progress' ];
-			$Differences = [];
-			$DifferenceTimes = [];
-
-			for( $i = count( $Paces ) - 1; $i > 0; $i-- )
-			{
-				$TimeDelta = $CurrentTimes[ $i ] - $CurrentTimes[ $i - 1 ];
-				$DifferenceTimes[] = $TimeDelta;
-				$Differences[] = ( $Paces[ $i ] - $Paces[ $i - 1 ] ) / $TimeDelta;
-			}
-
-			$TimeDelta = array_sum( $DifferenceTimes ) / count( $DifferenceTimes );
-			$PaceCutoff = ( array_sum( $Differences ) / count( $Differences ) ) * $TimeDelta;
-			$Cutoff = 1.0 - max( 0.01, $PaceCutoff / 7 );
-			$PaceTime = $PaceCutoff > 0 ? ceil( ( 1 - $Zone[ 'capture_progress' ] ) / $PaceCutoff * $WaitTime ) : 1000;
-
-			if( $PaceCutoff > 0.015 )
-			{
-				$Minutes = floor( $PaceTime / 60 );
-				$Seconds = $PaceTime % 60;
-
-				$ZoneMessages[] =
-				[
-					'     Zone {yellow}%3d{normal} - Captured: {yellow}%5s%%{normal} - Cutoff: {yellow}%5s%%{normal} - Pace: {yellow}%6s%%{normal} - ETA: {yellow}%2dm %2ds{normal}',
-					[
-						$Zone[ 'zone_position' ],
-						number_format( $Zone[ 'capture_progress' ] * 100, 2 ),
-						number_format( $Cutoff * 100, 2 ),
-						'+' . number_format( $PaceCutoff * 100, 2 ),
-						$Minutes,
-						$Seconds,
-					]
-				];
-			}
-		}
+		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$RandomizeZone ) ? 0.90 : 0.99;
 
 		// If a zone is close to completion, skip it because we want to avoid joining a completed zone
 		// Valve now rewards points, if the zone is completed before submission
@@ -437,64 +681,53 @@ function GetPlanetState( $Planet, &$ZonePaces, $WaitTime )
 
 	unset( $Zone );
 
-	$ShouldTruncate = count( $ZonePaces[ $Planet ][ 'times' ] ) > 1;
-
-	foreach( $Zones as $Zone )
-	{
-		if( !isset( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] ) )
-		{
-			$ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] = [ $Zone[ 'capture_progress' ] ];
-		}
-		else
-		{
-			if( $ShouldTruncate )
-			{
-				array_shift( $ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ] );
-			}
-
-			$ZonePaces[ $Planet ][ $Zone[ 'zone_position' ] ][] = $Zone[ 'capture_progress' ];
-		}
-	}
-
-	if( $ShouldTruncate )
-	{
-		array_shift( $ZonePaces[ $Planet ][ 'times' ] );
-	}
-
 	if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
+		goto bossLabel;
 	}
 	else if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
 
-	usort( $CleanZones, function( $a, $b )
+	if( $RandomizeZone )
 	{
-		if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
+		if( count( $HalfZones ) > 3 )
 		{
-			if( (int)( $a[ 'capture_progress' ] * 100 ) !== (int)( $b[ 'capture_progress' ] * 100 ) )
-			{
-				return (int)( $a[ 'capture_progress' ] * 100000 ) - (int)( $b[ 'capture_progress' ] * 100000 );
-			}
-
-			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
+			$CleanZones = $HalfZones;
 		}
 
-		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
-	} );
+		shuffle( $CleanZones );
+	}
+	else
+	{
+		usort( $CleanZones, function( $a, $b )
+		{
+			if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
+			{
+				if( (int)( $a[ 'capture_progress' ] * 100 ) !== (int)( $b[ 'capture_progress' ] * 100 ) )
+				{
+					return (int)( $a[ 'capture_progress' ] * 100000 ) - (int)( $b[ 'capture_progress' ] * 100000 );
+				}
 
+				return $b[ 'zone_position' ] - $a[ 'zone_position' ];
+			}
+
+			return $b[ 'difficulty' ] - $a[ 'difficulty' ];
+		} );
+	}
+
+bossLabel:
 	return [
 		'high_zones' => $HighZones,
 		'medium_zones' => $MediumZones,
 		'low_zones' => $LowZones,
 		'best_zone' => $CleanZones[ 0 ],
-		'messages' => $ZoneMessages,
 	];
 }
 
-function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
+function GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -502,10 +735,24 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 
 	if( empty( $Planets[ 'response' ][ 'planets' ] ) )
 	{
+		if( isset( $Planets[ 'response' ][ 'game_version' ] ) )
+		{
+			Msg( '{green}There are no active planets left! Good game!' );
+			exit( 0 );
+		}
+
 		return null;
 	}
 
 	$Planets = $Planets[ 'response' ][ 'planets' ];
+
+	usort( $Planets, function( $a, $b )
+	{
+		$a = isset( $a[ 'state' ][ 'boss_zone_position' ] ) ? 1000 : $a[ 'id' ];
+		$b = isset( $b[ 'state' ][ 'boss_zone_position' ] ) ? 1000 : $b[ 'id' ];
+
+		return $b - $a;
+	} );
 
 	foreach( $Planets as &$Planet )
 	{
@@ -521,23 +768,14 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 			$Planet[ 'state' ][ 'current_players' ] = 0;
 		}
 
-		if( !isset( $ZonePaces[ $Planet[ 'id' ] ] ) )
-		{
-			$ZonePaces[ $Planet[ 'id' ] ] =
-			[
-				'times' => []
-			];
-		}
-
 		do
 		{
-			$Zone = GetPlanetState( $Planet[ 'id' ], $ZonePaces, $WaitTime );
+			$Zone = GetPlanetState( $Planet[ 'id' ], $RandomizeZone, $WaitTime );
 		}
-		while( $Zone === null && sleep( 1 ) === 0 );
+		while( $Zone === null && sleep( $FailSleep ) === 0 );
 
 		if( $Zone === false )
 		{
-			$ZonePaces[ $Planet[ 'id' ] ] = [];
 			$Planet[ 'high_zones' ] = 0;
 			$Planet[ 'medium_zones' ] = 0;
 			$Planet[ 'low_zones' ] = 0;
@@ -566,11 +804,6 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 
 		if( $Zone !== false )
 		{
-			foreach( $Zone[ 'messages' ] as $Message )
-			{
-				Msg( $Message[ 0 ], PHP_EOL, $Message[ 1 ] );
-			}
-
 			if( $Zone[ 'best_zone' ][ 'type' ] == 4 )
 			{
 				Msg( '{green}>> This planet has an uncaptured boss, selecting this planet...' );
@@ -615,7 +848,7 @@ function GetBestPlanetAndZone( &$ZonePaces, $WaitTime )
 	return $Planet;
 }
 
-function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
+function LeaveCurrentGame( $Token, $FailSleep, $LeaveCurrentPlanet = 0 )
 {
 	do
 	{
@@ -625,8 +858,13 @@ function LeaveCurrentGame( $Token, $LeaveCurrentPlanet = 0 )
 		{
 			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_zone_game' ] );
 		}
+
+		if( isset( $Data[ 'response' ][ 'active_boss_game' ] ) )
+		{
+			SendPOST( 'IMiniGameService/LeaveGame', 'access_token=' . $Token . '&gameid=' . $Data[ 'response' ][ 'active_boss_game' ] );
+		}
 	}
-	while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( 1 ) === 0 );
+	while( !isset( $Data[ 'response' ][ 'score' ] ) && sleep( $FailSleep ) === 0 );
 
 	if( !isset( $Data[ 'response' ][ 'active_planet' ] ) )
 	{
@@ -742,7 +980,7 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				sleep( 10 );
 			}
-			else if( $EResult === 11 ) // EResult.InvalidState
+			else if( $EResult === 11 || $EResult === 27 ) // EResult.InvalidState || EResult.Expired
 			{
 				global $LastKnownPlanet;
 				$LastKnownPlanet = 0;
@@ -757,14 +995,14 @@ function ExecuteRequest( $Method, $URL, $Data = [] )
 
 				Msg( '{lightred}-- EResult 10 means Steam is busy' );
 
-				sleep( 3 );
+				sleep( 5 );
 			}
 		}
 
 		$Data = json_decode( $Data, true );
 		$Data[ 'eresult' ] = $EResult;
 	}
-	while( !isset( $Data[ 'response' ] ) && sleep( 1 ) === 0 );
+	while( !isset( $Data[ 'response' ] ) && sleep( 2 ) === 0 );
 
 	return $Data;
 }
@@ -805,6 +1043,20 @@ function GetRepositoryScriptHash( &$RepositoryScriptETag, $LocalScriptHash )
 	}
 
 	return strlen( $Data ) > 0 ? sha1( trim( $Data ) ) : $LocalScriptHash;
+}
+
+function GetAccountID( $SteamID )
+{
+	if( PHP_INT_SIZE === 8 )
+	{
+		return $SteamID & 0xFFFFFFFF;
+	}
+	else if( function_exists( 'gmp_and' ) )
+	{
+		return gmp_and( $SteamID, '0xFFFFFFFF' );
+	}
+
+	return 0;
 }
 
 function Msg( $Message, $EOL = PHP_EOL, $printf = [] )

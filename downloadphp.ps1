@@ -14,7 +14,7 @@ else
 }
 if($PSVersiontable.PSVersion.Major -lt 5)
 {
-    if((Test-Path "$workdingdir\php") -eq $False)
+    if((Test-Path "$workingdir\php") -eq $False)
     {
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [IO.Compression.ZipFile]::ExtractToDirectory('php.zip', 'php\')
