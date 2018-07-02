@@ -105,7 +105,7 @@ $FailSleep = 3;
 $OldScore = 0;
 $LastKnownPlanet = 0;
 $BestPlanetAndZone = 0;
-$RandomizeZone = 0;
+$HasReachedMaxLevel = 0;
 
 if( ini_get( 'precision' ) < 18 )
 {
@@ -144,7 +144,7 @@ do
 		// So please don't change this and let's get this mini game over with
 		if( $Data[ 'response' ][ 'level' ] >= 25 )
 		{
-			$RandomizeZone = 1;
+			$HasReachedMaxLevel = 1;
 
 			Msg( '{yellow}-- You will be joining random zones to reduce Steam server load and help capture planets faster' );
 		}
@@ -158,7 +158,7 @@ do
 	{
 		do
 		{
-			$BestPlanetAndZone = GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep );
+			$BestPlanetAndZone = GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep );
 		}
 		while( !$BestPlanetAndZone && sleep( $FailSleep ) === 0 );
 	}
@@ -209,6 +209,7 @@ do
 		$MyScoreInBoss = 0;
 		$BossEstimate =
 		[
+			'InitHP' => 0,
 			'PrevHP' => 0,
 			'PrevXP' => 0,
 			'DeltHP' => [],
@@ -219,8 +220,7 @@ do
 		{
 			$Time = microtime( true );
 			$UseHeal = 0;
-			// Do more damage in hopes of getting a harder boss next time
-			$DamageToBoss = $WaitingForPlayers ? 0 : random_int( 1, 40 );
+			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -312,6 +312,13 @@ do
 				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
 
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
+
+				if( $MyPlayer[ 'hp' ] <= 0 )
+				{
+					Msg( '{lightred}!! You died, restarting...' );
+
+					break;
+				}
 			}
 
 			if( $Data[ 'response' ][ 'game_over' ] )
@@ -321,20 +328,39 @@ do
 				break;
 			}
 
+			// Boss XP, DPS and Time Estimation
 			if( $BossEstimate[ 'PrevXP' ] > 0 )
 			{
+				// Calculate HP and XP change per game tick
 				$BossEstimate[ 'DeltHP' ][] = abs( $BossEstimate[ 'PrevHP' ] - $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 				$BossEstimate[ 'DeltXP' ][] = ( $MyPlayer !== null ? abs( $BossEstimate[ 'PrevXP' ] - $MyPlayer[ 'xp_earned' ] ) : 1 );
 
-				$EstXPRate = ( $MyPlayer !== null ? ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) ) : 2500 );
-				$EstBossDPT = ( array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] ) );
-				$EstXPTotal = ( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] / $EstBossDPT ) * $EstXPRate;
+				// Calculate XP rate, Boss damage per game tick (2500xp/tick fallback for players without $AccountID) and game ticks Remaining
+				$EstXPRate = ( $MyPlayer !== null ? array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) : 2500 );
+				$EstBossDPT = array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] );
+				$EstTickRemain = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT;
 
+				// Calculate Total XP Reward for Boss
+				$EstXPTotal = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] + ( $EstTickRemain * $EstXPRate ) : ( $BossEstimate[ 'InitHP' ] / $EstBossDPT ) * $EstXPRate );
+
+				// Display Estimated XP and DPS
 				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . "{normal} ({yellow}+" . number_format( $EstXPRate ) . "{normal}/tick excl. bonuses) - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
-			}
+				
+				// Display Estimated Time Remaining
+				Msg( '@@ Estimated Time Remaining: {teal}' . gmdate( 'H:i:s', $EstTickRemain * 5 ) );
 
+				// Only keep the last 1 minute of game time (12 ticks) in BossEstimate
+				if( count( $BossEstimate[ 'DeltHP' ] ) >= 12 )
+				{
+					array_shift( $BossEstimate[ 'DeltHP' ] );
+					array_shift( $BossEstimate[ 'DeltXP' ] );
+				}
+			}
+			
+			// Set Initial HP Once, Log HP and XP every tick
+			$BossEstimate[ 'InitHP' ] = ( $BossEstimate[ 'InitHP' ] ?: $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] );
 			$BossEstimate[ 'PrevHP' ] = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ];
-			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 0 );
+			$BossEstimate[ 'PrevXP' ] = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] : 1 );
 
 			Msg( '@@ Boss HP: {green}' . number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] ) . '{normal} / {lightred}' .  number_format( $Data[ 'response' ][ 'boss_status' ][ 'boss_max_hp' ] ) . '{normal} - Lasers: {yellow}' . $Data[ 'response' ][ 'num_laser_uses' ] . '{normal} - Team Heals: {green}' . $Data[ 'response' ][ 'num_team_heals' ] );
 
@@ -411,7 +437,7 @@ do
 
 	do
 	{
-		$BestPlanetAndZone = GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep );
+		$BestPlanetAndZone = GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep );
 	}
 	while( !$BestPlanetAndZone && sleep( $FailSleep ) === 0 );
 
@@ -488,7 +514,7 @@ do
 
 		if( $Data[ 'new_level' ] >= 25 )
 		{
-			$RandomizeZone = 1;
+			$HasReachedMaxLevel = 1;
 		}
 	}
 }
@@ -598,7 +624,7 @@ function GetNameForDifficulty( $Zone )
 	return $Boss . $Difficulty;
 }
 
-function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
+function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 {
 	$Zones = SendGET( 'ITerritoryControlMinigameService/GetPlanet', 'id=' . $Planet . '&language=english' );
 
@@ -644,7 +670,7 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 			$HalfZones[] = $Zone;
 		}
 
-		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$RandomizeZone ) ? 0.90 : 0.99;
+		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$HasReachedMaxLevel ) ? 0.90 : 0.99;
 
 		// If a zone is close to completion, skip it because we want to avoid joining a completed zone
 		// Valve now rewards points, if the zone is completed before submission
@@ -675,7 +701,7 @@ function GetPlanetState( $Planet, $RandomizeZone, $WaitTime )
 		return false;
 	}
 
-	if( $RandomizeZone )
+	if( $HasReachedMaxLevel )
 	{
 		if( count( $HalfZones ) > 3 )
 		{
@@ -711,7 +737,7 @@ bossLabel:
 	];
 }
 
-function GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep )
+function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 {
 	$Planets = SendGET( 'ITerritoryControlMinigameService/GetPlanets', 'active_only=1&language=english' );
 
@@ -754,7 +780,7 @@ function GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep )
 
 		do
 		{
-			$Zone = GetPlanetState( $Planet[ 'id' ], $RandomizeZone, $WaitTime );
+			$Zone = GetPlanetState( $Planet[ 'id' ], $HasReachedMaxLevel, $WaitTime );
 		}
 		while( $Zone === null && sleep( $FailSleep ) === 0 );
 
@@ -795,21 +821,34 @@ function GetBestPlanetAndZone( $RandomizeZone, $WaitTime, $FailSleep )
 				return $Planet;
 			}
 
-			$Planet[ 'sort_key' ] += (int)( $Planet[ 'state' ][ 'capture_progress' ] * 100 );
-
-			if( $Planet[ 'low_zones' ] > 0 )
-			{
-				$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
-			}
-
 			if( $Planet[ 'medium_zones' ] > 0 )
 			{
 				$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
 			}
 
-			if( $Planet[ 'high_zones' ] > 0 )
+			if( $HasReachedMaxLevel )
 			{
-				$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
+				if( $Planet[ 'low_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'low_zones' ] );
+				}
+
+				if( $Planet[ 'high_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += 99 - $Planet[ 'high_zones' ];
+				}
+			}
+			else
+			{
+				if( $Planet[ 'low_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
+				}
+
+				if( $Planet[ 'high_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'high_zones' ] );
+				}
 			}
 		}
 	}
