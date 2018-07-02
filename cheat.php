@@ -221,7 +221,7 @@ do
 			$Time = microtime( true );
 			$UseHeal = 0;
 			// Do more damage in hopes of getting a harder boss next time
-			$DamageToBoss = $WaitingForPlayers ? 0 : random_int( 1, 40 );
+			$DamageToBoss = $WaitingForPlayers ? 0 : random_int( 20, 70 );
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -313,6 +313,13 @@ do
 				$MyScoreInBoss = $MyPlayer[ 'score_on_join' ] + $MyPlayer[ 'xp_earned' ];
 
 				Msg( '@@ Started XP: ' . number_format( $MyPlayer[ 'score_on_join' ] ) . ' {teal}(L' . $MyPlayer[ 'level_on_join' ] . '){normal} - Current XP: {yellow}' . number_format( $MyScoreInBoss ) . ' ' . ( $MyPlayer[ 'level_on_join' ] != $MyPlayer[ 'new_level' ] ? '{green}' : '{teal}' ) . '(L' . $MyPlayer[ 'new_level' ] . ')' );
+
+				if( $MyPlayer[ 'hp' ] <= 0 )
+				{
+					Msg( '{lightred}!! You died, restarting...' );
+
+					break;
+				}
 			}
 
 			if( $Data[ 'response' ][ 'game_over' ] )
