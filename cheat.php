@@ -310,7 +310,7 @@ do
 			
 			if ( $TotalLasers !== $Data[ 'response' ][ 'num_laser_uses' ] )
 			{
-				Msg( '{lightred}@@ Hit by boss laser!' );
+				Msg( '{yellow}@@ Hit by boss laser!' );
 			}
 			
 			$TotalLasers = $Data[ 'response' ][ 'num_laser_uses' ];
