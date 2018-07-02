@@ -337,12 +337,12 @@ do
 				$BossEstimate[ 'DeltXP' ][] = ( $MyPlayer !== null ? abs( $BossEstimate[ 'PrevXP' ] - $MyPlayer[ 'xp_earned' ] ) : 1 );
 
 				// Calculate XP rate, Boss damage per game tick (2500xp/tick fallback for players without $AccountID) and game ticks Remaining
-				$EstXPRate = ( $MyPlayer !== null ? ( array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) ) : 2500 );
+				$EstXPRate = ( $MyPlayer !== null ? array_sum( $BossEstimate[ 'DeltXP' ] ) / count( $BossEstimate[ 'DeltXP' ] ) : 2500 );
 				$EstBossDPT = array_sum( $BossEstimate[ 'DeltHP' ] ) / count( $BossEstimate[ 'DeltHP' ] );
 				$EstTickRemain = $Data[ 'response' ][ 'boss_status' ][ 'boss_hp' ] / $EstBossDPT;
 
 				// Calculate Total XP Reward for Boss
-				$EstXPTotal = ( $MyPlayer !== null ? ( $MyPlayer[ 'xp_earned' ] + ( $EstTickRemain * $EstXPRate ) ) : ( ( $BossEstimate[ 'InitHP' ] / $EstBossDPT ) * $EstXPRate ) );
+				$EstXPTotal = ( $MyPlayer !== null ? $MyPlayer[ 'xp_earned' ] + ( $EstTickRemain * $EstXPRate ) : ( $BossEstimate[ 'InitHP' ] / $EstBossDPT ) * $EstXPRate );
 
 				// Display Estimated XP and DPS
 				Msg( '@@ Estimated Final XP: {lightred}' . number_format( $EstXPTotal ) . "{normal} ({yellow}+" . number_format( $EstXPRate ) . "{normal}/tick excl. bonuses) - Damage per Second: {green}" . number_format( $EstBossDPT / 5 ) );
