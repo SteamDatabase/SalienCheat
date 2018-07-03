@@ -146,7 +146,7 @@ do
 		{
 			$HasReachedMaxLevel = 1;
 
-			Msg( '{yellow}-- You will be joining random zones to reduce Steam server load and help capture planets faster' );
+			Msg( '{yellow}-- You have reached the max level, you will be helping others reach it faster' );
 		}
 	}
 }
@@ -220,7 +220,11 @@ do
 		{
 			$Time = microtime( true );
 			$UseHeal = 0;
-			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
+			// People at max level practically do not benefit from extra xp
+			// So doing zero damage should prolong the boss battle and help others reach max level
+			// Bonus XP should still be granted at the end of the boss battle
+			// And idlers will help others by using the heal ability
+			$DamageToBoss = $WaitingForPlayers || $HasReachedMaxLevel ? 0 : 1;
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -810,21 +814,17 @@ function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 				return $Planet;
 			}
 
-			if( $Planet[ 'medium_zones' ] > 0 )
-			{
-				$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
-			}
-
 			if( $HasReachedMaxLevel )
 			{
-				if( $Planet[ 'low_zones' ] > 0 )
+				if( $Planet[ 'state' ][ 'capture_progress' ] > 0.98 )
 				{
-					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'low_zones' ] );
+					// Only prefer planets over 98% if there's no other more complete choice
+					$Planet[ 'sort_key' ] += 5000;
 				}
-
-				if( $Planet[ 'high_zones' ] > 0 )
+				else
 				{
-					$Planet[ 'sort_key' ] += 99 - $Planet[ 'high_zones' ];
+					// Simply always prefer the most complete planet
+					$Planet[ 'sort_key' ] += (int)( $Planet[ 'state' ][ 'capture_progress' ] * 10000 );
 				}
 			}
 			else
@@ -832,6 +832,11 @@ function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 				if( $Planet[ 'low_zones' ] > 0 )
 				{
 					$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
+				}
+
+				if( $Planet[ 'medium_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
 				}
 
 				if( $Planet[ 'high_zones' ] > 0 )
