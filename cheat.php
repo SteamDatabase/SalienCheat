@@ -146,7 +146,7 @@ do
 		{
 			$HasReachedMaxLevel = 1;
 
-			Msg( '{yellow}-- You will be joining random zones to reduce Steam server load and help capture planets faster' );
+			Msg( '{yellow}-- You have reached the max level, you will be helping others reach it faster' );
 		}
 	}
 }
@@ -205,6 +205,7 @@ do
 
 		$BossFailsAllowed = 10;
 		$NextHeal = PHP_INT_MAX;
+		$DidBossDamage = false;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
 		$BossEstimate =
@@ -220,7 +221,18 @@ do
 		{
 			$Time = microtime( true );
 			$UseHeal = 0;
-			$DamageToBoss = $WaitingForPlayers ? 0 : 1;
+			// People at max level practically do not benefit from extra xp
+			// So doing zero damage should prolong the boss battle and help others reach max level
+			// Bonus XP should still be granted at the end of the boss battle
+			// And idlers will help others by using the heal ability
+			$DamageToBoss = 0;
+
+			if( !$WaitingForPlayers )
+			{
+				$DamageToBoss = $HasReachedMaxLevel && $DidBossDamage ? 0 : 1;
+				$DidBossDamage = true;
+			}
+
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
@@ -639,7 +651,6 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$BossZones = [];
-	$HalfZones = [];
 
 	foreach( $Zones as &$Zone )
 	{
@@ -663,18 +674,10 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 		{
 			$BossZones[] = $Zone;
 		}
-		// It appears that bosses like to spawn when a random zone gets over 50% capture progress
-		// So we will target fresh zones to bring them up to speed
-		else if( $Zone[ 'capture_progress' ] < 0.45 )
-		{
-			$HalfZones[] = $Zone;
-		}
-
-		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$HasReachedMaxLevel ) ? 0.90 : 0.99;
 
 		// If a zone is close to completion, skip it because we want to avoid joining a completed zone
 		// Valve now rewards points, if the zone is completed before submission
-		if( $Zone[ 'capture_progress' ] >= $Cutoff )
+		if( $Zone[ 'capture_progress' ] >= 0.98 )
 		{
 			continue;
 		}
@@ -694,41 +697,22 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 	if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
-		goto bossLabel;
 	}
 	else if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
 
-	if( $HasReachedMaxLevel )
+	usort( $CleanZones, function( $a, $b )
 	{
-		if( count( $HalfZones ) > 3 )
+		if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
 		{
-			$CleanZones = $HalfZones;
+			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
 		}
 
-		shuffle( $CleanZones );
-	}
-	else
-	{
-		usort( $CleanZones, function( $a, $b )
-		{
-			if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
-			{
-				if( (int)( $a[ 'capture_progress' ] * 100 ) !== (int)( $b[ 'capture_progress' ] * 100 ) )
-				{
-					return (int)( $a[ 'capture_progress' ] * 100000 ) - (int)( $b[ 'capture_progress' ] * 100000 );
-				}
+		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
+	} );
 
-				return $b[ 'zone_position' ] - $a[ 'zone_position' ];
-			}
-
-			return $b[ 'difficulty' ] - $a[ 'difficulty' ];
-		} );
-	}
-
-bossLabel:
 	return [
 		'high_zones' => $HighZones,
 		'medium_zones' => $MediumZones,
@@ -821,21 +805,17 @@ function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 				return $Planet;
 			}
 
-			if( $Planet[ 'medium_zones' ] > 0 )
-			{
-				$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
-			}
-
 			if( $HasReachedMaxLevel )
 			{
-				if( $Planet[ 'low_zones' ] > 0 )
+				if( $Planet[ 'state' ][ 'capture_progress' ] > 0.98 )
 				{
-					$Planet[ 'sort_key' ] += pow( 10, 4 ) * ( 99 - $Planet[ 'low_zones' ] );
+					// Only prefer planets over 98% if there's no other more complete choice
+					$Planet[ 'sort_key' ] += 5000;
 				}
-
-				if( $Planet[ 'high_zones' ] > 0 )
+				else
 				{
-					$Planet[ 'sort_key' ] += 99 - $Planet[ 'high_zones' ];
+					// Simply always prefer the most complete planet
+					$Planet[ 'sort_key' ] += (int)( $Planet[ 'state' ][ 'capture_progress' ] * 10000 );
 				}
 			}
 			else
@@ -843,6 +823,11 @@ function GetBestPlanetAndZone( $HasReachedMaxLevel, $WaitTime, $FailSleep )
 				if( $Planet[ 'low_zones' ] > 0 )
 				{
 					$Planet[ 'sort_key' ] += 99 - $Planet[ 'low_zones' ];
+				}
+
+				if( $Planet[ 'medium_zones' ] > 0 )
+				{
+					$Planet[ 'sort_key' ] += pow( 10, 2 ) * ( 99 - $Planet[ 'medium_zones' ] );
 				}
 
 				if( $Planet[ 'high_zones' ] > 0 )
