@@ -205,6 +205,7 @@ do
 
 		$BossFailsAllowed = 10;
 		$NextHeal = PHP_INT_MAX;
+		$DidBossDamage = false;
 		$WaitingForPlayers = true;
 		$MyScoreInBoss = 0;
 		$BossEstimate =
@@ -224,7 +225,14 @@ do
 			// So doing zero damage should prolong the boss battle and help others reach max level
 			// Bonus XP should still be granted at the end of the boss battle
 			// And idlers will help others by using the heal ability
-			$DamageToBoss = $WaitingForPlayers || $HasReachedMaxLevel ? 0 : 1;
+			$DamageToBoss = 0;
+
+			if( !$WaitingForPlayers )
+			{
+				$DamageToBoss = $HasReachedMaxLevel && $DidBossDamage ? 0 : 1;
+				$DidBossDamage = true;
+			}
+
 			$DamageTaken = 0;
 
 			if( $Time >= $NextHeal )
