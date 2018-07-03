@@ -1,0 +1,10 @@
+version: '3'
+services:
+# use one service for every steam account
+# you can name it however you like
+  token1:
+    # build this first! see readme for instructions
+    image: steamdb/saliencheat
+    environment:
+      # set your own token here, see readme
+      - TOKEN=865e2c119f3717811983834e30bffe3c
