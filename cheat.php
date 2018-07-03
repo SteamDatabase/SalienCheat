@@ -632,7 +632,6 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 	$MediumZones = 0;
 	$LowZones = 0;
 	$BossZones = [];
-	$HalfZones = [];
 
 	foreach( $Zones as &$Zone )
 	{
@@ -656,18 +655,10 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 		{
 			$BossZones[] = $Zone;
 		}
-		// It appears that bosses like to spawn when a random zone gets over 50% capture progress
-		// So we will target fresh zones to bring them up to speed
-		else if( $Zone[ 'capture_progress' ] < 0.45 )
-		{
-			$HalfZones[] = $Zone;
-		}
-
-		$Cutoff = ( $Zone[ 'difficulty' ] < 2 && !$HasReachedMaxLevel ) ? 0.90 : 0.99;
 
 		// If a zone is close to completion, skip it because we want to avoid joining a completed zone
 		// Valve now rewards points, if the zone is completed before submission
-		if( $Zone[ 'capture_progress' ] >= $Cutoff )
+		if( $Zone[ 'capture_progress' ] >= 0.98 )
 		{
 			continue;
 		}
@@ -687,41 +678,22 @@ function GetPlanetState( $Planet, $HasReachedMaxLevel, $WaitTime )
 	if( !empty( $BossZones ) )
 	{
 		$CleanZones = $BossZones;
-		goto bossLabel;
 	}
 	else if( count( $CleanZones ) < 2 )
 	{
 		return false;
 	}
 
-	if( $HasReachedMaxLevel )
+	usort( $CleanZones, function( $a, $b )
 	{
-		if( count( $HalfZones ) > 3 )
+		if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
 		{
-			$CleanZones = $HalfZones;
+			return $b[ 'zone_position' ] - $a[ 'zone_position' ];
 		}
 
-		shuffle( $CleanZones );
-	}
-	else
-	{
-		usort( $CleanZones, function( $a, $b )
-		{
-			if( $b[ 'difficulty' ] === $a[ 'difficulty' ] )
-			{
-				if( (int)( $a[ 'capture_progress' ] * 100 ) !== (int)( $b[ 'capture_progress' ] * 100 ) )
-				{
-					return (int)( $a[ 'capture_progress' ] * 100000 ) - (int)( $b[ 'capture_progress' ] * 100000 );
-				}
+		return $b[ 'difficulty' ] - $a[ 'difficulty' ];
+	} );
 
-				return $b[ 'zone_position' ] - $a[ 'zone_position' ];
-			}
-
-			return $b[ 'difficulty' ] - $a[ 'difficulty' ];
-		} );
-	}
-
-bossLabel:
 	return [
 		'high_zones' => $HighZones,
 		'medium_zones' => $MediumZones,
