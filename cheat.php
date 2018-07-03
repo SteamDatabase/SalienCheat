@@ -99,6 +99,12 @@ if( isset( $_SERVER[ 'DISABLE_COLORS' ] ) )
 	$DisableColors = (bool)$_SERVER[ 'DISABLE_COLORS' ];
 }
 
+$ShowAllPlayersFightingBoss = true;
+if( isset( $_SERVER[ 'SHOW_ALL_PLAYERS_FIGHTING_BOSS' ] ) )
+{
+	$ShowAllPlayersFightingBoss = (bool)$_SERVER[ 'SHOW_ALL_PLAYERS_FIGHTING_BOSS' ];
+}
+
 $GameVersion = 2;
 $WaitTime = 110;
 $FailSleep = 3;
@@ -282,7 +288,9 @@ do
 
 				$Name = trim( preg_replace( $RegMask, '', $Player[ 'name' ] ) );
 
-				Msg(
+				if ($ShowAllPlayersFightingBoss || $IsThisMe)
+				{
+				    Msg(
 					( $IsThisMe ? '{green}@@' : '  ' ) .
 					' %-20s - HP: {yellow}%6s' . $DefaultColor  . ' / %6s - XP Gained: {yellow}%10s' . $DefaultColor,
 					PHP_EOL,
@@ -292,7 +300,8 @@ do
 						$Player[ 'max_hp' ],
 						number_format( $Player[ 'xp_earned' ] )
 					]
-				);
+				    );
+				}
 			}
 
 			if( $MyPlayer !== null )
